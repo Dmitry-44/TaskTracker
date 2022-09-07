@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: photobank-interface
+  namespace: default
+  labels:
+    app: photobank-interface
+spec:
+  ports:
+    - port: 80
+  clusterIP: None
+  selector:
+    app: photobank-interface
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: photobank-interface
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: photobank-interface
+  replicas: 1
+  strategy:
+    type: "RollingUpdate"
+  template:
+    metadata:
+      labels:
+        app: photobank-interface
+    spec:
+      imagePullSecrets:
+        - name: regsecret
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+      containers:
+        - image: registry-git.ttrace.ru/ttrace/photobank_client:__VERSION__
+          name: photobank-interface
+          imagePullPolicy: Always
+          env:
+            - name: VUE_PRODUCTION
+              valueFrom:
+                secretKeyRef:
+                  name: server-type
+                  key: PRODUCTION
+            - name: VUE_AUTH_URL
+              valueFrom:
+                secretKeyRef:
+                  name: auth-default
+                  key: URL
+            - name: VUE_WS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: admin-backend-wss
+                  key: domain
+            - name: VUE_API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-admin-api
+                  key: URL
+          lifecycle:
+            postStart:
+              exec:
+                command: ["sh", "/usr/share/nginx/html/getenv.sh"]
