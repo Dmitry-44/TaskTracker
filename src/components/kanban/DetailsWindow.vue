@@ -10,10 +10,9 @@ const router = useRouter()
 //GETTERS
 const detailsWindow = computed(()=>store.getDetailsWindow) 
 const task = computed(()=>store.getActiveTask) 
-const creatingTask = computed(()=> store.getCreatingTask)
-// const PIPES = computed(()=> store.getPipes)
-const PIPES = computed(()=> {return store.getPipes})
-const OPERATIONS = computed(()=> store.getOperations)
+const creatingTask = computed(()=>store.getCreatingTask)
+const PIPES = computed(()=>store.getPipes)
+const OPERATIONS = computed(()=>store.getOperations)
 const PRIORITY_OPTIONS = store.getPriorityOptions
 const STATUS_OPTIONS = store.getStatusOptions
 //ACTIONS
@@ -28,8 +27,9 @@ const openInNewTab = () => {
 
 // const task = computed(()=> creatingTask.value ? taskDefault.value : activeTask.value)
 const windowTitle = computed(()=>creatingTask.value ? 'Создание задачи' : 'Редактирование задачи')
-const taskPipe = computed(() => PIPES.value.filter(pipe => pipe.id===task.value.pipe_id))
-const taskOperations = computed(() => taskPipe.value ? taskPipe.value[0].value.map(id => OPERATIONS.value.find(val=> val.id===id)) : [])
+
+// const taskPipe = computed(() => PIPES.value.filter(pipe => pipe.id===task.value.pipe_id))
+// const taskOperations = computed(() => taskPipe.value ? taskPipe.value[0].value.map(id => OPERATIONS.value.find(val=> val.id===id)) : [])
 
 // const taskDefault = ref({id:-1001,title:"",text:"",priority:null,status:null,pipe_id:null,event_id:-1,division_id:-1,created_by:-1,events:[],event_entities:[]})
 
@@ -64,9 +64,9 @@ const taskOperations = computed(() => taskPipe.value ? taskPipe.value[0].value.m
                 <div class="row">
                     <div class="left">Задача</div>
                     <div class="right">
-                        <el-select 
+                        <el-select
+                        v-if="task.status<=2"
                         v-model="task.pipe_id"
-                        :disabled="task.status<=2?'fasle':'true'"
                         clearable 
                         placeholder="Задача"
                         >
@@ -78,6 +78,7 @@ const taskOperations = computed(() => taskPipe.value ? taskPipe.value[0].value.m
                             >
                             </el-option>
                         </el-select>
+                        <div v-else>{{PIPES.filter(pipe=>pipe.id===task.pipe_id)[0]?.name}}</div>
                     </div>
                 </div>
                 <div class="row">
@@ -122,17 +123,9 @@ const taskOperations = computed(() => taskPipe.value ? taskPipe.value[0].value.m
                         />
                     </div>
                 </div>
-                <div v-if="taskOperations">
+                <!-- <div v-if="taskOperations">
                     Этапы
                 <el-collapse>
-                    <!-- <el-collapse-item v-for="operation in taskOperations" :title="operation?.name" :name="operation?.id">
-                        <div class="row">
-                            <div class="left">Статус</div>
-                            <div class="right">
-                                <el-tag>{{operation.status}}</el-tag>
-                            </div>
-                        </div>
-                    </el-collapse-item> -->
                     <el-collapse-item v-for="operation in task.event_entities" :title="operation?.id" :name="operation?.id">
                         <div class="row">
                             <div class="left">Статус</div>
@@ -142,7 +135,7 @@ const taskOperations = computed(() => taskPipe.value ? taskPipe.value[0].value.m
                         </div>
                     </el-collapse-item>
                 </el-collapse>
-            </div>
+                </div> -->
             </div>
         </div>
     </div>

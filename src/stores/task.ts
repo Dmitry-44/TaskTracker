@@ -91,7 +91,7 @@ interface PaginationBack {
   page: number;
 }
 
-export type { Task, Event };
+export type { Task, Event, Pipe };
 
 export const useTaskStore = defineStore({
   id: "task",
@@ -254,107 +254,8 @@ export const useTaskStore = defineStore({
           ]
         }
       ],
-      pipes: [
-        {
-            "id": 1,
-            "name": "Публикация новости",
-            "value": [
-                1,
-                2,
-                3
-            ]
-        },
-        {
-            "id": 2,
-            "name": "Опуликовать новости на сайты",
-            "value": [
-                4
-            ]
-        }
-      ],
-      operations: [
-        {
-            "id": 1,
-            "name": "Написать новость",
-            "params": {
-                "id": 0,
-                "direction": 0,
-                "time": 0
-            }
-        },
-        {
-            "id": 2,
-            "name": "Проверить новость",
-            "params": {
-                "started_at": 0
-            }
-        },
-        {
-            "id": 3,
-            "name": "Опубликовать новость",
-            "params": {
-                "site_id": 0
-            }
-        },
-        {
-          "id": 4,
-          "name": "Поставить задачи на публикацию на сайты",
-          "params": {
-              "site_ids": [],
-              "directionArr": [
-                  {
-                      "id": 0,
-                      "name": "Без направления",
-                      "disabled": false
-                  },
-                  {
-                      "id": 21,
-                      "name": "Политика",
-                      "disabled": false
-                  },
-                  {
-                      "id": 22,
-                      "name": "Общество",
-                      "disabled": false
-                  },
-                  {
-                      "id": 23,
-                      "name": "Происшествия",
-                      "disabled": false
-                  },
-                  {
-                      "id": 24,
-                      "name": "Экономика",
-                      "disabled": false
-                  },
-                  {
-                      "id": 25,
-                      "name": "Развлечения",
-                      "disabled": false
-                  },
-                  {
-                      "id": 26,
-                      "name": "Армия и ОПК",
-                      "disabled": false
-                  },
-                  {
-                      "id": 27,
-                      "name": "Ночь",
-                      "disabled": false
-                  },
-                  {
-                      "id": 28,
-                      "name": "Дзен",
-                      "disabled": false
-                  }
-              ],
-              "direction": 0,
-              "auto": true,
-              "selected_users": [],
-              "time": 0
-          }
-        },
-    ]
+      pipes: [],
+      operations: []
   }),
   getters: {
     getList: (state): Task[] => state.tasks || [],
@@ -372,7 +273,10 @@ export const useTaskStore = defineStore({
     getActiveTask:(state)=> state.activeTask,
     getPipes:(state): Pipe[] => state.pipes,
     getOperations:(state): Operation[] => state.operations,
-    getCreatingTask:(state) => state.detailsWindow.creatingTask
+    getCreatingTask:(state) => state.detailsWindow.creatingTask,
+    getPipeById:(state) => {
+      return (payload: number) => state.pipes.find((pipe)=>pipe.id===payload)
+    },
 
   },
   actions: {
@@ -389,6 +293,50 @@ export const useTaskStore = defineStore({
     setCreatingTask(bool: boolean): void {
       this.detailsWindow.creatingTask=bool
     },
+    setOperationsList(payload: Operation[]): void {
+      this.operations=payload
+    },
+    setPipesList(payload: Pipe[]): void {
+      this.pipes=payload
+    },
+    
+
+    fetchOperationsList(): Promise<Boolean> {
+      return axiosClient
+        .post(`${envConfig.API_URL}tasktracker/operations`)
+        .then((resp) => {
+          const respdata: ResultWithMessage = resp.data;
+          if (
+            Object.prototype.hasOwnProperty.call(respdata, "message") &&
+            respdata.message === "ok"
+          ) {
+            this.setOperationsList(respdata.result);
+            return true;
+          } else {
+            return respdata.message || -1;
+          }
+        })
+        .catch((e) => errRequestHandler(e));
+    },
+    fetchPipesList(): Promise<Boolean> {
+      return axiosClient
+        .post(`${envConfig.API_URL}tasktracker/pipe`)
+        .then((resp) => {
+          const respdata: ResultWithMessage = resp.data;
+          if (
+            Object.prototype.hasOwnProperty.call(respdata, "message") &&
+            respdata.message === "ok"
+          ) {
+            this.setPipesList(respdata.result);
+            return true;
+          } else {
+            return respdata.message || -1;
+          }
+        })
+        .catch((e) => errRequestHandler(e));
+    },
+
+
 
     fetchListMain(): Promise<boolean> {
       const options = JSON.parse(JSON.stringify(this.optionsSettings));
@@ -422,26 +370,6 @@ export const useTaskStore = defineStore({
     sendDeleteWatermark(id: number): Promise<boolean> {
       return axiosClient
         .delete(`${envConfig.API_URL}watermark/${id}`)
-        .then((resp) => {
-          const respdata: ResultWithMessage = resp.data;
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
-            return true;
-          } else {
-            return respdata.message || -1;
-          }
-        })
-        .catch((e) => errRequestHandler(e));
-    },
-    sendImage(payload: Watermark): Promise<boolean> {
-      const form = new FormData();
-      form.append("file", payload.blob);
-      form.append("name", payload.name);
-      form.append("type", payload.type.toString());
-      return axiosClient
-        .post(`${envConfig.API_URL}watermark/`, form)
         .then((resp) => {
           const respdata: ResultWithMessage = resp.data;
           if (

@@ -30,7 +30,6 @@ const selectMore = ref<any | HTMLInputElement>(null);
 const taskTitleEditing=ref(false)
 const titleInput=ref<any | HTMLInputElement>(null)
 const changeTitle=()=> {
-    console.log('chiiild')
     taskTitleEditing.value=true
     nextTick(() => {
         titleInput.value.focus();

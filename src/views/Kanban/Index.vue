@@ -3,18 +3,32 @@ import { Plus } from "@element-plus/icons-vue";
 import TaskCard from "@/components/kanban/TaskCard.vue";
 import { useTaskStore, type Task } from "@/stores/task";
 import DetailsWindow from "../../components/kanban/DetailsWindow.vue";
-import { ref, computed, nextTick } from "vue";
+import { ref, computed, nextTick, onBeforeMount } from "vue";
 
 
 const store = useTaskStore()
+//GETTERS
 const tasks = computed(()=>store.getList)
+const activeTask = computed(()=>store.getActiveTask) 
+
 const tasksToTake = computed(()=>tasks.value.filter(task=>task.status<=2).sort((taskA,taskB)=>taskA.priority-taskB.priority))
 const tasksInProcess = computed(()=>tasks.value.filter(task=>task.status===3).sort((taskA,taskB)=>taskA.priority-taskB.priority))
-const activeTask = computed(()=>useTaskStore().getActiveTask) 
 
 const toggleDetailsWindow = store.toggleDetailsWindow
 const setActiveTask = store.setActiveTask
 const setCreatingTask = store.setCreatingTask
+const fetchOperationsList = () => {
+    store.fetchOperationsList().then(()=>{console.log('sss')})
+}
+const fetchPipesList = () => {
+    store.fetchPipesList().then(()=>{console.log('sss')})
+}
+
+//HOOKS
+onBeforeMount(()=> {
+    fetchOperationsList()
+    fetchPipesList()
+})
 const emptyTask = {
         id: new Date().getTime(),
         title: '',
