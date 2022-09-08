@@ -58,7 +58,7 @@ onMounted(()=> {
 
 </script>
 <template>
-    <div :class="['card', active?'active':'']">
+    <div  draggable="true" :class="['card', active?'active':'']">
         <div class="content">
             <div class="title-indicator">
                 <span class="title">
@@ -75,9 +75,9 @@ onMounted(()=> {
                     </form>
                     <span v-else>{{task.title}}</span>
                 </span>
-                <!-- <el-tooltip class="item" effect="dark" :content="task.done ? 'Задача не завершена' : 'Задача завершена'" placement="top-start">
-                    <div class="indicator" @click.stop="task.done=!task.done">
-                        <el-icon :color="task.done ? '#67C23A' : ''">
+                <!-- <el-tooltip class="item" effect="dark" :content="task.status===4 ? 'Задача не завершена' : 'Задача завершена'" placement="top-start">
+                    <div class="indicator" @click.stop="task.status=4">
+                        <el-icon :color="task.status===4 ? '#67C23A' : ''">
                             <SuccessFilled />
                         </el-icon>
                     </div>

@@ -21,11 +21,10 @@ const setActiveTask = store.setActiveTask
 const setCreatingTask = store.setCreatingTask
 
 const openInNewTab = () => {
-    // let routeData = router.resolve({path: `/tasks/${activeTask.value.id}`})
-    // window.open(routeData.href, '_blank');
+    let routeData = router.resolve({path: `/tasks/${task.value.id}`})
+    window.open(routeData.href, '_blank');
 }
 
-// const task = computed(()=> creatingTask.value ? taskDefault.value : activeTask.value)
 const windowTitle = computed(()=>creatingTask.value ? 'Создание задачи' : 'Редактирование задачи')
 
 // const taskPipe = computed(() => PIPES.value.filter(pipe => pipe.id===task.value.pipe_id))
