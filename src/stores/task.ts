@@ -3,6 +3,9 @@ import { axiosClient } from "@/plugins/axios";
 import { errRequestHandler } from "@/plugins/errorResponser";
 import { envConfig } from "@/plugins/envConfig";
 
+export interface SimpleObject {
+  [key: string]: any;
+}
 interface Task {
   id: number;
   title: string;
@@ -43,18 +46,19 @@ interface Event {
   status: number
   selected_users: number[]
   result?: string | null
-  params?: object
+  params?: SimpleObject
 }
 
-interface Pipe {
+type Pipe = {
   id: number,
   name: string,
   value: number[]
-}
+} | null
+
 interface Operation {
   id: number;
   name: string
-  params: Object
+  params: SimpleObject
 
 }
 
@@ -75,23 +79,41 @@ interface TaskOption {
   color: string
 }
 
+
 interface State {
   tasks: Task[]
   priorityOptions: TaskOption[]
   statusOptions: TaskOption[]
   detailsWindow: DetailsWindow
   activeTask: Task,
-  pipes: Pipe[]
+  pipes: Pipe[],
+  pipeSingle: Pipe,
   operations: Operation[]
 }
-
+interface FilterPayload {
+  select: string[];
+  filter: SimpleObject;
+  options: {
+    onlyLimit: boolean;
+    page?: number;
+    itemsPerPage: number;
+    sortBy?: string[];
+    sortDesc?: boolean[];
+    groupBy?: string[];
+    groupDesc?: boolean[];
+    mustSort?: boolean;
+    multiSort?: boolean;
+    allCount?: number;
+    maxPages?: number;
+  };
+}
 interface PaginationBack {
   allCount: number;
   maxPages: number;
   page: number;
 }
 
-export type { Task, Event, Pipe };
+export type { Task, Event, Pipe, Operation, FilterPayload, ResultWithMessage };
 
 export const useTaskStore = defineStore({
   id: "task",
@@ -255,6 +277,7 @@ export const useTaskStore = defineStore({
         }
       ],
       pipes: [],
+      pipeSingle: null,
       operations: []
   }),
   getters: {
@@ -274,9 +297,7 @@ export const useTaskStore = defineStore({
     getPipes:(state): Pipe[] => state.pipes,
     getOperations:(state): Operation[] => state.operations,
     getCreatingTask:(state) => state.detailsWindow.creatingTask,
-    getPipeById:(state) => {
-      return (payload: number) => state.pipes.find((pipe)=>pipe.id===payload)
-    },
+    // getPipeSingle:(state): Pipe => state.pipeSingle
 
   },
   actions: {
@@ -293,14 +314,36 @@ export const useTaskStore = defineStore({
     setCreatingTask(bool: boolean): void {
       this.detailsWindow.creatingTask=bool
     },
+    setTasksList(payload: Task[]): void {
+      this.tasks=payload
+    },
     setOperationsList(payload: Operation[]): void {
       this.operations=payload
     },
     setPipesList(payload: Pipe[]): void {
       this.pipes=payload
     },
+    // setPipeSingle(payload: Pipe): void {
+    //     this.pipeSingle=payload
+    // },
     
-
+    fetchTasksList(): Promise<Boolean> {
+      return axiosClient
+        .post(`${envConfig.API_URL}tasktracker/smiCenterTasks`)
+        .then((resp) => {
+          const respdata: ResultWithMessage = resp.data;
+          if (
+            Object.prototype.hasOwnProperty.call(respdata, "message") &&
+            respdata.message === "ok"
+          ) {
+            this.setTasksList(respdata.result);
+            return true;
+          } else {
+            return respdata.message || -1;
+          }
+        })
+        .catch((e) => errRequestHandler(e));
+    },
     fetchOperationsList(): Promise<Boolean> {
       return axiosClient
         .post(`${envConfig.API_URL}tasktracker/operations`)
@@ -318,16 +361,42 @@ export const useTaskStore = defineStore({
         })
         .catch((e) => errRequestHandler(e));
     },
-    fetchPipesList(): Promise<Boolean> {
+    fetchPipesList(payload?: FilterPayload): Promise<ResultWithMessage> {
       return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/pipe`)
+        .post(`${envConfig.API_URL}tasktracker/pipe`, payload)
+        .then((resp) => {
+          const respdata: ResultWithMessage = resp.data;
+          return respdata
+        })
+        .catch((e) => errRequestHandler(e));
+    },
+    fetchPipeById(payload: FilterPayload): Promise<Boolean> {
+      return axiosClient
+        .post(`${envConfig.API_URL}tasktracker/pipe`, payload)
         .then((resp) => {
           const respdata: ResultWithMessage = resp.data;
           if (
             Object.prototype.hasOwnProperty.call(respdata, "message") &&
             respdata.message === "ok"
           ) {
-            this.setPipesList(respdata.result);
+            this.setPipeSingle(respdata.result);
+            return true;
+          } else {
+            return respdata.message || -1;
+          }
+        })
+        .catch((e) => errRequestHandler(e));
+    },
+    sendPipe(payload: Partial<Pipe>): Promise<Boolean> {
+      let api = payload?.id ? `${envConfig.API_URL}tasktracker/pipe/${payload?.id}` : `${envConfig.API_URL}tasktracker/pipe`
+      return axiosClient
+        .put(api, payload)
+        .then((resp) => {
+          const respdata: ResultWithMessage = resp.data;
+          if (
+            Object.prototype.hasOwnProperty.call(respdata, "message") &&
+            respdata.message === "ok"
+          ) {
             return true;
           } else {
             return respdata.message || -1;
@@ -356,6 +425,7 @@ export const useTaskStore = defineStore({
         })
         .catch((e) => errRequestHandler(e));
     },
+
     setImageList(payload: ImagesListWithPagination): void {
       this.imageList = payload.data || [];
       this.imageList.forEach((img) => {

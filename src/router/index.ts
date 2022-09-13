@@ -32,6 +32,12 @@ const router = createRouter({
           meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
         },
         {
+          path: "/operations/:id",
+          name: "Операция",
+          component: () => import("@/views/Operations/Edit.vue"),
+          meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
+        },
+        {
           path: "/pipes",
           name: "Пайплайны",
           component: () => import("@/views/Pipes/Index.vue"),
@@ -41,6 +47,12 @@ const router = createRouter({
           path: "/pipes/:id",
           name: "Пайплайн",
           component: () => import("@/views/Pipes/Edit.vue"),
+          meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
+        },
+        {
+          path: "/pipes/create",
+          name: "Создание пайплайна",
+          component: () => import("@/views/Pipes/Create.vue"),
           meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
         },
         {
