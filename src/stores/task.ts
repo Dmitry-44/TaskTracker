@@ -7,33 +7,27 @@ export interface SimpleObject {
   [key: string]: any;
 }
 interface Task {
-  id: number;
+  id?: number;
   title: string;
   text: string;
-  priority: number;
-  status: number;
-  pipe_id: number;
+  priority?: number;
+  status?: number;
+  pipe_id?: number;
   event_id: number;
   division_id: number;
   created_by: number;
   events?: number[];
   event_entities: Event[]
 }
-
 const taskDefault: Task = {
-  id: -1000,
   title: '',
   text: '',
-  priority: -1,
-  status: -1,
-  pipe_id: -1,
   event_id: -1,
   division_id: -1,
   created_by: -1,
   events: [],
   event_entities:[],
 }
-
 interface Event {
   id: number
   task_id?: number
@@ -48,38 +42,30 @@ interface Event {
   result?: string | null
   params?: SimpleObject
 }
-
 type Pipe = {
   id: number,
   name: string,
   value: number[]
 } | null
-
 interface Operation {
   id: number;
   name: string
   params: SimpleObject
 
 }
-
 interface DetailsWindow {
   isOpened: boolean
   creatingTask: boolean
 }
-
-
 interface ResultWithMessage {
   message: string;
   result: any;
 }
-
 interface TaskOption {
   id: number,
   value: string,
   color: string
 }
-
-
 interface State {
   tasks: Task[]
   priorityOptions: TaskOption[]
@@ -87,7 +73,6 @@ interface State {
   detailsWindow: DetailsWindow
   activeTask: Task,
   pipes: Pipe[],
-  pipeSingle: Pipe,
   operations: Operation[]
 }
 interface FilterPayload {
@@ -134,7 +119,7 @@ export const useTaskStore = defineStore({
       isOpened: false,
       creatingTask: false,
     },
-    activeTask: taskDefault,
+    activeTask: {...taskDefault},
     tasks: [
       {
         "id": 245166,
@@ -277,7 +262,6 @@ export const useTaskStore = defineStore({
         }
       ],
       pipes: [],
-      pipeSingle: null,
       operations: []
   }),
   getters: {
@@ -297,16 +281,14 @@ export const useTaskStore = defineStore({
     getPipes:(state): Pipe[] => state.pipes,
     getOperations:(state): Operation[] => state.operations,
     getCreatingTask:(state) => state.detailsWindow.creatingTask,
-    // getPipeSingle:(state): Pipe => state.pipeSingle
-
   },
   actions: {
     toggleDetailsWindow(payload: boolean): void {
       this.detailsWindow.isOpened = payload
     },
     setActiveTask(task: Task | null): void {
-      if(this.activeTask?.id === task?.id)return;
-      this.activeTask = task || taskDefault
+      if(this.activeTask?.id == task?.id && !this.detailsWindow.creatingTask)return;
+      this.activeTask = task || {...taskDefault}
     },
     addNewTAsk(task: Task): void {
       this.tasks.push(task)
@@ -323,9 +305,6 @@ export const useTaskStore = defineStore({
     setPipesList(payload: Pipe[]): void {
       this.pipes=payload
     },
-    // setPipeSingle(payload: Pipe): void {
-    //     this.pipeSingle=payload
-    // },
     
     fetchTasksList(): Promise<Boolean> {
       return axiosClient
@@ -344,20 +323,12 @@ export const useTaskStore = defineStore({
         })
         .catch((e) => errRequestHandler(e));
     },
-    fetchOperationsList(): Promise<Boolean> {
+    fetchOperationsList(payload?: FilterPayload): Promise<ResultWithMessage> {
       return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/operations`)
+        .post(`${envConfig.API_URL}tasktracker/operations`, payload)
         .then((resp) => {
           const respdata: ResultWithMessage = resp.data;
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
-            this.setOperationsList(respdata.result);
-            return true;
-          } else {
-            return respdata.message || -1;
-          }
+          return respdata;
         })
         .catch((e) => errRequestHandler(e));
     },
@@ -370,24 +341,7 @@ export const useTaskStore = defineStore({
         })
         .catch((e) => errRequestHandler(e));
     },
-    fetchPipeById(payload: FilterPayload): Promise<Boolean> {
-      return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/pipe`, payload)
-        .then((resp) => {
-          const respdata: ResultWithMessage = resp.data;
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
-            this.setPipeSingle(respdata.result);
-            return true;
-          } else {
-            return respdata.message || -1;
-          }
-        })
-        .catch((e) => errRequestHandler(e));
-    },
-    sendPipe(payload: Partial<Pipe>): Promise<Boolean> {
+    sendPipe(payload: Partial<Pipe>): Promise<boolean> {
       let api = payload?.id ? `${envConfig.API_URL}tasktracker/pipe/${payload?.id}` : `${envConfig.API_URL}tasktracker/pipe`
       return axiosClient
         .put(api, payload)
@@ -404,44 +358,12 @@ export const useTaskStore = defineStore({
         })
         .catch((e) => errRequestHandler(e));
     },
-
-
-
-    fetchListMain(): Promise<boolean> {
-      const options = JSON.parse(JSON.stringify(this.optionsSettings));
+    sendOperation(payload: Partial<Operation>): Promise<boolean> {
+      let api = payload?.id ? `${envConfig.API_URL}tasktracker/operation/${payload?.id}` : `${envConfig.API_URL}tasktracker/operation`
       return axiosClient
-        .post(`${envConfig.API_URL}watermark/getList`, options)
+        .put(api, payload)
         .then((resp) => {
-          const respdata: ResultWithMessage = resp.data;
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
-            this.setImageList(respdata.result);
-            return true;
-          } else {
-            return respdata.message || -1;
-          }
-        })
-        .catch((e) => errRequestHandler(e));
-    },
-
-    setImageList(payload: ImagesListWithPagination): void {
-      this.imageList = payload.data || [];
-      this.imageList.forEach((img) => {
-        img.isWatermark = true;
-        img.preview = `${envConfig.API_URL}${img.path}`;
-        return img;
-      });
-      this.optionsSettings.options.allCount = payload.allCount;
-      this.optionsSettings.options.page = payload.page;
-      this.optionsSettings.options.maxPages = payload.maxPages;
-    },
-    sendDeleteWatermark(id: number): Promise<boolean> {
-      return axiosClient
-        .delete(`${envConfig.API_URL}watermark/${id}`)
-        .then((resp) => {
-          const respdata: ResultWithMessage = resp.data;
+          const respdata: ResultWithMessage = resp.data
           if (
             Object.prototype.hasOwnProperty.call(respdata, "message") &&
             respdata.message === "ok"

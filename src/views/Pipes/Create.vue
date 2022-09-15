@@ -3,16 +3,24 @@ import { useTaskStore, type FilterPayload, type ResultWithMessage } from "@/stor
 import { computed, onBeforeMount } from "vue";
 import { useRouter } from "vue-router";
 import PipeCard from "../../components/kanban/PipeCard.vue";
-const router = useRouter()
-const paramId = router.currentRoute.value.params.id
+
 const store = useTaskStore()
-
 const fetchOperationsList = () => {
-    store.fetchOperationsList()
+    return store.fetchOperationsList()
 }
-
 onBeforeMount(() => {
-    fetchOperationsList()
+    fetchOperationsList().then(res=> {
+      if (
+          Object.prototype.hasOwnProperty.call(res, "message") &&
+          res.message === "ok"
+        ) {
+          res.result
+          store.setOperationsList(res.result)
+          return true;
+        } else {
+          return res.message || -1;
+        }
+    })
 });
 </script>
 

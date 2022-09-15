@@ -17,12 +17,12 @@ const tasksInProcess = computed(()=>tasks.value.filter(task=>task.status===3).so
 const toggleDetailsWindow = store.toggleDetailsWindow
 const setActiveTask = store.setActiveTask
 const setCreatingTask = store.setCreatingTask
-const fetchOperationsList = () => {store.fetchOperationsList().then(()=>{console.log('sss')})}
+// const fetchOperationsList = () => {store.fetchOperationsList().then(()=>{console.log('sss')})}
 const fetchPipesList = () => {store.fetchPipesList().then(()=>{console.log('sss')})}
 
 //HOOKS
 onBeforeMount(()=> {
-    fetchOperationsList()
+    // fetchOperationsList()
     fetchPipesList()
 })
 const emptyTask = {

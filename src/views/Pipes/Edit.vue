@@ -15,7 +15,7 @@ const fetchPipeById = () => {
     return store.fetchPipesList(payload)
 }
 const fetchOperationsList = () => {
-    store.fetchOperationsList()
+    return store.fetchOperationsList()
 }
 onBeforeMount(() => {
   fetchPipeById().then(res=> {
@@ -31,7 +31,18 @@ onBeforeMount(() => {
             return res.message || -1;
           }
     })
-    fetchOperationsList() 
+    fetchOperationsList().then(res=> {
+      if (
+          Object.prototype.hasOwnProperty.call(res, "message") &&
+          res.message === "ok"
+        ) {
+          res.result
+          store.setOperationsList(res.result)
+          return true;
+        } else {
+          return res.message || -1;
+        }
+    }) 
 });
 </script>
 

@@ -9,7 +9,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     CardSettrings: typeof import('./src/components/CardSettrings.vue')['default']
     Column: typeof import('./src/components/kanban/Column.vue')['default']
-    copy: typeof import('./src/components/kanban/OperationCard copy.vue')['default']
+    copy: typeof import('./src/components/kanban/PipeCard copy.vue')['default']
     DetailsWindow: typeof import('./src/components/kanban/DetailsWindow.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
@@ -63,6 +63,7 @@ declare module '@vue/runtime-core' {
     MenuAside: typeof import('./src/components/MenuAside.vue')['default']
     MultiEditor: typeof import('./src/components/photoEditor/MultiEditor.vue')['default']
     OperationCard: typeof import('./src/components/kanban/OperationCard.vue')['default']
+    OperationCard2: typeof import('./src/components/kanban/OperationCard2.vue')['default']
     PhohoInfo: typeof import('./src/components/PhohoInfo.vue')['default']
     PhotoCard: typeof import('./src/components/PhotoCard.vue')['default']
     PhotoFilter: typeof import('./src/components/PhotoFilter.vue')['default']

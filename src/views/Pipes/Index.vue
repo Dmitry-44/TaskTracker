@@ -21,7 +21,7 @@ const fetchPipesList = () => {
     })
 }
 const fetchOperationsList = () => {
-    store.fetchOperationsList()
+    return store.fetchOperationsList()
 }
 
 const pipes = computed(() => store.getPipes);
@@ -30,12 +30,20 @@ const operations = computed(() => store.getOperations);
 const handleEdit = (id: number) => {
     router.push(`/pipes/${id}`)
 }
-const handleCreate = () => {
-    router.push(`/pipes/create`)
-}
 onBeforeMount(() => {
     fetchPipesList()
-    fetchOperationsList()
+    fetchOperationsList().then(res=> {
+      if (
+          Object.prototype.hasOwnProperty.call(res, "message") &&
+          res.message === "ok"
+        ) {
+          res.result
+          store.setOperationsList(res.result)
+          return true;
+        } else {
+          return res.message || -1;
+        }
+    })
 });
 </script>
 
@@ -44,7 +52,7 @@ onBeforeMount(() => {
         <template #header>
         <div class="card-header">
             <span class="title">Пайплайны</span>
-            <el-button type="primary" style="margin-left:auto" :icon="Edit" @click="handleCreate()">Создать</el-button>
+            <el-button type="primary" style="margin-left:auto" :icon="Edit" @click="router.push(`/pipes/create`)">Создать</el-button>
         </div>
         </template>
         <el-table class="table" :data="pipes" size="large" :border=true>
@@ -85,4 +93,3 @@ onBeforeMount(() => {
     margin: 0 auto
 
 </style>
-

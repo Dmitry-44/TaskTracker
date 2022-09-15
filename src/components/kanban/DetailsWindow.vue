@@ -2,7 +2,7 @@
 import { useTaskStore, type Task } from '@/stores/task';
 import { Close, Pointer, Notification } from "@element-plus/icons-vue";
 import { computed } from '@vue/reactivity';
-import { ref } from 'vue';
+import { onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const store = useTaskStore()
@@ -24,13 +24,36 @@ const openInNewTab = () => {
     let routeData = router.resolve({path: `/tasks/${task.value.id}`})
     window.open(routeData.href, '_blank');
 }
+const fetchPipesList = () => {
+    store.fetchPipesList().then(res=> {
+        if (
+            Object.prototype.hasOwnProperty.call(res, "message") &&
+            res.message === "ok"
+          ) {
+            store.setPipesList(res.result);
+            return true;
+          } else {
+            return res.message || -1;
+          }
+    })
+}
 
 const windowTitle = computed(()=>creatingTask.value ? 'Создание задачи' : 'Редактирование задачи')
+const LOADING = ref(false)
+let oldContent = ref('')
+const wasChanged = computed(()=> {
+    const updatedData = JSON.parse(JSON.stringify(task.value))
+    return oldContent.value != JSON.stringify(updatedData)
+})
 
-// const taskPipe = computed(() => PIPES.value.filter(pipe => pipe.id===task.value.pipe_id))
-// const taskOperations = computed(() => taskPipe.value ? taskPipe.value[0].value.map(id => OPERATIONS.value.find(val=> val.id===id)) : [])
+//HOOKS
+onBeforeMount(() => {
+    fetchPipesList()
+});
+watch(creatingTask, async (newVal, oldVal) => {
+    if(newVal)oldContent.value=JSON.stringify({...task.value})
+})
 
-// const taskDefault = ref({id:-1001,title:"",text:"",priority:null,status:null,pipe_id:null,event_id:-1,division_id:-1,created_by:-1,events:[],event_entities:[]})
 
 </script>
 <template>
@@ -46,6 +69,7 @@ const windowTitle = computed(()=>creatingTask.value ? 'Создание зада
                         <el-button :icon="Notification" @click.stop="openInNewTab()"></el-button>
                     </el-tooltip>
                 </template>
+                <el-button v-else :loading="LOADING" :disabled="!wasChanged" type="success" @click="sendTask()">Сохранить</el-button>
                 <el-tooltip class="item" effect="dark" content="Закрыть" placement="top-start">
                     <el-button class="close-btn" :icon="Close" @click.stop="toggleDetailsWindow(false),setActiveTask(null),setCreatingTask(false)"></el-button>
                 </el-tooltip>
@@ -64,20 +88,20 @@ const windowTitle = computed(()=>creatingTask.value ? 'Создание зада
                     <div class="left">Задача</div>
                     <div class="right">
                         <el-select
-                        v-if="task.status<=2"
+                        v-if="task.status!<=2 || !task.status"
                         v-model="task.pipe_id"
                         clearable 
                         placeholder="Задача"
                         >
                             <el-option
                             v-for="item in PIPES"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id"
+                            :key="item?.id"
+                            :label="item?.name"
+                            :value="item?.id"
                             >
                             </el-option>
                         </el-select>
-                        <div v-else>{{PIPES.filter(pipe=>pipe.id===task.pipe_id)[0]?.name}}</div>
+                        <div v-else>{{PIPES.find(pipe=>pipe?.id===task.pipe_id)?.name}}</div>
                     </div>
                 </div>
                 <div class="row">
@@ -122,7 +146,7 @@ const windowTitle = computed(()=>creatingTask.value ? 'Создание зада
                         />
                     </div>
                 </div>
-                <!-- <div v-if="taskOperations">
+                <div>
                     Этапы
                 <el-collapse>
                     <el-collapse-item v-for="operation in task.event_entities" :title="operation?.id" :name="operation?.id">
@@ -134,7 +158,7 @@ const windowTitle = computed(()=>creatingTask.value ? 'Создание зада
                         </div>
                     </el-collapse-item>
                 </el-collapse>
-                </div> -->
+                </div>
             </div>
         </div>
     </div>

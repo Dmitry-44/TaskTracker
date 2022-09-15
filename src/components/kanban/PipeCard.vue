@@ -4,6 +4,8 @@ import { computed, type PropType, ref, toRef, onBeforeMount, onMounted, onBefore
 import { Plus, Close, Delete, Bottom } from "@element-plus/icons-vue";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
+import { errVueHandler } from "@/plugins/errorResponser";
 
 const props = defineProps({
     pipeData: {
@@ -43,77 +45,68 @@ const addEvent = (id: number) => {
     pipe?.value?.value.push(id!)
 }
 const sendPipe = () => {
+    if(LOADING.value)return;
     LOADING.value=true
-    const data = {id:pipe?.value?.id,name:pipe?.value?.name,u_id:user?.id,value:pipe?.value?.value}
+    const msg = ElMessage({
+        message: "Сохранение...",
+        type: "warning",
+        center: true,
+        duration: 1000,
+    });
+    const data = {
+        id: pipe?.value?.id,
+        name: pipe?.value?.name,
+        u_id: user?.id,
+        value: pipe?.value?.value,
+    }
     store.sendPipe(data).then(res=>{
-        if(res){
+        if (errVueHandler(res)) {
+            ElMessage({
+                message: "Операция выполнена успешно!",
+                type: "success",
+                center: true,
+                duration: 1500,
+                showClose: true,
+            });
             if(!pipe?.value?.id)router.push('/pipes')
-            LOADING.value=false
+            oldContent.value=JSON.stringify(pipe.value)
         }
-        oldContent.value=JSON.stringify(pipe.value)
+        LOADING.value=false
+        msg.close();
     })
 }
 
 //DRAG AND DROP
-// const transferItem = ref<Pipe|null>(null)
-const taskInProcessArea = ref<any|HTMLDivElement>(null)
-const tasksToTakeArea = ref<any|HTMLDivElement>(null)
 let draggableItem = ref<Operation|null>(null)
 const stopAll = (e: DragEvent) => {
   e.preventDefault();
   e.stopPropagation();
 };
-const dragstartHandler= (ev: DragEvent, event: Operation) => {
-    draggableItem.value = event
+const dragstartHandler= (ev: DragEvent, id: number) => {
+    draggableItem.value = operations.value.find(op=>op.id===id) || null
     const target = ev.target as Element
     target.classList.add('dragging')
-    ev.dataTransfer!.setData("text/html", target.outerHTML);
     ev.dataTransfer!.effectAllowed = "link";
 }
-const dragoverHandler = (ev: DragEvent) => {
+const dragoverHandler = (ev: DragEvent, targetIndex: number) => {
     stopAll(ev)
-    ev.dataTransfer!.effectAllowed = "link"
-    const target = ev.target as Element
-    const transferItem = ev.dataTransfer!.getData("text/html")
-    const index = Number(target.getAttribute('data-index')) || null
-    if(index===data.value.map(item=>item.id).indexOf(draggableItem!.value!.id))return false
-    moveItemToIndex(draggableItem!.value!, index)
-    // const draggableIndex: number
-    // if(draggableItem.value.id) {
-
-    // }
-    // draggableIndex = data.value.map(item => item.id).indexOf(draggableItem.value.id)
-    // if(data.value.map(item => item.id).indexOf(draggableItem.value.id))
-    // target.insertAdjacentHTML( 'afterend', transferItem )
-
-}
-const dragleaveHandler = (ev: DragEvent) => {
-    stopAll(ev)
-    tasksToTakeArea.value.classList.remove('dragOver')
-    taskInProcessArea.value.classList.remove('dragOver')
-}
-const dropHandler = (ev: DragEvent, area: number) => {
-    // ev.dataTransfer!.dropEffect = "link";
-    // tasks.value.map(task=>{if(task.id===transferTask?.value?.id) {task.status=areaParams.get(area)?.status || 2}})
-    // tasksToTakeArea.value.classList.remove('dragOver')
-    // taskInProcessArea.value.classList.remove('dragOver')
-}
-
-const moveItemToIndex = (pipe: Operation, toIndex: number|null) => {
-    if(!toIndex)return false
-    const fromIndex = data.value.map(pipe=>pipe.id).indexOf(pipe.id);
-    const [element] = data.value.splice(0, 1);
-    console.log({'fromIndex': fromIndex, 'toIndex': toIndex})
-    data.value.splice(toIndex, 0, element);
+    const draggbleItemIndex = pipe?.value?.value.indexOf(draggableItem?.value!.id)
+    if(draggbleItemIndex === targetIndex)return
+    moveItemToIndex(draggbleItemIndex, targetIndex)
 }
 const dragendHandler = (ev: DragEvent) => {
+    stopAll(ev)
     const target = ev.target as Element
     target.classList.remove('dragging')
 }
-
-
+const moveItemToIndex = (fromIndex: number|undefined, toIndex: number) => {
+    const element = pipe?.value?.value[fromIndex!];
+    pipe?.value?.value.splice(fromIndex!, 1);
+    pipe?.value?.value.splice(toIndex, 0, element!);
+}
 
 </script>
+
 <template>
       <el-card class="card">
         <template #header>
@@ -121,7 +114,7 @@ const dragendHandler = (ev: DragEvent) => {
                 <h3>Пайплайн</h3>
                 <div class="header-actions">
                     <el-button type="info" @click="router.push('/pipes')">Отмена</el-button>
-                    <el-button :loading="LOADING" :disabled="!wasChanged" type="success" @click="sendPipe()">Сохранить</el-button>
+                    <el-button :loading="LOADING" :disabled="!wasChanged || pipe?.value.length===0" type="success" @click="sendPipe()">Сохранить</el-button>
                 </div>
             </el-row>
         </template>
@@ -129,14 +122,14 @@ const dragendHandler = (ev: DragEvent) => {
             <el-col :lg="12">
                 <el-input class="card-name" v-model="pipe.name" placeholder="Название" />
                 <h4>Список операций</h4>
-                <div class="area">
+                <div class="area" @dragend="dragendHandler($event)">
                     <template v-if="pipe?.value.length!>0" v-for="(id,index) in pipe?.value" :key="id">
                         <el-row align="middle">
                             <el-col :span="1">
                                 <span style="color:#909399;">{{index+1}}.</span>
                             </el-col>
                             <el-col :span="23">
-                                <div class="event" :data-index="index" draggable="true" @dragstart="dragstartHandler($event, event)" @dragover="dragoverHandler($event)" @dragend="dragendHandler($event)">
+                                <div class="event" :data-index="index" draggable="true" @dragstart="dragstartHandler($event, id)" @dragover="dragoverHandler($event, index)">
                                     <span>{{operations!.find(oper=>oper!.id===id)?.name}}</span>
                                     <el-tooltip class="item" effect="dark" content="Удалить" placement="right-start">
                                         <el-button type="danger" icon="Delete" style="margin-left:auto" @keydown.enter="removeEventByIndex(index)" @click.stop="removeEventByIndex(index)"></el-button>
