@@ -18,6 +18,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["titleChanged"]);
 const task = ref(props.task)
+const readonlyTask = computed(()=> task.value.status===4)
 const store = useTaskStore()
 const toggleDetailsWindow = store.toggleDetailsWindow
 const router = useRouter()
@@ -42,11 +43,11 @@ const copyTaskLink = () => {
         <el-icon><Notification /></el-icon>
         <span style="margin-left:10px;">Открыть в новой вкладке</span>
     </el-option>
-    <el-option value="">
+    <el-option v-if="!readonlyTask" value="">
         <el-icon><Pointer /></el-icon>
         <span style="margin-left:10px;">Взять задачу</span>
     </el-option>
-    <el-option value="" @click="emit('titleChanged')">
+    <el-option v-if="!readonlyTask" value="" @click="emit('titleChanged')">
         <el-icon><EditPen /></el-icon>
         <span style="margin-left:10px;">Изменить название задачи</span>
     </el-option>

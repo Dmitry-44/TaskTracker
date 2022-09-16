@@ -26,6 +26,42 @@ const router = createRouter({
           meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
         },
         {
+          path: "/operations",
+          name: "Операции",
+          component: () => import("@/views/Operations/Index.vue"),
+          meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
+        },
+        {
+          path: "/operations/:id",
+          name: "Операция",
+          component: () => import("@/views/Operations/Edit.vue"),
+          meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
+        },
+        {
+          path: "/operations/create",
+          name: "Создание операции",
+          component: () => import("@/views/Operations/Create.vue"),
+          meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
+        },
+        {
+          path: "/pipes",
+          name: "Пайплайны",
+          component: () => import("@/views/Pipes/Index.vue"),
+          meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
+        },
+        {
+          path: "/pipes/:id",
+          name: "Пайплайн",
+          component: () => import("@/views/Pipes/Edit.vue"),
+          meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
+        },
+        {
+          path: "/pipes/create",
+          name: "Создание пайплайна",
+          component: () => import("@/views/Pipes/Create.vue"),
+          meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
+        },
+        {
           path: "/tasks/:id",
           name: "Задача",
           component: () => import("@/views/Task/Index.vue"),
