@@ -11,6 +11,7 @@ declare module '@vue/runtime-core' {
     Column: typeof import('./src/components/kanban/Column.vue')['default']
     copy: typeof import('./src/components/kanban/PipeCard copy.vue')['default']
     DetailsWindow: typeof import('./src/components/kanban/DetailsWindow.vue')['default']
+    ElAffix: typeof import('element-plus/es')['ElAffix']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElBtn: typeof import('element-plus/es')['ElBtn']

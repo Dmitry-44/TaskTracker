@@ -18,10 +18,11 @@ const props = defineProps({
   emptyCard: {
       type: Boolean,
       default: () => false
-  }
+  },
 });
 
 const task = ref(props.task)
+const readonlyTask = computed(()=> task.value.status===4)
 const priorityOptions = useTaskStore().getPriorityOptions
 const statusOptions = useTaskStore().getStatusOptions
 
@@ -58,7 +59,7 @@ onMounted(()=> {
 
 </script>
 <template>
-    <div  draggable="true" :class="['card', active?'active':'']">
+    <div :class="['card', active?'active':'', readonlyTask?'done':'']">
         <div class="content">
             <div class="title-indicator">
                 <span class="title">
@@ -97,7 +98,7 @@ onMounted(()=> {
             </div>
             <div class="actions">
                 <div class="buttons">
-                    <el-tooltip class="item" effect="dark" content="Взять задачу" placement="top-start">
+                    <el-tooltip v-if="!readonlyTask" class="item" effect="dark" content="Взять задачу" placement="top-start">
                         <el-button :icon="Pointer" @click.stop></el-button>
                     </el-tooltip>
                 </div>
@@ -107,7 +108,7 @@ onMounted(()=> {
             <el-button type="info" plain :icon="More" @click.stop="selectMore.toggleMenu()"></el-button>
             <el-select class="select-more" ref="selectMore">
                 <SelectOptions 
-                :task="task" 
+                :task="task"
                 @titleChanged="changeTitle()"
                  />
             </el-select>

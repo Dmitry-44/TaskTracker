@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useTaskStore, type Task } from '@/stores/task';
-import { Close, Pointer, Notification } from "@element-plus/icons-vue";
+import { Close, Pointer, Notification, SuccessFilled } from "@element-plus/icons-vue";
 import { computed } from '@vue/reactivity';
 import { onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -10,11 +10,13 @@ const router = useRouter()
 //GETTERS
 const detailsWindow = computed(()=>store.getDetailsWindow) 
 const task = computed(()=>store.getActiveTask) 
+const readonlyTask = computed(()=> task.value.status===4)
 const creatingTask = computed(()=>store.getCreatingTask)
 const PIPES = computed(()=>store.getPipes)
 const OPERATIONS = computed(()=>store.getOperations)
 const PRIORITY_OPTIONS = store.getPriorityOptions
 const STATUS_OPTIONS = store.getStatusOptions
+
 //ACTIONS
 const toggleDetailsWindow = store.toggleDetailsWindow
 const setActiveTask = store.setActiveTask
@@ -38,7 +40,7 @@ const fetchPipesList = () => {
     })
 }
 
-const windowTitle = computed(()=>creatingTask.value ? 'Создание задачи' : 'Редактирование задачи')
+// const windowTitle = computed(()=>creatingTask.value ? 'Создание задачи' : 'Редактирование задачи')
 const LOADING = ref(false)
 let oldContent = ref('')
 const wasChanged = computed(()=> {
@@ -46,9 +48,22 @@ const wasChanged = computed(()=> {
     return oldContent.value != JSON.stringify(updatedData)
 })
 
+
 //HOOKS
 onBeforeMount(() => {
     fetchPipesList()
+    store.fetchOperationsList().then(res=> {
+      if (
+          Object.prototype.hasOwnProperty.call(res, "message") &&
+          res.message === "ok"
+        ) {
+          res.result
+          store.setOperationsList(res.result)
+          return true;
+        } else {
+          return res.message || -1;
+        }
+    })
 });
 watch(creatingTask, async (newVal, oldVal) => {
     if(newVal)oldContent.value=JSON.stringify({...task.value})
@@ -59,10 +74,9 @@ watch(creatingTask, async (newVal, oldVal) => {
 <template>
     <div :class="['details', detailsWindow.isOpened?'active':'']" @click.stop>
         <div class="header">
-            <h4 class="title">{{windowTitle}}</h4>
             <div class="actions">
                 <template v-if="!creatingTask">
-                    <el-tooltip class="item" effect="dark" content="Взять задачу" placement="top-start">
+                    <el-tooltip v-if="!readonlyTask" class="item" effect="dark" content="Взять задачу" placement="top-start">
                         <el-button :icon="Pointer"></el-button>
                     </el-tooltip>
                     <el-tooltip class="item" effect="dark" content="Открыть в новой вкладке" placement="top-start">
@@ -79,6 +93,7 @@ watch(creatingTask, async (newVal, oldVal) => {
             <div class="title_block">
                 <input 
                 v-model="task.title"
+                :disabled="readonlyTask"
                 class="title-input" 
                 placeholder="Ввести название задачи"
                 >
@@ -88,8 +103,8 @@ watch(creatingTask, async (newVal, oldVal) => {
                     <div class="left">Задача</div>
                     <div class="right">
                         <el-select
-                        v-if="task.status!<=2 || !task.status"
                         v-model="task.pipe_id"
+                        :disabled="readonlyTask || task?.status!>2"
                         clearable 
                         placeholder="Задача"
                         >
@@ -101,13 +116,13 @@ watch(creatingTask, async (newVal, oldVal) => {
                             >
                             </el-option>
                         </el-select>
-                        <div v-else>{{PIPES.find(pipe=>pipe?.id===task.pipe_id)?.name}}</div>
+                        <!-- <div v-else>{{PIPES.find(pipe=>pipe?.id===task.pipe_id)?.name}}</div> -->
                     </div>
                 </div>
                 <div class="row">
                     <div class="left">Приоритет</div>
                     <div class="right">
-                        <el-select v-model="task.priority" clearable placeholder="Приоритет">
+                        <el-select v-model="task.priority" :disabled="readonlyTask" clearable placeholder="Приоритет">
                             <el-option
                             v-for="item in PRIORITY_OPTIONS"
                             :key="item.value"
@@ -122,7 +137,7 @@ watch(creatingTask, async (newVal, oldVal) => {
                 <div class="row">
                     <div class="left">Статус</div>
                     <div class="right">
-                        <el-select v-model="task.status" clearable placeholder="Статус">
+                        <el-select v-model="task.status" :disabled="readonlyTask" clearable placeholder="Статус" style="box-shadow:none">
                             <el-option
                             v-for="item in STATUS_OPTIONS"
                             :key="item.value"
@@ -139,6 +154,7 @@ watch(creatingTask, async (newVal, oldVal) => {
                     <div class="right text">
                         <el-input
                             v-model="task.text"
+                            :disabled="readonlyTask"
                             clearable
                             :autosize="{ minRows: 2, maxRows: 4 }"
                             type="textarea"
@@ -146,18 +162,47 @@ watch(creatingTask, async (newVal, oldVal) => {
                         />
                     </div>
                 </div>
-                <div>
-                    Этапы
-                <el-collapse>
-                    <el-collapse-item v-for="operation in task.event_entities" :title="operation?.id" :name="operation?.id">
-                        <div class="row">
-                            <div class="left">Статус</div>
-                            <div class="right">
-                                <el-tag>{{operation.status}}</el-tag>
+                <div v-if="task.pipe_id">
+                    <span class="left mt-2">Этапы</span>
+                    <el-collapse>
+                        <el-collapse-item v-for="operation in task.event_entities" :title="OPERATIONS.find(oper=> oper.id==operation?.operation_id!)!.name" :name="operation?.id">
+                            <template #title>
+                                <div class="collapse-item-header">
+                                    <el-icon :color="operation.status===3 ? '#67C23A' : ''">
+                                        <SuccessFilled />
+                                    </el-icon>
+                                    <span class="ml-1">{{OPERATIONS.find(oper=> oper.id==operation?.operation_id!)!.name}}</span>
+                                </div>
+                            </template>
+                            <div class="row">
+                                <div class="left">Статус</div>
+                                <div class="right">
+                                    <template v-if="operation.status===3">
+                                        <el-tag type="success">Готово</el-tag>
+                                    </template>
+                                    <el-tag v-else color="#f8df72">В работе</el-tag>
+                                </div>
                             </div>
-                        </div>
-                    </el-collapse-item>
-                </el-collapse>
+                            <div class="row">
+                                <div class="left">Старт</div>
+                                <div class="right">
+                                    <el-tag>{{new Date(operation.created*1000).toLocaleString()}}</el-tag>
+                                </div>
+                            </div>
+                            <div class="row" v-if="operation.finished">
+                                <div class="left">Финиш</div>
+                                <div class="right">
+                                    <el-tag>{{new Date(operation.finished*1000).toLocaleString()}}</el-tag>
+                                </div>
+                            </div>
+                            <div class="row" v-if="operation.user_name">
+                                <div class="left">Исполнитель</div>
+                                <div class="right">
+                                    <el-tag>{{operation.user_name}}</el-tag>
+                                </div>
+                            </div>
+                        </el-collapse-item>
+                    </el-collapse>
                 </div>
             </div>
         </div>
@@ -168,12 +213,12 @@ watch(creatingTask, async (newVal, oldVal) => {
 .details
     box-shadow: 0 0 0 1px #edeae9, 0 5px 20px 0 rgba(109, 110, 111, 0.08)
     background-color: #fff
-    border-top: 1px solid #edeae9
+    // border-top: 1px solid #edeae9
     display: flex
     flex-direction: column
     right: 0
-    position: absolute
-    top: 0
+    position: fixed
+    top: 60px
     bottom: 0
     width: 0
     z-index: 600
@@ -181,13 +226,16 @@ watch(creatingTask, async (newVal, oldVal) => {
     visibility: hidden
     &.active
         width: min(700px, 60%)
-        transform: translateX(-100px)
+        // transform: translateX(-100px)
         visibility: visible
 .details .header
-    padding: 12px
+    height: 50px
+    padding: 0px 12px
     display: flex
     .actions
         margin-left: auto
+        display: flex
+        align-items: center
 .details .body
     display: flex
     flex-direction: column
@@ -251,8 +299,15 @@ watch(creatingTask, async (newVal, oldVal) => {
     box-shadow: none
     &:hover
         box-shadow:  0 0 0 1px #dcdfe6 inset
+
+.el-select .el-input__wrapper
+    box-shadow: none !important
 .el-tag
     color: #000
     border: none
+
+.el-collapse .row
+    margin-bottom: .5rem
+
 
 </style>
