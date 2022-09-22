@@ -64,7 +64,7 @@ const router = createRouter({
         {
           path: "/tasks/:id",
           name: "Задача",
-          component: () => import("@/views/Task/Index.vue"),
+          component: () => import("@/views/Tasks/Index.vue"),
           meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
         },
       ],

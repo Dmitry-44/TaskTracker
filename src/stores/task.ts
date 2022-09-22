@@ -95,6 +95,7 @@ interface FilterPayload {
     maxPages?: number;
   };
 }
+
 interface PaginationBack {
   allCount: number;
   maxPages: number;
@@ -309,20 +310,12 @@ export const useTaskStore = defineStore({
       this.pipes=payload
     },
     
-    fetchTasksList(payload?: FilterPayload): Promise<Boolean> {
+    fetchTasksList(payload?: FilterPayload): Promise<ResultWithMessage> {
       return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/smiCenterTasks`, payload)
+        .post(`${envConfig.API_URL}tasktracker/tasks`, payload)
         .then((resp) => {
           const respdata: ResultWithMessage = resp.data;
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
-            this.setTasksList(respdata.result.queryResult);
-            return true;
-          } else {
-            return respdata.message || -1;
-          }
+          return respdata
         })
         .catch((e) => errRequestHandler(e));
     },

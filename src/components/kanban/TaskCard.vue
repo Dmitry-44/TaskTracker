@@ -134,7 +134,7 @@ onMounted(()=> {
     &:hover
         border-color: #afabac
     &.done .content
-        opacity: .6 
+        opacity: .4 
     &.active
         background: #f1f2fc
         border-color: #406ac4
@@ -169,6 +169,7 @@ onMounted(()=> {
     right: 0
     top: 0
     display: initial
+
 .select-more
     appearance: none
     position: absolute
