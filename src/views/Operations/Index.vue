@@ -7,29 +7,14 @@ import { ref, computed, onBeforeMount } from "vue";
 const router = useRouter()
 const store = useTaskStore()
 
-const fetchOperationsList = () => {
-    return store.fetchOperationsList()
-}
-
 // const pipes = computed(() => store.getPipes);
-const operations = computed(() => store.getOperations);
+let operations = computed(() => store.getOperations);
 
 const handleEdit = (id: number) => {
     router.push(`/operations/${id}`)
 }
 onBeforeMount(() => {
-    fetchOperationsList().then(res=> {
-      if (
-          Object.prototype.hasOwnProperty.call(res, "message") &&
-          res.message === "ok"
-        ) {
-          res.result
-          store.setOperationsList(res.result)
-          return true;
-        } else {
-          return res.message || -1;
-        }
-    })
+    store.fetchOperationsList()
 });
 
 </script>

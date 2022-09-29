@@ -7,43 +7,15 @@ import { ref, computed, onBeforeMount } from "vue";
 const router = useRouter()
 const store = useTaskStore()
 
-const fetchPipesList = () => {
-    store.fetchPipesList().then(res=> {
-        if (
-            Object.prototype.hasOwnProperty.call(res, "message") &&
-            res.message === "ok"
-          ) {
-            store.setPipesList(res.result);
-            return true;
-          } else {
-            return res.message || -1;
-          }
-    })
-}
-const fetchOperationsList = () => {
-    return store.fetchOperationsList()
-}
-
-const pipes = computed(() => store.getPipes);
-const operations = computed(() => store.getOperations);
+let pipes = computed(() => store.getPipes);
+let operations = computed(() => store.getOperations);
 
 const handleEdit = (id: number) => {
     router.push(`/pipes/${id}`)
 }
 onBeforeMount(() => {
-    fetchPipesList()
-    fetchOperationsList().then(res=> {
-      if (
-          Object.prototype.hasOwnProperty.call(res, "message") &&
-          res.message === "ok"
-        ) {
-          res.result
-          store.setOperationsList(res.result)
-          return true;
-        } else {
-          return res.message || -1;
-        }
-    })
+    store.fetchPipesList()
+    store.fetchOperationsList()
 });
 </script>
 
@@ -61,7 +33,7 @@ onBeforeMount(() => {
             <el-table-column label="Операции">
                 <template #default="scope">
                     <el-tag v-for="id in scope.row.value" style="margin:5px">
-                        {{operations.filter(op=>op.id===id)[0].name}}
+                        {{operations.filter(op=>op?.id===id)[0]?.name}}
                     </el-tag>
                 </template>
             </el-table-column>

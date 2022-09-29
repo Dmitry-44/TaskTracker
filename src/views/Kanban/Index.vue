@@ -7,34 +7,22 @@ import { ref, computed, nextTick, onBeforeMount, getCurrentInstance, watch } fro
 
 const store = useTaskStore()
 //GETTERS
-const tasks = computed(()=>store.getList)
-const activeTask = computed(()=>store.getActiveTask) 
+let tasks = computed(()=>store.getList)
+let activeTask = computed(()=>store.getActiveTask) 
 
-const tasksToTake = computed(()=>tasks.value.filter(task=>task.status!<=2).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
-const tasksInProcess = computed(()=>tasks.value.filter(task=>task.status===3).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
-const tasksFinished = computed(()=>tasks.value.filter(task=>task.status===4).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
+let tasksToTake = computed(()=>tasks.value.filter(task=>task.status!<=2).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
+let tasksInProcess = computed(()=>tasks.value.filter(task=>task.status===3).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
+let tasksFinished = computed(()=>tasks.value.filter(task=>task.status===4).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
 
 //ACTIONS
 const toggleDetailsWindow = store.toggleDetailsWindow
 const setActiveTask = store.setActiveTask
 const setCreatingTask = store.setCreatingTask
-const fetchOperationsList = () => {return store.fetchOperationsList()}
-const fetchPipesList = () => {return store.fetchPipesList()}
-const fetchTasksList = async(payload: FilterPayload) => {
-    return store.fetchTasksList(payload).then(res => {
-            if (
-                Object.prototype.hasOwnProperty.call(res, "message") &&
-                res.message === "ok"
-            ){
-            store.setTasksList(res.result.queryResult)
-            return true;
-            } else {
-            return res.message || -1;
-        }})}
+const fetchTasksList = async(payload: FilterPayload) => {return store.fetchTasksList(payload)}
 
 const LOADING = ref(false)
 const date = ref([new Date(new Date().getTime() - 86400 * 1000).toLocaleDateString('en-CA'), new Date().toISOString().substr(0, 10)])
-const dateInt = computed(()=> {
+let dateInt = computed(()=> {
         let dtss = Math.round(new Date(date.value[0]).getTime() / 1000)
         let dtff = Math.round(new Date(date.value[1]).getTime() / 1000)
         return {
@@ -42,7 +30,7 @@ const dateInt = computed(()=> {
           dtf: new Date(((dtff < dtss ? dtss : dtff) + 86399) * 1000)
         }
       })
-const filter = computed(() => {
+let filter = computed(() => {
     return {
         filter: {
             pipe_id: null,
@@ -107,9 +95,9 @@ const FILTER_OPTIONS =
 
 //HOOKS
 onBeforeMount(async()=> {
-    fetchOperationsList()
+    store.fetchOperationsList()
     LOADING.value=true
-    fetchPipesList()
+    store.fetchPipesList()
     await fetchTasksList(filter.value)
     LOADING.value=false
 })
@@ -410,4 +398,3 @@ const shortcuts = [
     border-color: #67C23A
 
 </style>
-
