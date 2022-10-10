@@ -86,7 +86,7 @@ interface State {
   singlePipe: Pipe
   operations: Operation[],
   singleOperation: Operation,
-  filter: FilterPayload
+  filterBase: FilterPayload
 }
 interface FilterPayload {
   select: string[];
@@ -140,7 +140,7 @@ export const useTaskStore = defineStore({
     singlePipe: null,
     operations: [],
     singleOperation: null,
-    filter: {
+    filterBase: {
       select: [],
       filter: {},
       options: {
@@ -207,16 +207,16 @@ export const useTaskStore = defineStore({
       this.singlePipe=payload[0]
     },
     
-    fetchTasksList(payload?: FilterPayload): Promise<ResultWithMessage> {
+    fetchTasksList(filterPayload?: FilterPayload|Partial<FilterPayload>): Promise<ResultWithMessage> {
       return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/tasks`, payload)
+        .post(`${envConfig.API_URL}tasktracker/tasks`, {...this.filterBase, ...filterPayload})
         .then((resp) => {
           const respdata: ResultWithMessage = resp.data;
           if (
             Object.prototype.hasOwnProperty.call(respdata, "message") &&
             respdata.message === "ok"
           ) {
-            if(payload?.filter['id']) {
+            if(filterPayload?.filter!['id']) {
               this.setSingleTask(respdata.result.queryResult)
             } else {
               this.setTasksList(respdata.result.queryResult);

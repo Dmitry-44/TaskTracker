@@ -4,8 +4,10 @@ import TaskCard from "@/components/kanban/TaskCard.vue";
 import { useTaskStore, type FilterPayload, type Task } from "@/stores/task";
 import DetailsWindow from "../../components/kanban/DetailsWindow.vue";
 import { ref, computed, nextTick, onBeforeMount, getCurrentInstance, watch } from "vue";
+import Filters from "./Filters.vue";
 
 const store = useTaskStore()
+const $filters = ref(null)
 //GETTERS
 let tasks = computed(()=>store.getList)
 let activeTask = computed(()=>store.getActiveTask) 
@@ -21,21 +23,12 @@ const setCreatingTask = store.setCreatingTask
 const fetchTasksList = async(payload: FilterPayload) => {return store.fetchTasksList(payload)}
 
 const LOADING = ref(false)
-const date = ref([new Date(new Date().getTime() - 86400 * 1000).toLocaleDateString('en-CA'), new Date().toISOString().substr(0, 10)])
-let dateInt = computed(()=> {
-        let dtss = Math.round(new Date(date.value[0]).getTime() / 1000)
-        let dtff = Math.round(new Date(date.value[1]).getTime() / 1000)
-        return {
-          dts: new Date((dtss > dtff ? dtff : dtss) * 1000),
-          dtf: new Date(((dtff < dtss ? dtss : dtff) + 86399) * 1000)
-        }
-      })
-let filter = computed(() => {
-    return {
+
+let filter = ref<FilterPayload>(
+    {
         filter: {
             pipe_id: null,
             priority: [],
-            ...dateInt.value
         },
         options: {
             onlyLimit: false,
@@ -43,76 +36,14 @@ let filter = computed(() => {
         },
         select: []
     }
-})
-
-const FILTER_OPTIONS =
-    {   
-        STATUS: [
-            {
-                key: 1,
-                value: 1,
-                label: 'Незавершенные задачи'
-            },
-            {
-                key: 2,
-                value: 2,
-                label: 'Завершенные задачи'
-            },
-            {
-                key: 3,
-                value: 3,
-                label: 'Все задачи'
-            }
-        ],
-        PRIORITY: [
-            {
-                key: 0,
-                value: 0,
-                label: 'Любой приоритет'
-            },
-            {
-                key: 1,
-                value: 1,
-                label: 'Молния'
-            },
-            {
-                key: 2,
-                value: 2,
-                label: 'Срочная'
-            },
-            {
-                key: 3,
-                value: 3,
-                label: 'Базовая'
-            },
-            {
-                key: 4,
-                value: 4,
-                label: 'Низкий'
-            }
-        ]
-    }
-
+)
 //HOOKS
 onBeforeMount(async()=> {
     store.fetchOperationsList()
     LOADING.value=true
     store.fetchPipesList()
-    await fetchTasksList(filter.value)
     LOADING.value=false
 })
-watch(
-() => filter,
-  async (newValue, oldValue) => {
-    if(filter.value.filter.priority[0]===0){
-        filter.value.filter.priority=[]
-    }
-    LOADING.value=true
-    await fetchTasksList(filter.value)
-    LOADING.value=false
-  },
-  { deep: true }
-)
 
 //METHODS
 const addTask = () => {
@@ -126,9 +57,15 @@ const taskClickHandler = (task: Task) => {
     toggleDetailsWindow(true)
 }
 const clickOutsideCards = () => {
+    $filters?.value?.closeFilters()
     toggleDetailsWindow(false)
     setActiveTask(null)
     setCreatingTask(false)
+}
+const filterUpdate = async(payload: FilterPayload) => {
+    LOADING.value=true
+    await fetchTasksList(payload)
+    LOADING.value=false
 }
 
 
@@ -145,7 +82,6 @@ const stopAll = (e: DragEvent) => {
   e.stopPropagation();
 };
 const dragstartHandler= (ev: DragEvent, task: Task) => {
-    console.log('drag start handler')
     transferTask.value = task
     ev.dataTransfer!.effectAllowed = "link";
 }
@@ -169,62 +105,15 @@ const dropHandler = (ev: DragEvent, area: number) => {
     taskInProcessArea.value.classList.remove('dragOver')
 }
 
-const shortcuts = [
-  {
-    text: 'Сегодня',
-    value: () => {
-      const end = new Date()
-      const start = new Date()
-      start.setTime(start.getTime() - 3600 * 1000 * 24 * 1)
-      return [start, end]
-    },
-  },
-  {
-    text: 'Неделя',
-    value: () => {
-      const end = new Date()
-      const start = new Date()
-      start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
-      return [start, end]
-    },
-  },
-  {
-    text: 'Месяц',
-    value: () => {
-      const end = new Date()
-      const start = new Date()
-      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
-      return [start, end]
-    },
-  },
-]
-
-
 </script>
 <template>
     <div class="kanbar-wrapper">
         <div class="menu-top">
-            <div class="filters_block">
-                <el-date-picker
-                    type="daterange"
-                    v-model="date"
-                    unlink-panels
-                    range-separator="Период"
-                    start-placeholder="От"
-                    end-placeholder="До"
-                    :shortcuts="shortcuts"
+            <div class="filters-wrapper">
+                <Filters 
+                @update="filterUpdate($event)"
+                ref="$filters"
                 />
-                <el-select v-model="filter.filter.priority[0]" class="ml-3" placeholder="Любой приоритет">
-                    <el-option
-                    v-for="item in FILTER_OPTIONS.PRIORITY"
-                    :key="item.key"
-                    :label="item.label"
-                    :value="item.value"
-                    >
-                    <span>{{ item.label }}</span>
-                    </el-option>
-                </el-select>
-                <el-button type="warning" class="ml-3">Сбросить фильтры</el-button>
             </div>
         </div>
         <div class="kanban-background" @click.stop="clickOutsideCards()">
@@ -349,10 +238,9 @@ const shortcuts = [
     display: flex
     background: #fff
     border-bottom: 1px solid #edeae9
-.filters_block
-    margin-left: auto
+.filters-wrapper
     display: flex
-    align-items: center
+    margin-left: auto
 .kanban-column
     display: flex
     flex-direction: column
