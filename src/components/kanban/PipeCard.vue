@@ -120,7 +120,7 @@ const moveItemToIndex = (fromIndex: number|undefined, toIndex: number) => {
         </template>
         <el-row>
             <el-col :lg="12">
-                <el-input class="card-name" v-model="pipe?.name" placeholder="Название" />
+                <el-input v-if="pipe?.name" class="card-name" v-model="pipe.name" placeholder="Название" />
                 <h4>Список операций</h4>
                 <div class="area" @dragend="dragendHandler($event)">
                     <template v-if="pipe?.value.length!>0" v-for="(id,index) in pipe?.value" :key="id">

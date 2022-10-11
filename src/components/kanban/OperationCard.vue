@@ -77,8 +77,8 @@ const sendOperation = () => {
             </el-row>
         </template>
         <el-row>
-            <el-col :lg="12">
-                <el-input class="card-name" v-model="operation?.name" placeholder="Название" />
+            <el-col :lg="12" v-if="operation?.name">
+                <el-input class="card-name" v-model="operation.name" placeholder="Название" />
             </el-col>
             <el-col :lg="12">
                 <div>{{operation?.params}}</div>

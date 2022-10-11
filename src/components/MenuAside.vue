@@ -36,7 +36,7 @@ const rights = computed(() => UserStore.getRights);
       <el-icon>
         <DataAnalysis />
       </el-icon>
-      <template #title>Доска</template>
+      <template #title>Канбан</template>
     </el-menu-item>
     <el-menu-item index="/operations">
       <el-icon>

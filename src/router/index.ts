@@ -21,7 +21,7 @@ const router = createRouter({
       children: [
         {
           path: "/kanban",
-          name: "Доска",
+          name: "Канбан",
           component: () => import("@/views/Kanban/Index.vue"),
           meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
         },
