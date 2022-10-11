@@ -26,19 +26,7 @@ const openInNewTab = () => {
     let routeData = router.resolve({path: `/tasks/${task.value.id}`})
     window.open(routeData.href, '_blank');
 }
-const fetchPipesList = () => {
-    store.fetchPipesList().then(res=> {
-        if (
-            Object.prototype.hasOwnProperty.call(res, "message") &&
-            res.message === "ok"
-          ) {
-            store.setPipesList(res.result);
-            return true;
-          } else {
-            return res.message || -1;
-          }
-    })
-}
+const fetchPipesList = () => store.fetchPipesList()
 
 // const windowTitle = computed(()=>creatingTask.value ? 'Создание задачи' : 'Редактирование задачи')
 const LOADING = ref(false)
@@ -52,18 +40,7 @@ const wasChanged = computed(()=> {
 //HOOKS
 onBeforeMount(() => {
     fetchPipesList()
-    store.fetchOperationsList().then(res=> {
-      if (
-          Object.prototype.hasOwnProperty.call(res, "message") &&
-          res.message === "ok"
-        ) {
-          res.result
-          store.setOperationsList(res.result)
-          return true;
-        } else {
-          return res.message || -1;
-        }
-    })
+    store.fetchOperationsList()
 });
 watch(creatingTask, async (newVal, oldVal) => {
     if(newVal)oldContent.value=JSON.stringify({...task.value})
@@ -83,7 +60,7 @@ watch(creatingTask, async (newVal, oldVal) => {
                         <el-button :icon="Notification" @click.stop="openInNewTab()"></el-button>
                     </el-tooltip>
                 </template>
-                <el-button v-else :loading="LOADING" :disabled="!wasChanged" type="success" @click="sendTask()">Сохранить</el-button>
+                <el-button v-else :loading="LOADING" :disabled="!wasChanged" type="success">Сохранить</el-button>
                 <el-tooltip class="item" effect="dark" content="Закрыть" placement="top-start">
                     <el-button class="close-btn" :icon="Close" @click.stop="toggleDetailsWindow(false),setActiveTask(null),setCreatingTask(false)"></el-button>
                 </el-tooltip>
@@ -134,7 +111,7 @@ watch(creatingTask, async (newVal, oldVal) => {
                         </el-select>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row" v-if="!creatingTask">
                     <div class="left">Статус</div>
                     <div class="right">
                         <el-select v-model="task.status" :disabled="readonlyTask" clearable placeholder="Статус" style="box-shadow:none">
@@ -165,19 +142,19 @@ watch(creatingTask, async (newVal, oldVal) => {
                 <div v-if="task.pipe_id">
                     <span class="left mt-2">Этапы</span>
                     <el-collapse>
-                        <el-collapse-item v-for="operation in task.event_entities" :title="OPERATIONS.find(oper=> oper.id==operation?.operation_id!)!.name" :name="operation?.id">
+                        <el-collapse-item v-for="operation in task.event_entities" :title="OPERATIONS.find(oper=> oper?.id==operation?.operation_id!)!.name" :name="operation?.id">
                             <template #title>
                                 <div class="collapse-item-header">
-                                    <el-icon :color="operation.status===3 ? '#67C23A' : ''">
+                                    <el-icon :color="operation?.status===3 ? '#67C23A' : ''">
                                         <SuccessFilled />
                                     </el-icon>
-                                    <span class="ml-1">{{OPERATIONS.find(oper=> oper.id==operation?.operation_id!)!.name}}</span>
+                                    <span class="ml-1">{{OPERATIONS.find(oper=> oper?.id==operation?.operation_id!)!.name}}</span>
                                 </div>
                             </template>
                             <div class="row">
                                 <div class="left">Статус</div>
                                 <div class="right">
-                                    <template v-if="operation.status===3">
+                                    <template v-if="operation?.status===3">
                                         <el-tag type="success">Готово</el-tag>
                                     </template>
                                     <el-tag v-else color="#f8df72">В работе</el-tag>
@@ -186,16 +163,16 @@ watch(creatingTask, async (newVal, oldVal) => {
                             <div class="row">
                                 <div class="left">Старт</div>
                                 <div class="right">
-                                    <el-tag>{{new Date(operation.created*1000).toLocaleString()}}</el-tag>
+                                    <el-tag>{{new Date(operation!.created*1000).toLocaleString()}}</el-tag>
                                 </div>
                             </div>
-                            <div class="row" v-if="operation.finished">
+                            <div class="row" v-if="operation?.finished">
                                 <div class="left">Финиш</div>
                                 <div class="right">
                                     <el-tag>{{new Date(operation.finished*1000).toLocaleString()}}</el-tag>
                                 </div>
                             </div>
-                            <div class="row" v-if="operation.user_name">
+                            <div class="row" v-if="operation?.user_name">
                                 <div class="left">Исполнитель</div>
                                 <div class="right">
                                     <el-tag>{{operation.user_name}}</el-tag>

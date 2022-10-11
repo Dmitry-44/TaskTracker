@@ -5,22 +5,9 @@ import { useRouter } from "vue-router";
 import PipeCard from "../../components/kanban/PipeCard.vue";
 
 const store = useTaskStore()
-const fetchOperationsList = () => {
-    return store.fetchOperationsList()
-}
+
 onBeforeMount(() => {
-    fetchOperationsList().then(res=> {
-      if (
-          Object.prototype.hasOwnProperty.call(res, "message") &&
-          res.message === "ok"
-        ) {
-          res.result
-          store.setOperationsList(res.result)
-          return true;
-        } else {
-          return res.message || -1;
-        }
-    })
+  store.fetchOperationsList()
 });
 </script>
 

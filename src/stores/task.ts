@@ -10,6 +10,7 @@ interface Task {
   id?: number;
   title: string;
   text: string;
+  created_at: number;
   priority?: number;
   status?: number;
   pipe_id?: number;
@@ -17,10 +18,13 @@ interface Task {
   division_id: number;
   created_by: number;
   events?: number[];
-  event_entities: Event[]
+  event_entities: Event[],
+  child_tasks?: Task[],
+  smi_direction?: number,
 }
-const taskDefault: Task = {
+const taskDefault: ActiveTask = {
   title: '',
+  created_at: -1,
   text: '',
   event_id: -1,
   division_id: -1,
@@ -31,7 +35,7 @@ const taskDefault: Task = {
 interface ActiveTask extends Task {
   readonly?: boolean
 }
-interface Event {
+type Event = {
   id: number
   task_id?: number
   operation_id?: number
@@ -44,18 +48,20 @@ interface Event {
   selected_users: number[]
   result?: string | null
   params?: SimpleObject
-}
+} | null
+
 type Pipe = {
-  id: number,
-  name: string,
+  id: number
+  name: string
+  operation_entities: Operation[]
   value: number[]
 } | null
-interface Operation {
+
+type Operation = {
   id: number;
   name: string
   params: SimpleObject
-
-}
+} | null
 interface DetailsWindow {
   isOpened: boolean
   creatingTask: boolean
@@ -71,12 +77,16 @@ interface TaskOption {
 }
 interface State {
   tasks: Task[]
+  singleTask: Task|null
   priorityOptions: TaskOption[]
   statusOptions: TaskOption[]
   detailsWindow: DetailsWindow
   activeTask: ActiveTask,
   pipes: Pipe[],
-  operations: Operation[]
+  singlePipe: Pipe
+  operations: Operation[],
+  singleOperation: Operation,
+  filterBase: FilterPayload
 }
 interface FilterPayload {
   select: string[];
@@ -95,13 +105,17 @@ interface FilterPayload {
     maxPages?: number;
   };
 }
+
+interface OperationsById {
+  [key: string]: Operation
+}
 interface PaginationBack {
   allCount: number;
   maxPages: number;
   page: number;
 }
 
-export type { Task, ActiveTask, Event, Pipe, Operation, FilterPayload, ResultWithMessage };
+export type { Task, ActiveTask, Event, Pipe, Operation, FilterPayload, ResultWithMessage, OperationsById };
 
 export const useTaskStore = defineStore({
   id: "task",
@@ -123,155 +137,31 @@ export const useTaskStore = defineStore({
       creatingTask: false,
     },
     activeTask: {...taskDefault},
-    tasks: [
-      // {
-      //   "id": 245166,
-      //   "pipe_id": 1,
-      //   "priority": 1,
-      //   "status": 2,
-      //   "division_id": 1,
-      //   "created_by": 262,
-      //     "title": "НЕВЕРНАЯ СУПРУГА ",
-      //     "text": "<p>https://yandex.ru/news/instory/VPodmoskove_muzhchina_zazhivo_szheg_nevernuyu_suprugu_i_poluchil_sem_let--f37a0982372586da24d67bac05892144?lr=120590&amp;content=alldocs&amp;stid=5VB6Ah30&amp;persistent_id=221549503&amp;from=story</p>",
-      //     "event_id": 542563,
-      //     "events": [
-      //         542564
-      //     ],
-      //     "event_entities": [
-      //         {
-      //             "id": 542564,
-      //             "task_id": 245166,
-      //             "operation_id": 1,
-      //             "created": 1662017005,
-      //             "modified": 1662017048,
-      //             "finished": null,
-      //             "u_id": 436,
-      //             "user_name": "Исламгалиева Альфия Ильшатовна",
-      //             "status": 2,
-      //             "selected_users": [],
-      //             "result": null,
-      //             "params": {
-      //                 "id": 23620750,
-      //                 "direction": 23,
-      //                 "time": 0,
-      //                 "started_at": 1662017047.657
-      //             }
-      //         }
-      //     ]
-      // },
-      // {
-      //   "id": 245199,
-      //   "pipe_id": 1,
-      //   "priority": 3,
-      //   "status": 2,
-      //   "division_id": 1,
-      //   "created_by": 262,
-      //     "title": "Новый дворец Путина",
-      //     "text": "<p>https://yandex.ru/news/instory/VPodmoskove_muzhchina_zazhivo_szheg_nevernuyu_suprugu_i_poluchil_sem_let--f37a0982372586da24d67bac05892144?lr=120590&amp;content=alldocs&amp;stid=5VB6Ah30&amp;persistent_id=221549503&amp;from=story</p>",
-      //     "event_id": 542553,
-      //     "events": [
-      //         542563
-      //     ],
-      //     "event_entities": [
-      //         {
-      //             "id": 542563,
-      //             "task_id": 245199,
-      //             "operation_id": 1,
-      //             "created": 1662017005,
-      //             "modified": 1662017048,
-      //             "finished": null,
-      //             "u_id": 436,
-      //             "user_name": "Исламгалиева Альфия Ильшатовна",
-      //             "status": 2,
-      //             "selected_users": [],
-      //             "result": null,
-      //             "params": {
-      //                 "id": 23620750,
-      //                 "direction": 23,
-      //                 "time": 0,
-      //                 "started_at": 1662017047.657
-      //             }
-      //         }
-      //     ]
-      // },
-      // {
-      //   "id": 245207,
-      //   "pipe_id": 1,
-      //   "priority": 2,
-      //   "status": 3,
-      //   "division_id": 1,
-      //   "created_by": 262,
-      //     "title": "ЭВАКУИРУЮТ ВЕРНАДСКОГО",
-      //     "text": "<p>https://t.me/vesticrimea/5747</p>",
-      //     "event_id": 542638,
-      //     "events": [
-      //         542639,
-      //         542656,
-      //         542661
-      //     ],
-      //     "event_entities": [
-      //       {
-      //           "id": 542639,
-      //           "task_id": 245207,
-      //           "operation_id": 1,
-      //           "created": 1662017699,
-      //           "modified": 1662017719,
-      //           "finished": null,
-      //           "u_id": 436,
-      //           "user_name": "Исламгалиева Альфия Ильшатовна",
-      //           "status": 3,
-      //           "selected_users": [],
-      //           "result": null,
-      //           "params": {
-      //               "id": 23620774,
-      //               "direction": 23,
-      //               "time": 0,
-      //               "started_at": 1662017719.034
-      //           }
-      //       },
-      //       {
-      //           "id": 542656,
-      //           "task_id": 245207,
-      //           "operation_id": 2,
-      //           "created": 1662017983,
-      //           "modified": 1662018015,
-      //           "finished": null,
-      //           "u_id": 436,
-      //           "user_name": "Исламгалиева Альфия Ильшатовна",
-      //           "status": 3,
-      //           "selected_users": [],
-      //           "result": null,
-      //           "params": {
-      //               "started_at": 1662018015
-      //           }
-      //       },
-      //       {
-      //           "id": 542661,
-      //           "task_id": 245207,
-      //           "operation_id": 3,
-      //           "created": 1662018015,
-      //           "modified": null,
-      //           "finished": null,
-      //           "u_id": null,
-      //           "user_name": null,
-      //           "status": 3,
-      //           "selected_users": [],
-      //           "result": null,
-      //           "params": {
-      //               "site_id": 3
-      //           }
-      //       }
-      //     ]
-      //   }
-      ],
-      pipes: [],
-      operations: []
+    tasks: [],
+    singleTask: null,
+    pipes: [],
+    singlePipe: null,
+    operations: [],
+    singleOperation: null,
+    filterBase: {
+      select: [],
+      filter: {},
+      options: {
+        onlyLimit: false,
+        page: 1,
+        itemsPerPage: 50,
+        sortBy: ['id'],
+        sortDesc: [false],
+        groupBy: [],
+        groupDesc: [false],
+        mustSort: false,
+        multiSort: false,
+      }
+    }
   }),
   getters: {
     getList: (state): Task[] => state.tasks || [],
-    getTaskById: (state) => {
-      return (taskId: number) => state.tasks.find((task) => task.id === taskId)
-    },
+    getSingleTask: (state) => {return state.singleTask},
     getDetailsWindow:(state): DetailsWindow => state.detailsWindow,
 
     getPriorityOptions: (state): TaskOption[] => {
@@ -282,8 +172,14 @@ export const useTaskStore = defineStore({
     },
     getActiveTask:(state)=> state.activeTask,
     getPipes:(state): Pipe[] => state.pipes,
+    getSinglePipe:(state): Pipe => state.singlePipe,
     getOperations:(state): Operation[] => state.operations,
+    getSingleOperation:(state): Operation => state.singleOperation,
     getCreatingTask:(state) => state.detailsWindow.creatingTask,
+    getOperationsById:(state): OperationsById => state.operations.reduce((acc,el) => {
+      acc[el?.id!] = el
+      return acc
+    },{} as OperationsById)
   },
   actions: {
     toggleDetailsWindow(payload: boolean): void {
@@ -302,23 +198,36 @@ export const useTaskStore = defineStore({
     setTasksList(payload: Task[]): void {
       this.tasks=payload
     },
+    setSingleTask(payload: Task[]):void {
+      this.singleTask=payload[0]
+    },
     setOperationsList(payload: Operation[]): void {
       this.operations=payload
+    },
+    setSingleOperation(payload: Operation[]): void {
+      this.singleOperation=payload[0]
     },
     setPipesList(payload: Pipe[]): void {
       this.pipes=payload
     },
+    setSinglePipe(payload: Pipe[]):void {
+      this.singlePipe=payload[0]
+    },
     
-    fetchTasksList(payload?: FilterPayload): Promise<Boolean> {
+    fetchTasksList(filterPayload?: FilterPayload|Partial<FilterPayload>): Promise<ResultWithMessage> {
       return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/smiCenterTasks`, payload)
+        .post(`${envConfig.API_URL}tasktracker/tasks`, {...this.filterBase, ...filterPayload})
         .then((resp) => {
           const respdata: ResultWithMessage = resp.data;
           if (
             Object.prototype.hasOwnProperty.call(respdata, "message") &&
             respdata.message === "ok"
           ) {
-            this.setTasksList(respdata.result.queryResult);
+            if(filterPayload?.filter!['id']) {
+              this.setSingleTask(respdata.result.queryResult)
+            } else {
+              this.setTasksList(respdata.result.queryResult);
+            }
             return true;
           } else {
             return respdata.message || -1;
@@ -331,7 +240,19 @@ export const useTaskStore = defineStore({
         .post(`${envConfig.API_URL}tasktracker/operations`, payload)
         .then((resp) => {
           const respdata: ResultWithMessage = resp.data;
-          return respdata;
+          if (
+            Object.prototype.hasOwnProperty.call(respdata, "message") &&
+            respdata.message === "ok"
+          ) {
+            if(payload?.filter['id']) {
+              this.setSingleOperation(respdata.result)
+            } else {
+              this.setOperationsList(respdata.result);
+            }
+            return true;
+          } else {
+            return respdata.message || -1;
+          }
         })
         .catch((e) => errRequestHandler(e));
     },
@@ -340,7 +261,19 @@ export const useTaskStore = defineStore({
         .post(`${envConfig.API_URL}tasktracker/pipe`, payload)
         .then((resp) => {
           const respdata: ResultWithMessage = resp.data;
-          return respdata
+          if (
+            Object.prototype.hasOwnProperty.call(respdata, "message") &&
+            respdata.message === "ok"
+          ) {
+            if(payload?.filter['id']) {
+              this.setSinglePipe(respdata.result)
+            } else {
+              this.setPipesList(respdata.result);
+            }
+            return true;
+          } else {
+            return respdata.message || -1;
+          }
         })
         .catch((e) => errRequestHandler(e));
     },
