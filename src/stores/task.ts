@@ -106,13 +106,16 @@ interface FilterPayload {
   };
 }
 
+interface OperationsById {
+  [key: string]: Operation
+}
 interface PaginationBack {
   allCount: number;
   maxPages: number;
   page: number;
 }
 
-export type { Task, ActiveTask, Event, Pipe, Operation, FilterPayload, ResultWithMessage };
+export type { Task, ActiveTask, Event, Pipe, Operation, FilterPayload, ResultWithMessage, OperationsById };
 
 export const useTaskStore = defineStore({
   id: "task",
@@ -173,6 +176,10 @@ export const useTaskStore = defineStore({
     getOperations:(state): Operation[] => state.operations,
     getSingleOperation:(state): Operation => state.singleOperation,
     getCreatingTask:(state) => state.detailsWindow.creatingTask,
+    getOperationsById:(state): OperationsById => state.operations.reduce((acc,el) => {
+      acc[el?.id!] = el
+      return acc
+    },{} as OperationsById)
   },
   actions: {
     toggleDetailsWindow(payload: boolean): void {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FilterPayload } from '@/stores/task';
+import { useTaskStore, type FilterPayload } from '@/stores/task';
 import { useSitesStore } from "@/stores/sites";
 import { Close } from '@element-plus/icons-vue';
 import { ref, computed, watch, nextTick, onMounted, onBeforeMount } from 'vue';
@@ -9,9 +9,16 @@ const emit = defineEmits<{
     (e: 'update', value: FilterPayload): void
 }>()
 
+//CONSTANTS
 const sitesStore = useSitesStore()
-let filterIsOpen = ref(false)
+const taskStore = useTaskStore()
+const PRIORITY_OPTIONS = computed(() => taskStore.getPriorityOptions)
 const SITES_OPTIONS = computed(() => sitesStore.getList)
+const operationsById = computed(()=> taskStore.getOperationsById)
+const DIRECTIONS_OPTIONS = computed(() => operationsById?.value[4]?.params.directionArr || [])
+
+//VARIABLES
+let filterIsOpen = ref(false)
 let priority = ref([])
 let direction = ref([])
 let site_ids = ref([])
@@ -79,12 +86,13 @@ const openFilters = () => {
 //HOOKS
 onBeforeMount(() => {
     sitesStore.fetchSites()
+    taskStore.fetchOperationsList()
 })
 onMounted(()=> {
     applyFilters()
 })
 
-//SECONDARY DEFAULT OPTIONS
+//DATEPICKER DEFAULT SETTINGS
 const shortcuts = [
     {
     text: 'Сегодня',
@@ -114,31 +122,14 @@ const shortcuts = [
     },
     },
 ]
-const FILTER_OPTIONS =
-    {   
-        PRIORITY: [
-            {
-                id: 1, value: 'Молния'
-            },
-            {
-                id: 2, value: 'Срочная'
-            },
-            {
-                id: 3, value: 'Базовая'
-            },
-            {
-                id: 4, value: 'Низкий'
-            }
-        ]
-    }
 
-    defineExpose({
-        closeFilters,
-        openFilters,
-        resetFilters,
-        applyFilters,
-        filterPayload
-    })
+defineExpose({
+    closeFilters,
+    openFilters,
+    resetFilters,
+    applyFilters,
+    filterPayload
+})
 </script>
 
 <template>
@@ -159,7 +150,9 @@ const FILTER_OPTIONS =
             <el-card v-if="filterIsOpen" class="box-card filters_card">
                 <template #header>
                     <div class="my-1">
-                        <el-button class="filters_card-close-btn" :icon="Close" @click="filterIsOpen=false"/>
+                        <el-tooltip class="item" effect="dark" content="Закрыть" placement="top-start">
+                            <el-button class="filters_card-close-btn" :icon="Close" @click="filterIsOpen=false"/>
+                        </el-tooltip>
                     </div>
                 </template>
                 <div class="body">
@@ -174,7 +167,7 @@ const FILTER_OPTIONS =
                     style="width: 240px"
                     >
                         <el-option
-                        v-for="item in FILTER_OPTIONS.PRIORITY"
+                        v-for="item in PRIORITY_OPTIONS"
                         :key="item.value"
                         :label="item.value"
                         :value="item.id"
@@ -192,12 +185,12 @@ const FILTER_OPTIONS =
                     style="width: 240px"
                     >
                         <el-option
-                        v-for="item in FILTER_OPTIONS.PRIORITY"
-                        :key="item.value"
-                        :label="item.value"
+                        v-for="item in DIRECTIONS_OPTIONS"
+                        :key="item.name"
+                        :label="item.name"
                         :value="item.id"
                         >
-                        <span>{{item.value}}</span>
+                        <span>{{item.name}}</span>
                         </el-option>
                     </el-select>
                     
