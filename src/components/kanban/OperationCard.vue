@@ -78,10 +78,10 @@ const sendOperation = () => {
         </template>
         <el-row>
             <el-col :lg="12">
-                <el-input class="card-name" v-model="operation.name" placeholder="Название" />
+                <el-input class="card-name" v-model="operation?.name" placeholder="Название" />
             </el-col>
             <el-col :lg="12">
-                <div>{{operation.params}}</div>
+                <div>{{operation?.params}}</div>
             </el-col>
         </el-row>
     </el-card>

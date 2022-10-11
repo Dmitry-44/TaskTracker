@@ -2,7 +2,7 @@
 import { useTaskStore, type Task } from '@/stores/task';
 import { Close, Pointer, Notification, SuccessFilled } from "@element-plus/icons-vue";
 import { computed } from '@vue/reactivity';
-import { onBeforeMount, onMounted, ref, watch } from 'vue';
+import { nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const store = useTaskStore()
@@ -35,6 +35,7 @@ const wasChanged = computed(()=> {
     const updatedData = JSON.parse(JSON.stringify(task.value))
     return oldContent.value != JSON.stringify(updatedData)
 })
+const titleInput = ref<HTMLInputElement|any>(null)
 
 
 //HOOKS
@@ -43,7 +44,12 @@ onBeforeMount(() => {
     store.fetchOperationsList()
 });
 watch(creatingTask, async (newVal, oldVal) => {
-    if(newVal)oldContent.value=JSON.stringify({...task.value})
+    if(newVal){
+        oldContent.value=JSON.stringify({...task.value})
+        setTimeout(() => {
+            titleInput.value.focus()
+        }, 500);
+    }
 })
 
 
@@ -73,6 +79,7 @@ watch(creatingTask, async (newVal, oldVal) => {
                 :disabled="readonlyTask"
                 class="title-input" 
                 placeholder="Ввести название задачи"
+                ref="titleInput"
                 >
             </div>
             <div class="content">
