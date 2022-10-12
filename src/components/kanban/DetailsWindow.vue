@@ -4,6 +4,7 @@ import { Close, Pointer, Notification, SuccessFilled } from "@element-plus/icons
 import { computed } from '@vue/reactivity';
 import { nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import OperationCollapseItem from './OperationCollapseItem.vue';
 
 const store = useTaskStore()
 const router = useRouter()
@@ -36,6 +37,7 @@ const wasChanged = computed(()=> {
     return oldContent.value != JSON.stringify(updatedData)
 })
 const titleInput = ref<HTMLInputElement|any>(null)
+let taskPipe = computed(()=> PIPES.value.find(pipe=>pipe?.id===task.value?.pipe_id) || null)
 
 
 //HOOKS
@@ -149,43 +151,9 @@ watch(creatingTask, async (newVal, oldVal) => {
                 <div v-if="task.pipe_id">
                     <span class="left mt-2">Этапы</span>
                     <el-collapse>
-                        <el-collapse-item v-for="operation in task.event_entities" :title="OPERATIONS.find(oper=> oper?.id==operation?.operation_id!)!.name" :name="operation?.id">
-                            <template #title>
-                                <div class="collapse-item-header">
-                                    <el-icon :color="operation?.status===3 ? '#67C23A' : ''">
-                                        <SuccessFilled />
-                                    </el-icon>
-                                    <span class="ml-1">{{OPERATIONS.find(oper=> oper?.id==operation?.operation_id!)!.name}}</span>
-                                </div>
-                            </template>
-                            <div class="row">
-                                <div class="left">Статус</div>
-                                <div class="right">
-                                    <template v-if="operation?.status===3">
-                                        <el-tag type="success">Готово</el-tag>
-                                    </template>
-                                    <el-tag v-else color="#f8df72">В работе</el-tag>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="left">Старт</div>
-                                <div class="right">
-                                    <el-tag>{{new Date(operation!.created*1000).toLocaleString()}}</el-tag>
-                                </div>
-                            </div>
-                            <div class="row" v-if="operation?.finished">
-                                <div class="left">Финиш</div>
-                                <div class="right">
-                                    <el-tag>{{new Date(operation.finished*1000).toLocaleString()}}</el-tag>
-                                </div>
-                            </div>
-                            <div class="row" v-if="operation?.user_name">
-                                <div class="left">Исполнитель</div>
-                                <div class="right">
-                                    <el-tag>{{operation.user_name}}</el-tag>
-                                </div>
-                            </div>
-                        </el-collapse-item>
+                        <template v-for="operation in taskPipe?.operation_entities" :key="`${task.id}-${operation?.id}`">
+                            <OperationCollapseItem :operation="operation" :event="task?.event_entities.find(event=>event?.operation_id===operation?.id) || null" />
+                        </template>
                     </el-collapse>
                 </div>
             </div>

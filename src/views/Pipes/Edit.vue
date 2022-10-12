@@ -9,19 +9,21 @@ const paramId = router.currentRoute.value.params.id
 const store = useTaskStore()
 
 let pipe = computed<Pipe>(()=>store.getSinglePipe)
+let LOADING = ref(false)
 
 const fetchPipeById = () => {
     const payload: FilterPayload = {select:[],filter:{'id':paramId}, options:{onlyLimit:true,itemsPerPage:1}}
     return store.fetchPipesList(payload)
 }
 
-onBeforeMount(() => {
-  fetchPipeById()
-  store.fetchOperationsList()
+onBeforeMount(async() => {
+  LOADING.value=true
+  await fetchPipeById()
+  await store.fetchOperationsList()
+  LOADING.value=false
 });
 </script>
 
 <template>
-    <PipeCard v-if="pipe" :pipeData=pipe />
-    <el-table v-else v-loading="true" style="width: 100%"></el-table>
+    <PipeCard :pipeData=pipe :loading=LOADING :key=pipe?.id />
 </template>

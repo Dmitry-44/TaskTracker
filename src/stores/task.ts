@@ -75,11 +75,17 @@ interface TaskOption {
   value: string,
   color: string
 }
+interface EventStatusOption {
+  id: number,
+  value: string,
+  color: string
+}
 interface State {
   tasks: Task[]
   singleTask: Task|null
   priorityOptions: TaskOption[]
   statusOptions: TaskOption[]
+  eventStatusOptions: EventStatusOption[]
   detailsWindow: DetailsWindow
   activeTask: ActiveTask,
   pipes: Pipe[],
@@ -132,6 +138,11 @@ export const useTaskStore = defineStore({
       {id:3,value:'В работе',color:'#f8df72'},
       {id:4,value:'Закончена',color:'#909399'},
     ],
+    eventStatusOptions: [
+      {id:1,value:'Создана',color:''},
+      {id:2,value:'В работе',color:'#f8df72'},
+      {id:3,value:'Готово',color:'#67C23A'},
+    ],
     detailsWindow: {
       isOpened: false,
       creatingTask: false,
@@ -179,7 +190,8 @@ export const useTaskStore = defineStore({
     getOperationsById:(state): OperationsById => state.operations.reduce((acc,el) => {
       acc[el?.id!] = el
       return acc
-    },{} as OperationsById)
+    },{} as OperationsById),
+    getEventStatusOptions:(state): EventStatusOption[]=> state.eventStatusOptions
   },
   actions: {
     toggleDetailsWindow(payload: boolean): void {

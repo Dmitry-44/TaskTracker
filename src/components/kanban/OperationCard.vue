@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useTaskStore, type Operation } from "@/stores/task";
-import { computed, type PropType, ref, toRef, onBeforeMount, onMounted, onBeforeUnmount } from "vue";
+import { computed, type PropType, ref, toRef, onBeforeMount, onMounted, onBeforeUnmount, watch } from "vue";
 import { Plus, Close, Delete, Bottom } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
+
 
 const props = defineProps({
     operationData: {
@@ -13,10 +14,17 @@ const props = defineProps({
             name: '',
             params: {}
         }),
+    },
+    loading: {
+        type: Boolean,
+        default: () => false
     }
 })
 const router = useRouter()
-const operation = ref(props.operationData)
+const paramsInput = ref<HTMLInputElement|any>(null)
+let operationParams = computed(()=>JSON.parse(operationParamsString.value))
+let operationParamsString = ref(JSON.stringify(props.operationData?.params, null, 2))
+let operation = ref({...props.operationData, params: operationParams})
 
 const store = useTaskStore()
 const oldContent = ref('')
@@ -26,6 +34,12 @@ const wasChanged = computed(()=> {
 })
 const LOADING = ref(false)
 
+watch(
+    () => operationParams,
+    () => {
+        operation.value.params=operationParams
+    }
+)
 //HOOKS
 onMounted(()=> {
     oldContent.value=JSON.stringify(props.operationData)
@@ -63,10 +77,11 @@ const sendOperation = () => {
     })
 }
 
+
 </script>
 
 <template>
-      <el-card class="card">
+      <el-card class="card" v-loading="loading">
         <template #header>
             <el-row justify="space-between">
                 <h3>Операция</h3>
@@ -76,14 +91,26 @@ const sendOperation = () => {
                 </div>
             </el-row>
         </template>
-        <el-row>
-            <el-col :lg="12" v-if="operation?.name">
-                <el-input class="card-name" v-model="operation.name" placeholder="Название" />
-            </el-col>
-            <el-col :lg="12">
-                <div>{{operation?.params}}</div>
-            </el-col>
-        </el-row>
+        <!-- <el-row justify="center"> -->
+            <div>
+                <h4>Заголовок</h4>
+                <el-input class="card-name mb-4" label="Заголовок" v-model="operation.name" placeholder="Название" />
+            </div>
+        <!-- </el-row>
+        <el-row justify="center"> -->
+            <div>
+                <h4>Параметры</h4>
+                <el-input
+                    @keydown.tab.prevent
+                    v-model="operationParamsString"
+                    :autosize="{ minRows: 2, maxRows: 100 }"
+                    type="textarea"
+                    class="input-textarea"
+                    placeholder="Параметры операции"
+                    ref="paramsInput"
+                />
+            </div>
+        <!-- </el-row> -->
     </el-card>
 </template>
 
@@ -93,4 +120,6 @@ const sendOperation = () => {
     margin: 20px auto
     &-name 
         width: min(100%, 400px)
+    // .input-textarea
+    //     width: min(100%, 400px)
 </style>

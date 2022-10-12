@@ -9,7 +9,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     CardSettrings: typeof import('./src/components/CardSettrings.vue')['default']
     Column: typeof import('./src/components/kanban/Column.vue')['default']
-    copy: typeof import('./src/components/kanban/PipeCard copy.vue')['default']
+    copy: typeof import('./src/components/kanban/OperationCollapse copy.vue')['default']
     DetailsWindow: typeof import('./src/components/kanban/DetailsWindow.vue')['default']
     ElAffix: typeof import('element-plus/es')['ElAffix']
     ElAside: typeof import('element-plus/es')['ElAside']
@@ -71,6 +71,9 @@ declare module '@vue/runtime-core' {
     MultiEditor: typeof import('./src/components/photoEditor/MultiEditor.vue')['default']
     OperationCard: typeof import('./src/components/kanban/OperationCard.vue')['default']
     OperationCard2: typeof import('./src/components/kanban/OperationCard2.vue')['default']
+    OperationCollapse: typeof import('./src/components/kanban/OperationCollapse.vue')['default']
+    OperationCollapse2: typeof import('./src/components/kanban/OperationCollapse2.vue')['default']
+    OperationCollapseItem: typeof import('./src/components/kanban/OperationCollapseItem.vue')['default']
     OperationColumn: typeof import('./src/components/kanban/OperationColumn.vue')['default']
     PhohoInfo: typeof import('./src/components/PhohoInfo.vue')['default']
     PhotoCard: typeof import('./src/components/PhotoCard.vue')['default']
