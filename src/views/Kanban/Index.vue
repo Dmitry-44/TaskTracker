@@ -4,7 +4,7 @@ import TaskCard from "@/components/kanban/TaskCard.vue";
 import { useTaskStore, type FilterPayload, type Task } from "@/stores/task";
 import DetailsWindow from "../../components/kanban/DetailsWindow.vue";
 import { ref, computed, nextTick, onBeforeMount, getCurrentInstance, watch } from "vue";
-import Filters from "./Filters.vue";
+import Filters from "../../components/kanban/Filters.vue";
 
 const store = useTaskStore()
 const $filters = ref(null)

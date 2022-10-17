@@ -66,6 +66,7 @@ declare module '@vue/runtime-core' {
     ElTree: typeof import('element-plus/es')['ElTree']
     ElUpload: typeof import('element-plus/es')['ElUpload']
     EventsModal: typeof import('./src/components/kanban/EventsModal.vue')['default']
+    Filters: typeof import('./src/components/kanban/Filters.vue')['default']
     Index: typeof import('./src/components/kanban/Index.vue')['default']
     MenuAside: typeof import('./src/components/MenuAside.vue')['default']
     MultiEditor: typeof import('./src/components/photoEditor/MultiEditor.vue')['default']

@@ -92,7 +92,8 @@ interface State {
   singlePipe: Pipe
   operations: Operation[],
   singleOperation: Operation,
-  filterBase: FilterPayload
+  filterBase: FilterPayload,
+  filterVersion: string
 }
 interface FilterPayload {
   select: string[];
@@ -168,19 +169,16 @@ export const useTaskStore = defineStore({
         mustSort: false,
         multiSort: false,
       }
-    }
+    },
+    filterVersion: '1.0',
   }),
   getters: {
     getList: (state): Task[] => state.tasks || [],
     getSingleTask: (state) => {return state.singleTask},
     getDetailsWindow:(state): DetailsWindow => state.detailsWindow,
-
-    getPriorityOptions: (state): TaskOption[] => {
-      return state.priorityOptions
-    },
-    getStatusOptions: (state): TaskOption[] => {
-      return state.statusOptions
-    },
+    getFilterVersion:(state): string => state.filterVersion,
+    getPriorityOptions: (state): TaskOption[] => state.priorityOptions,
+    getStatusOptions: (state): TaskOption[] => state.statusOptions,
     getActiveTask:(state)=> state.activeTask,
     getPipes:(state): Pipe[] => state.pipes,
     getSinglePipe:(state): Pipe => state.singlePipe,
