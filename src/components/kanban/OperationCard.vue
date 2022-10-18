@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useTaskStore, type Operation } from "@/stores/task";
-import { computed, type PropType, ref, toRef, onBeforeMount, onMounted, onBeforeUnmount } from "vue";
+import { computed, type PropType, ref, toRef, onBeforeMount, onMounted, onBeforeUnmount, watch, type ComputedRef } from "vue";
 import { Plus, Close, Delete, Bottom } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
+import JsonEditor from "../JsonEditor.vue";
+
 
 const props = defineProps({
     operationData: {
@@ -13,18 +15,26 @@ const props = defineProps({
             name: '',
             params: {}
         }),
+    },
+    loading: {
+        type: Boolean,
+        default: () => false
     }
 })
-const router = useRouter()
-const operation = ref(props.operationData)
 
+//VARIABLES
+const router = useRouter()
 const store = useTaskStore()
-const oldContent = ref('')
-const wasChanged = computed(()=> {
+const paramsEditor = ref<HTMLInputElement|any>(null)
+
+let params = ref(props.operationData?.params)
+let operation = ref(props.operationData)
+let oldContent = ref('')
+let wasChanged = computed(()=> {
     const updatedData = JSON.parse(JSON.stringify(operation.value))
     return oldContent.value != JSON.stringify(updatedData)
 })
-const LOADING = ref(false)
+let LOADING = ref(false)
 
 //HOOKS
 onMounted(()=> {
@@ -32,6 +42,9 @@ onMounted(()=> {
 })
 
 //METHODS
+const paramUpdateHandle = (val: Object) => {
+    operation.value!.params=val
+}
 const sendOperation = () => {
     if(LOADING.value)return;
     LOADING.value=true
@@ -66,7 +79,7 @@ const sendOperation = () => {
 </script>
 
 <template>
-      <el-card class="card">
+      <el-card class="card" v-loading="loading">
         <template #header>
             <el-row justify="space-between">
                 <h3>Операция</h3>
@@ -76,14 +89,14 @@ const sendOperation = () => {
                 </div>
             </el-row>
         </template>
-        <el-row>
-            <el-col :lg="12" v-if="operation?.name">
-                <el-input class="card-name" v-model="operation.name" placeholder="Название" />
-            </el-col>
-            <el-col :lg="12">
-                <div>{{operation?.params}}</div>
-            </el-col>
-        </el-row>
+        <div>
+            <h4>Заголовок</h4>
+            <el-input class="card-name mb-4" label="Заголовок" v-model="operation.name" placeholder="Название" />
+        </div>
+        <div>
+            <h4>Параметры</h4>
+            <JsonEditor :data="params" @update="paramUpdateHandle" ref="paramsEditor"/>
+        </div>
     </el-card>
 </template>
 

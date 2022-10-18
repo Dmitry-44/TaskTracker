@@ -9,17 +9,19 @@ const paramId = router.currentRoute.value.params.id
 const store = useTaskStore()
 
 let operation = computed<Operation>(()=>store.getSingleOperation)
+let LOADING = ref(false)
 
 const fetchOperationById = () => {
     const payload: FilterPayload = {select:[],filter:{'id':paramId}, options:{onlyLimit:true,itemsPerPage:1}}
     return store.fetchOperationsList(payload)
 }
-onBeforeMount(() => {
-    fetchOperationById()
+onBeforeMount(async() => {
+    LOADING.value=true
+    await fetchOperationById()
+    LOADING.value=false
 });
 </script>
 
 <template>
-    <OperationCard v-if="operation" :operationData=operation />
-    <el-table v-else v-loading="true" style="width: 100%"></el-table>
+    <OperationCard :operationData=operation :loading=LOADING :key=operation?.id />
 </template>

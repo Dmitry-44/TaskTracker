@@ -75,18 +75,25 @@ interface TaskOption {
   value: string,
   color: string
 }
+interface EventStatusOption {
+  id: number,
+  value: string,
+  color: string
+}
 interface State {
   tasks: Task[]
   singleTask: Task|null
   priorityOptions: TaskOption[]
   statusOptions: TaskOption[]
+  eventStatusOptions: EventStatusOption[]
   detailsWindow: DetailsWindow
   activeTask: ActiveTask,
   pipes: Pipe[],
   singlePipe: Pipe
   operations: Operation[],
   singleOperation: Operation,
-  filterBase: FilterPayload
+  filterBase: FilterPayload,
+  filterVersion: string
 }
 interface FilterPayload {
   select: string[];
@@ -132,6 +139,11 @@ export const useTaskStore = defineStore({
       {id:3,value:'В работе',color:'#f8df72'},
       {id:4,value:'Закончена',color:'#909399'},
     ],
+    eventStatusOptions: [
+      {id:1,value:'Создана',color:''},
+      {id:2,value:'В работе',color:'#f8df72'},
+      {id:3,value:'Готово',color:'#67C23A'},
+    ],
     detailsWindow: {
       isOpened: false,
       creatingTask: false,
@@ -157,19 +169,16 @@ export const useTaskStore = defineStore({
         mustSort: false,
         multiSort: false,
       }
-    }
+    },
+    filterVersion: '1.0',
   }),
   getters: {
     getList: (state): Task[] => state.tasks || [],
     getSingleTask: (state) => {return state.singleTask},
     getDetailsWindow:(state): DetailsWindow => state.detailsWindow,
-
-    getPriorityOptions: (state): TaskOption[] => {
-      return state.priorityOptions
-    },
-    getStatusOptions: (state): TaskOption[] => {
-      return state.statusOptions
-    },
+    getFilterVersion:(state): string => state.filterVersion,
+    getPriorityOptions: (state): TaskOption[] => state.priorityOptions,
+    getStatusOptions: (state): TaskOption[] => state.statusOptions,
     getActiveTask:(state)=> state.activeTask,
     getPipes:(state): Pipe[] => state.pipes,
     getSinglePipe:(state): Pipe => state.singlePipe,
@@ -179,7 +188,8 @@ export const useTaskStore = defineStore({
     getOperationsById:(state): OperationsById => state.operations.reduce((acc,el) => {
       acc[el?.id!] = el
       return acc
-    },{} as OperationsById)
+    },{} as OperationsById),
+    getEventStatusOptions:(state): EventStatusOption[]=> state.eventStatusOptions
   },
   actions: {
     toggleDetailsWindow(payload: boolean): void {
@@ -311,5 +321,21 @@ export const useTaskStore = defineStore({
         })
         .catch((e) => errRequestHandler(e));
     },
+    takeTask(payload: Partial<Task>): Promise<ResultWithMessage> {
+      return axiosClient
+        .post(`${envConfig.API_URL}tasktracker/takeTaskSmi`, payload)
+        .then((resp) => {
+          const respdata: ResultWithMessage = resp.data
+          if (
+            Object.prototype.hasOwnProperty.call(respdata, "message") &&
+            respdata.message === "ok"
+          ) {
+            return true;
+          } else {
+            return respdata.message || -1;
+          }
+        })
+        .catch((e) => errRequestHandler(e));
+    }
   },
 });
