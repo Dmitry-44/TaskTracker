@@ -21,34 +21,30 @@ const props = defineProps({
         default: () => false
     }
 })
-const router = useRouter()
-const paramsInput = ref<HTMLInputElement|any>(null)
-let params = ref(props.operationData?.params)
-let operationParams = computed(()=>JSON.parse(operationParamsString.value)) as ComputedRef<Object>
-let operationParamsString = ref(JSON.stringify(props.operationData?.params, null, 2))
-let operation = ref({...props.operationData, params: operationParams})
 
+//VARIABLES
+const router = useRouter()
 const store = useTaskStore()
-const oldContent = ref('')
-const wasChanged = computed(()=> {
+const paramsEditor = ref<HTMLInputElement|any>(null)
+
+let params = ref(props.operationData?.params)
+let operation = ref(props.operationData)
+let oldContent = ref('')
+let wasChanged = computed(()=> {
     const updatedData = JSON.parse(JSON.stringify(operation.value))
     return oldContent.value != JSON.stringify(updatedData)
 })
-const LOADING = ref(false)
-const paramsEditor = ref<HTMLInputElement|any>(null)
+let LOADING = ref(false)
 
-watch(
-    () => operationParams,
-    () => {
-        operation.value.params=operationParams
-    }
-)
 //HOOKS
 onMounted(()=> {
     oldContent.value=JSON.stringify(props.operationData)
 })
 
 //METHODS
+const paramUpdateHandle = (val: Object) => {
+    operation.value!.params=val
+}
 const sendOperation = () => {
     if(LOADING.value)return;
     LOADING.value=true
@@ -79,12 +75,6 @@ const sendOperation = () => {
         msg.close();
     })
 }
-const paramUpdateHandle = (val: Object) => {
-    console.log('val', val)
-    operation.value.params=val
-    // params.value = val
-}
-
 
 </script>
 
@@ -99,27 +89,14 @@ const paramUpdateHandle = (val: Object) => {
                 </div>
             </el-row>
         </template>
-        <!-- <el-row justify="center"> -->
-            <div>
-                <h4>Заголовок</h4>
-                <el-input class="card-name mb-4" label="Заголовок" v-model="operation.name" placeholder="Название" />
-            </div>
-        <!-- </el-row>
-        <el-row justify="center"> -->
-            <div>
-                <h4>Параметры</h4>
-                <JsonEditor :data="params" @update="paramUpdateHandle" ref="paramsEditor"/>
-                <!-- <el-input
-                    @keydown.tab.prevent
-                    v-model="operationParamsString"
-                    :autosize="{ minRows: 2, maxRows: 100 }"
-                    type="textarea"
-                    class="input-textarea"
-                    placeholder="Параметры операции"
-                    ref="paramsInput"
-                /> -->
-            </div>
-        <!-- </el-row> -->
+        <div>
+            <h4>Заголовок</h4>
+            <el-input class="card-name mb-4" label="Заголовок" v-model="operation.name" placeholder="Название" />
+        </div>
+        <div>
+            <h4>Параметры</h4>
+            <JsonEditor :data="params" @update="paramUpdateHandle" ref="paramsEditor"/>
+        </div>
     </el-card>
 </template>
 

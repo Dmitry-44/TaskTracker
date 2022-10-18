@@ -27,10 +27,7 @@ const emit = defineEmits<{
 //VARIABLES
 let value = ref(props.data)
 let OPTIONS = ref(props.options)
-const textAreaElement = ref<HTMLElement|any>(null)
 let valueString = ref(JSON.stringify(value.value, null, OPTIONS.value.tabSize))
-let isJsonValid = ref(true)
-
 
 //METHODS
 const tabHandler = (e: KeyboardEvent) => {
@@ -39,21 +36,21 @@ const tabHandler = (e: KeyboardEvent) => {
 }
 const inputHandle = (e: InputEvent) => {
     const target = e.target as HTMLInputElement
-    emit('update', value.value)
     value.value=JSON.parse(target.value)
+    emit('update', value.value)
 }
 const format = () => {
     valueString.value=JSON.stringify(JSON.parse(JSON.stringify(value.value)), null, OPTIONS.value.tabSize)
 }
-const isJsonData = (data: any) => {
-    try {
-        JSON.parse(data);
-    } catch (e) {
-        console.log('error parse', e)
-        return false;
-    }
-    return true;
-}
+// const isJsonData = (data: any) => {
+//     try {
+//         JSON.parse(data);
+//     } catch (e) {
+//         console.log('error parse', e)
+//         return false;
+//     }
+//     return true;
+// }
 
 const getValue = () => {
     return value.value
@@ -80,7 +77,7 @@ defineExpose({
         :placeholder="OPTIONS.placeholder"
         @keydown.tab.prevent="tabHandler($event)" 
         @input="inputHandle($event)"
-        ref="textAreaElement">
+        >
         </textarea>
         <div class="actions_block">
             <el-tooltip class="item" effect="dark" content="Отформатировать" placement="right-start">
@@ -88,7 +85,6 @@ defineExpose({
             </el-tooltip>
         </div>
     </div>
-    <span v-if="!isJsonValid" class="error-msg">Невалидный JSON</span>
 </template>
 
 <style lang="sass" scope>
