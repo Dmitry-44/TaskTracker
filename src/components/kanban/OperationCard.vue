@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useTaskStore, type Operation } from "@/stores/task";
-import { computed, type PropType, ref, toRef, onBeforeMount, onMounted, onBeforeUnmount, watch } from "vue";
+import { computed, type PropType, ref, toRef, onBeforeMount, onMounted, onBeforeUnmount, watch, type ComputedRef } from "vue";
 import { Plus, Close, Delete, Bottom } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
+import JsonEditor from "../JsonEditor.vue";
 
 
 const props = defineProps({
@@ -22,7 +23,8 @@ const props = defineProps({
 })
 const router = useRouter()
 const paramsInput = ref<HTMLInputElement|any>(null)
-let operationParams = computed(()=>JSON.parse(operationParamsString.value))
+let params = ref(props.operationData?.params)
+let operationParams = computed(()=>JSON.parse(operationParamsString.value)) as ComputedRef<Object>
 let operationParamsString = ref(JSON.stringify(props.operationData?.params, null, 2))
 let operation = ref({...props.operationData, params: operationParams})
 
@@ -33,6 +35,7 @@ const wasChanged = computed(()=> {
     return oldContent.value != JSON.stringify(updatedData)
 })
 const LOADING = ref(false)
+const paramsEditor = ref<HTMLInputElement|any>(null)
 
 watch(
     () => operationParams,
@@ -76,6 +79,11 @@ const sendOperation = () => {
         msg.close();
     })
 }
+const paramUpdateHandle = (val: Object) => {
+    console.log('val', val)
+    operation.value.params=val
+    // params.value = val
+}
 
 
 </script>
@@ -100,7 +108,8 @@ const sendOperation = () => {
         <el-row justify="center"> -->
             <div>
                 <h4>Параметры</h4>
-                <el-input
+                <JsonEditor :data="params" @update="paramUpdateHandle" ref="paramsEditor"/>
+                <!-- <el-input
                     @keydown.tab.prevent
                     v-model="operationParamsString"
                     :autosize="{ minRows: 2, maxRows: 100 }"
@@ -108,7 +117,7 @@ const sendOperation = () => {
                     class="input-textarea"
                     placeholder="Параметры операции"
                     ref="paramsInput"
-                />
+                /> -->
             </div>
         <!-- </el-row> -->
     </el-card>
@@ -120,6 +129,4 @@ const sendOperation = () => {
     margin: 20px auto
     &-name 
         width: min(100%, 400px)
-    // .input-textarea
-    //     width: min(100%, 400px)
 </style>
