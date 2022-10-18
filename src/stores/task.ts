@@ -311,5 +311,21 @@ export const useTaskStore = defineStore({
         })
         .catch((e) => errRequestHandler(e));
     },
+    upserTask(payload: Partial<Task>): Promise<boolean> {
+      return axiosClient
+        .put(`${envConfig.API_URL}tasktracker/smiCenterTaskUpsert`, payload)
+        .then((resp) => {
+          const respdata: ResultWithMessage = resp.data
+          if (
+            Object.prototype.hasOwnProperty.call(respdata, "message") &&
+            respdata.message === "ok"
+          ) {
+            return true;
+          } else {
+            return respdata.message || -1;
+          }
+        })
+        .catch((e) => errRequestHandler(e));
   },
+}
 });

@@ -43,21 +43,24 @@ onBeforeMount(() => {
     fetchPipesList()
     store.fetchOperationsList()
 });
-watch(creatingTask, async (newVal, oldVal) => {
-    if(newVal){
+
+watch(task, (newVal, oldVal)=>{
+    if(oldVal.id != newVal.id) {
         oldContent.value=JSON.stringify({...task.value})
-        setTimeout(() => {
-            titleInput.value.focus()
-        }, 500);
+        if(creatingTask.value){
+            nextTick(()=>{
+                titleInput.value.focus()
+            })
+        }
     }
 })
-
 
 </script>
 <template>
     <div :class="['details', detailsWindow.isOpened?'active':'']" @click.stop>
         <div class="header">
             <div class="actions">
+                <el-button :loading="LOADING" :disabled="!wasChanged" type="success">Сохранить</el-button>
                 <template v-if="!creatingTask">
                     <el-tooltip v-if="!readonlyTask" class="item" effect="dark" content="Взять задачу" placement="top-start">
                         <el-button :icon="Pointer"></el-button>
@@ -66,7 +69,6 @@ watch(creatingTask, async (newVal, oldVal) => {
                         <el-button :icon="Notification" @click.stop="openInNewTab()"></el-button>
                     </el-tooltip>
                 </template>
-                <el-button v-else :loading="LOADING" :disabled="!wasChanged" type="success">Сохранить</el-button>
                 <el-tooltip class="item" effect="dark" content="Закрыть" placement="top-start">
                     <el-button class="close-btn" :icon="Close" @click.stop="toggleDetailsWindow(false),setActiveTask(null),setCreatingTask(false)"></el-button>
                 </el-tooltip>
