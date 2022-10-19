@@ -87,7 +87,6 @@ const getPersonalFilters = () => {
         priority.value=personalFilters.filter.priority
         site_ids.value=personalFilters.filter.site_ids
         smi_direction.value=personalFilters.filter.smi_direction
-        setPersonalFilters()
     }
 }
 const applyFilters = () => {
