@@ -3,6 +3,7 @@ import { useTaskStore, type FilterPayload } from '@/stores/task';
 import { useSitesStore } from "@/stores/sites";
 import { Close } from '@element-plus/icons-vue';
 import { ref, computed, watch, nextTick, onMounted, onBeforeMount } from 'vue';
+import { useUserStore } from '@/stores/user';
 
 
 const emit = defineEmits<{
@@ -12,15 +13,18 @@ const emit = defineEmits<{
 //CONSTANTS
 const sitesStore = useSitesStore()
 const taskStore = useTaskStore()
+const userStore = useUserStore()
 const PRIORITY_OPTIONS = computed(() => taskStore.getPriorityOptions)
 const SITES_OPTIONS = computed(() => sitesStore.getList)
 const operationsById = computed(()=> taskStore.getOperationsById)
 const DIRECTIONS_OPTIONS = computed(() => operationsById?.value[4]?.params.directionArr || [])
+const filterVersion = computed(()=> taskStore.getFilterVersion)
+const user = computed(()=> userStore.getUser)
 
 //VARIABLES
 let filterIsOpen = ref(false)
 let priority = ref([])
-let direction = ref([])
+let smi_direction = ref([])
 let site_ids = ref([])
 let search1 = ref(null)
 let search2 = ref(null)
@@ -41,7 +45,7 @@ let filterPayload = computed(()=>{
             pipe_id: null,
             priority: priority.value,
             ...dateInt.value,
-            smi_direction: direction.value,
+            smi_direction: smi_direction.value,
             site_ids: site_ids.value, 
             search1: search1.value,
             search2: search2.value,
@@ -65,15 +69,40 @@ watch(
 )
 
 //METHODS
+const setPersonalFilters = () => {
+    let data = {...filterPayload.value} as Partial<FilterPayload>
+    delete data!.filter!.search1
+    delete data!.filter!.search2
+    delete data!.filter!.dts
+    delete data!.filter!.dtf
+    localStorage.setItem(`tasks_filter_settings_${filterVersion.value}_${user?.value?.id}`, JSON.stringify(data))
+    
+}
+const getPersonalFilters = () => {
+    let personalFiltersString = localStorage.getItem(`tasks_filter_settings_${filterVersion.value}_${user?.value?.id}`)
+    if (!personalFiltersString) {
+        setPersonalFilters()
+    } else {
+        let personalFilters = JSON.parse(personalFiltersString)
+        priority.value=personalFilters.filter.priority
+        site_ids.value=personalFilters.filter.site_ids
+        smi_direction.value=personalFilters.filter.smi_direction
+        setPersonalFilters()
+    }
+}
 const applyFilters = () => {
+    if(search1.value===''){
+        search1.value=null
+    }
     emit('update', filterPayload.value)
+    setPersonalFilters()
     closeFilters()
 }
 const resetFilters = () => {
     search1.value=null
     search2.value=null
     priority.value=[]
-    direction.value=[]
+    smi_direction.value=[]
     site_ids.value=[] 
 }
 const closeFilters = () => {
@@ -85,6 +114,7 @@ const openFilters = () => {
 
 //HOOKS
 onBeforeMount(() => {
+    getPersonalFilters()
     sitesStore.fetchSites()
     taskStore.fetchOperationsList()
 })
@@ -177,7 +207,7 @@ defineExpose({
                     </el-select>
 
                     <el-select 
-                    v-model="direction" 
+                    v-model="smi_direction" 
                     multiple 
                     collapse-tags
                     placeholder="Любое направление" 

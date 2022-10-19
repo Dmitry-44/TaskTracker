@@ -4,7 +4,7 @@ import TaskCard from "@/components/kanban/TaskCard.vue";
 import { useTaskStore, type FilterPayload, type Task } from "@/stores/task";
 import DetailsWindow from "../../components/kanban/DetailsWindow.vue";
 import { ref, computed, nextTick, onBeforeMount, getCurrentInstance, watch } from "vue";
-import Filters from "./Filters.vue";
+import Filters from "../../components/kanban/Filters.vue";
 
 const store = useTaskStore()
 const $filters = ref(null)
@@ -21,6 +21,10 @@ const toggleDetailsWindow = store.toggleDetailsWindow
 const setActiveTask = store.setActiveTask
 const setCreatingTask = store.setCreatingTask
 const fetchTasksList = async(payload: FilterPayload) => {return store.fetchTasksList(payload)}
+const takeTask = async(taskId: Partial<Task>) => { 
+    console.log('taskId', taskId)
+    return store.takeTask({id:+taskId})
+}
 
 const LOADING = ref(false)
 
@@ -64,6 +68,7 @@ const clickOutsideCards = () => {
 }
 const filterUpdate = async(payload: FilterPayload) => {
     LOADING.value=true
+    console.log('payload', payload)
     await fetchTasksList(payload)
     LOADING.value=false
 }
@@ -147,6 +152,7 @@ const dropHandler = (ev: DragEvent, area: number) => {
                             :active="task.id===activeTask?.id?true:false" 
                             @click.stop="taskClickHandler(task)"
                             @dragstart="dragstartHandler($event, task)" 
+                            @take="takeTask($event)"
                             />
                         </template>
                         <el-button @click.stop="addTask()" class="column-button-footer" :icon="Plus">

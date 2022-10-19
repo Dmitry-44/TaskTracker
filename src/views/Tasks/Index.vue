@@ -44,7 +44,6 @@ const addNewEvent = (value: Operation) => {
 }
 
 
-
 </script>
 <template>
     <div class="kanbar-wrapper">
@@ -199,31 +198,5 @@ const addNewEvent = (value: Operation) => {
     justify-content: center
     &:hover
         box-shadow: 0 0 0 1px #edeae9
-        // background-color: #dadada
-
-// .el-tag
-//     color: #000
-//     border: none
-//     min-height: 24px
-//     height: auto
-
-// .kanban-column .content
-//     display: flex
-//     flex-direction: column
-//     gap: 14px
-//     .row
-//         display: flex
-//         align-items: baseline
-//     .left
-//         flex: 0 0 120px
-//         color: #6d6e6f
-//         font-size: 15px
-//         line-height: 18px
-//         overflow: hidden
-//         text-overflow: ellipsis
-//         white-space: nowrap
-//     .right
-//         flex: 1 1 auto
-//         overflow-x: clip
 
 </style>

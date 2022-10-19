@@ -103,7 +103,7 @@ const saveCard = () => taskStore.upserTask(task.value)
             <div class="actions">
                 <div class="buttons">
                     <el-tooltip v-if="!readonlyTask" class="item" effect="dark" content="Взять задачу" placement="top-start">
-                        <el-button :icon="Pointer" @click.stop></el-button>
+                        <el-button :icon="Pointer" @click.stop="$emit('take',task.id)"></el-button>
                     </el-tooltip>
                 </div>
             </div>
