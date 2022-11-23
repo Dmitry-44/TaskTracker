@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { axiosClient } from "@/plugins/axios";
 import { errRequestHandler } from "@/plugins/errorResponser";
 import { envConfig } from "@/plugins/envConfig";
+import type { Operation } from "./operation";
 
 export interface SimpleObject {
   [key: string]: any;
@@ -57,11 +58,6 @@ type Pipe = {
   value: number[]
 } | null
 
-type Operation = {
-  id: number;
-  name: string
-  params: SimpleObject
-} | null
 interface DetailsWindow {
   isOpened: boolean
   creatingTask: boolean
@@ -90,8 +86,6 @@ interface State {
   activeTask: ActiveTask,
   pipes: Pipe[],
   singlePipe: Pipe
-  operations: Operation[],
-  singleOperation: Operation,
   filterBase: FilterPayload,
   filterVersion: string
 }
@@ -113,16 +107,13 @@ interface FilterPayload {
   };
 }
 
-interface OperationsById {
-  [key: string]: Operation
-}
 interface PaginationBack {
   allCount: number;
   maxPages: number;
   page: number;
 }
 
-export type { Task, ActiveTask, Event, Pipe, Operation, FilterPayload, ResultWithMessage, OperationsById };
+export type { Task, ActiveTask, Event, Pipe, Operation, FilterPayload, ResultWithMessage };
 
 export const useTaskStore = defineStore({
   id: "task",
@@ -153,8 +144,6 @@ export const useTaskStore = defineStore({
     singleTask: null,
     pipes: [],
     singlePipe: null,
-    operations: [],
-    singleOperation: null,
     filterBase: {
       select: [],
       filter: {},
@@ -182,13 +171,7 @@ export const useTaskStore = defineStore({
     getActiveTask:(state)=> state.activeTask,
     getPipes:(state): Pipe[] => state.pipes,
     getSinglePipe:(state): Pipe => state.singlePipe,
-    getOperations:(state): Operation[] => state.operations,
-    getSingleOperation:(state): Operation => state.singleOperation,
     getCreatingTask:(state) => state.detailsWindow.creatingTask,
-    getOperationsById:(state): OperationsById => state.operations.reduce((acc,el) => {
-      acc[el?.id!] = el
-      return acc
-    },{} as OperationsById),
     getEventStatusOptions:(state): EventStatusOption[]=> state.eventStatusOptions
   },
   actions: {
@@ -211,12 +194,6 @@ export const useTaskStore = defineStore({
     setSingleTask(payload: Task[]):void {
       this.singleTask=payload[0]
     },
-    setOperationsList(payload: Operation[]): void {
-      this.operations=payload
-    },
-    setSingleOperation(payload: Operation[]): void {
-      this.singleOperation=payload[0]
-    },
     setPipesList(payload: Pipe[]): void {
       this.pipes=payload
     },
@@ -237,27 +214,6 @@ export const useTaskStore = defineStore({
               this.setSingleTask(respdata.result.queryResult)
             } else {
               this.setTasksList(respdata.result.queryResult);
-            }
-            return true;
-          } else {
-            return respdata.message || -1;
-          }
-        })
-        .catch((e) => errRequestHandler(e));
-    },
-    fetchOperationsList(payload?: FilterPayload): Promise<ResultWithMessage> {
-      return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/operations`, payload)
-        .then((resp) => {
-          const respdata: ResultWithMessage = resp.data;
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
-            if(payload?.filter['id']) {
-              this.setSingleOperation(respdata.result)
-            } else {
-              this.setOperationsList(respdata.result);
             }
             return true;
           } else {
@@ -293,23 +249,6 @@ export const useTaskStore = defineStore({
         .put(api, payload)
         .then((resp) => {
           const respdata: ResultWithMessage = resp.data;
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
-            return true;
-          } else {
-            return respdata.message || -1;
-          }
-        })
-        .catch((e) => errRequestHandler(e));
-    },
-    sendOperation(payload: Partial<Operation>): Promise<boolean> {
-      let api = payload?.id ? `${envConfig.API_URL}tasktracker/operation/${payload?.id}` : `${envConfig.API_URL}tasktracker/operation`
-      return axiosClient
-        .put(api, payload)
-        .then((resp) => {
-          const respdata: ResultWithMessage = resp.data
           if (
             Object.prototype.hasOwnProperty.call(respdata, "message") &&
             respdata.message === "ok"

@@ -43,7 +43,6 @@ let filter = ref<FilterPayload>(
 )
 //HOOKS
 onBeforeMount(async()=> {
-    store.fetchOperationsList()
     LOADING.value=true
     store.fetchPipesList()
     LOADING.value=false

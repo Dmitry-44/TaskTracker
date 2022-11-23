@@ -29,6 +29,8 @@ type State = {
     singleOperation: Operation | null
 }
 
+export type { Operation }
+
 export const useOperationStore = defineStore({
     id: "operation",
     state: (): State => ({
@@ -47,8 +49,8 @@ export const useOperationStore = defineStore({
         setOperations(payload: Operation[]):void {
             this.operations=payload
         },
-        setSingleOperation(payload: Operation|null):void {
-            this.singleOperation=payload
+        setSingleOperation(payload: Operation[]|null):void {
+            this.singleOperation = payload===null ? null : payload[0]
         },
         fetchOperations(payload?: FilterPayload): Promise<any> {
             return axiosClient

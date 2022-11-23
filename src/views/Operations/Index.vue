@@ -1,21 +1,17 @@
 <script setup lang="ts">
+import { useOperationStore, type Operation } from "@/stores/operation";
 import { Plus, Edit } from "@element-plus/icons-vue";
-import { useTaskStore } from "@/stores/task";
 import { useRouter } from "vue-router";
 import { ref, computed, onBeforeMount } from "vue";
 
 const router = useRouter()
-const store = useTaskStore()
+const operationStore = useOperationStore()
 
-// const pipes = computed(() => store.getPipes);
-let operations = computed(() => store.getOperations);
+let operations = computed(() => operationStore.getOperations);
 
 const handleEdit = (id: number) => {
     router.push(`/operations/${id}`)
 }
-onBeforeMount(() => {
-    store.fetchOperationsList()
-});
 
 </script>
 <template>
@@ -29,13 +25,6 @@ onBeforeMount(() => {
         <el-table class="table" :data="operations" size="large" :border=true>
             <el-table-column label="Название" prop="name" width="auto">
             </el-table-column>
-            <!-- <el-table-column label="Операции">
-                <template #default="scope">
-                    <el-tag v-for="id in scope.row.value" style="margin:5px">
-                        {{operations.filter(op=>op.id===id)[0].name}}
-                    </el-tag>
-                </template>
-            </el-table-column> -->
             <el-table-column label="Действия" width="120px">
             <template #default="scope">
                 <el-button size="small" @click="handleEdit(scope.row.id)">Изменить</el-button>

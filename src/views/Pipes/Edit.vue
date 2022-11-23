@@ -19,7 +19,6 @@ const fetchPipeById = () => {
 onBeforeMount(async() => {
   LOADING.value=true
   await fetchPipeById()
-  await store.fetchOperationsList()
   LOADING.value=false
 });
 </script>

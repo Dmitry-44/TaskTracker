@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useTaskStore, type Task } from '@/stores/task';
+import { useOperationStore, type Operation } from '@/stores/operation';
 import { Close, Pointer, Notification, SuccessFilled } from "@element-plus/icons-vue";
 import { computed } from '@vue/reactivity';
 import { nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
@@ -14,7 +15,6 @@ const task = computed(()=>store.getActiveTask)
 const readonlyTask = computed(()=> task.value.status===4)
 const creatingTask = computed(()=>store.getCreatingTask)
 const PIPES = computed(()=>store.getPipes)
-const OPERATIONS = computed(()=>store.getOperations)
 const PRIORITY_OPTIONS = store.getPriorityOptions
 const STATUS_OPTIONS = store.getStatusOptions
 
@@ -43,7 +43,6 @@ let taskPipe = computed(()=> PIPES.value.find(pipe=>pipe?.id===task.value?.pipe_
 //HOOKS
 onBeforeMount(() => {
     fetchPipesList()
-    store.fetchOperationsList()
 });
 
 watch(task, (newVal, oldVal)=>{

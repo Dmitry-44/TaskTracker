@@ -4,22 +4,31 @@ import { RouterView, useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import Menu from "@/components/MenuAside.vue";
 import Io from "@/plugins/io";
+import { useOperationStore, type Operation } from "@/stores/operation";
 const isCollapse = ref(true);
 const route = useRoute();
 const router = useRouter();
 const UserStore = useUserStore();
 const userInfo = computed(() => UserStore.getUser);
 const logout = () => UserStore.logout();
+const operationsStore = useOperationStore()
 onBeforeMount(() => {
   const query = Object.assign({}, route.query);
   delete query.auth;
   router.replace({ query });
+  
+  const operations = operationsStore.fetchOperations()
+  Promise.allSettled([operations]).then(() => loading.value=false)
 });
 const loader = computed(() => UserStore.getLoader);
+let loading = ref(false)
+
+
+
 </script>
 
 <template>
-  <div class="common-layout" v-loading="loader">
+  <div class="common-layout" v-loading="loading">
     <el-container>
       <el-header class="navbar">
         <el-container class="toolbar first">

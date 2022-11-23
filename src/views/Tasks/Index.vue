@@ -10,7 +10,6 @@ import OperationColumn from "../../components/kanban/OperationColumn.vue";
 
 const router = useRouter()
 const taskStore = useTaskStore()
-let OPERATIONS = computed(()=>taskStore.getOperations)
 let PIPES = computed(()=>taskStore.getPipes)
 const LOADING = ref(false)
 const taskId = router.currentRoute.value.params.id
@@ -31,7 +30,6 @@ const fetchTaskById = (payload: FilterPayload) => { return taskStore.fetchTasksL
 onBeforeMount(async()=> {
     LOADING.value=true
     taskStore.fetchPipesList()
-    taskStore.fetchOperationsList()
     await fetchTaskById({filter: {id: Number(taskId)},options: {onlyLimit: true,itemsPerPage: 1},select: []})
     LOADING.value=false
 })

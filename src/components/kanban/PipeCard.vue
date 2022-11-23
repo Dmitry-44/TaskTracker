@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useTaskStore, type Pipe, type Operation } from "@/stores/task";
+import { useOperationStore } from "@/stores/operation";
 import { computed, type PropType, ref, toRef, onBeforeMount, onMounted, onBeforeUnmount } from "vue";
 import { Plus, Close, Delete, Bottom } from "@element-plus/icons-vue";
 import { useUserStore } from "@/stores/user";
@@ -25,7 +26,8 @@ const user = useUserStore().getUser
 const pipe = ref(props.pipeData)
 
 const store = useTaskStore()
-const operations = computed(()=>store.getOperations)
+const operationStore = useOperationStore()
+let operations = computed(()=>operationStore.getOperations)
 const oldContent = ref('')
 const wasChanged = computed(()=> {
     const updatedData = JSON.parse(JSON.stringify(pipe.value))
@@ -124,7 +126,7 @@ const moveItemToIndex = (fromIndex: number|undefined, toIndex: number) => {
         </template>
         <el-row>
             <el-col :lg="12">
-                <el-input class="card-name" v-model="pipe.name" placeholder="Название" />
+                <el-input class="card-name" v-model="pipe!.name" placeholder="Название" />
                 <h4>Список операций</h4>
                 <div class="area" @dragend="dragendHandler($event)">
                     <template v-if="pipe?.value.length!>0" v-for="(id,index) in pipe?.value" :key="id">

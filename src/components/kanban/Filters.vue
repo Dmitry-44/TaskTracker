@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useTaskStore, type FilterPayload } from '@/stores/task';
+import { useOperationStore, type Operation } from '@/stores/operation';
 import { useSitesStore } from "@/stores/sites";
 import { Close } from '@element-plus/icons-vue';
 import { ref, computed, watch, nextTick, onMounted, onBeforeMount } from 'vue';
@@ -13,10 +14,11 @@ const emit = defineEmits<{
 //CONSTANTS
 const sitesStore = useSitesStore()
 const taskStore = useTaskStore()
+const operationStore = useOperationStore()
 const userStore = useUserStore()
 const PRIORITY_OPTIONS = computed(() => taskStore.getPriorityOptions)
 const SITES_OPTIONS = computed(() => sitesStore.getList)
-const operationsById = computed(()=> taskStore.getOperationsById)
+const operationsById = computed(()=> operationStore.getOperationsById)
 const DIRECTIONS_OPTIONS = computed(() => operationsById?.value[4]?.params.directionArr || [])
 const filterVersion = computed(()=> taskStore.getFilterVersion)
 const user = computed(()=> userStore.getUser)
@@ -115,7 +117,6 @@ const openFilters = () => {
 onBeforeMount(() => {
     getPersonalFilters()
     sitesStore.fetchSites()
-    taskStore.fetchOperationsList()
 })
 onMounted(()=> {
     applyFilters()
