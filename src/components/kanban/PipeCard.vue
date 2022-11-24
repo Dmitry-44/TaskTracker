@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { useTaskStore, type Pipe, type Operation } from "@/stores/task";
-import { useOperationStore } from "@/stores/operation";
+import { useOperationStore, type Operation } from "@/stores/operation";
 import { computed, type PropType, ref, toRef, onBeforeMount, onMounted, onBeforeUnmount } from "vue";
 import { Plus, Close, Delete, Bottom } from "@element-plus/icons-vue";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
+import { usePipeStore, type Pipe } from "@/stores/pipe";
 
 const props = defineProps({
     pipeData: {
-        type: Object as PropType<Pipe>,
+        type: Object as PropType<Pipe|null>,
         default: () => ({
             name: '',
             value: []
@@ -25,7 +25,7 @@ const router = useRouter()
 const user = useUserStore().getUser
 const pipe = ref(props.pipeData)
 
-const store = useTaskStore()
+const pipeStore = usePipeStore()
 const operationStore = useOperationStore()
 let operations = computed(()=>operationStore.getOperations)
 const oldContent = ref('')
@@ -65,7 +65,7 @@ const sendPipe = () => {
         u_id: user?.id,
         value: pipe?.value?.value,
     }
-    store.sendPipe(data).then(res=>{
+    pipeStore.sendPipe(data).then(res=>{
         if (errVueHandler(res)) {
             ElMessage({
                 message: "Операция выполнена успешно!",

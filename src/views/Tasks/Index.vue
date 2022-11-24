@@ -29,7 +29,6 @@ const fetchTaskById = (payload: FilterPayload) => { return taskStore.fetchTasksL
         
 onBeforeMount(async()=> {
     LOADING.value=true
-    taskStore.fetchPipesList()
     await fetchTaskById({filter: {id: Number(taskId)},options: {onlyLimit: true,itemsPerPage: 1},select: []})
     LOADING.value=false
 })

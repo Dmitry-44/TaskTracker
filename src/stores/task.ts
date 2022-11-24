@@ -2,7 +2,6 @@ import { defineStore } from "pinia";
 import { axiosClient } from "@/plugins/axios";
 import { errRequestHandler } from "@/plugins/errorResponser";
 import { envConfig } from "@/plugins/envConfig";
-import type { Operation } from "./operation";
 
 export interface SimpleObject {
   [key: string]: any;
@@ -51,13 +50,6 @@ type Event = {
   params?: SimpleObject
 } | null
 
-type Pipe = {
-  id: number
-  name: string
-  operation_entities: Operation[]
-  value: number[]
-} | null
-
 interface DetailsWindow {
   isOpened: boolean
   creatingTask: boolean
@@ -84,8 +76,6 @@ interface State {
   eventStatusOptions: EventStatusOption[]
   detailsWindow: DetailsWindow
   activeTask: ActiveTask,
-  pipes: Pipe[],
-  singlePipe: Pipe
   filterBase: FilterPayload,
   filterVersion: string
 }
@@ -107,13 +97,7 @@ interface FilterPayload {
   };
 }
 
-interface PaginationBack {
-  allCount: number;
-  maxPages: number;
-  page: number;
-}
-
-export type { Task, ActiveTask, Event, Pipe, Operation, FilterPayload, ResultWithMessage };
+export type { Task, ActiveTask, Event, FilterPayload, ResultWithMessage };
 
 export const useTaskStore = defineStore({
   id: "task",
@@ -142,8 +126,6 @@ export const useTaskStore = defineStore({
     activeTask: {...taskDefault},
     tasks: [],
     singleTask: null,
-    pipes: [],
-    singlePipe: null,
     filterBase: {
       select: [],
       filter: {},
@@ -169,8 +151,6 @@ export const useTaskStore = defineStore({
     getPriorityOptions: (state): TaskOption[] => state.priorityOptions,
     getStatusOptions: (state): TaskOption[] => state.statusOptions,
     getActiveTask:(state)=> state.activeTask,
-    getPipes:(state): Pipe[] => state.pipes,
-    getSinglePipe:(state): Pipe => state.singlePipe,
     getCreatingTask:(state) => state.detailsWindow.creatingTask,
     getEventStatusOptions:(state): EventStatusOption[]=> state.eventStatusOptions
   },
@@ -194,16 +174,10 @@ export const useTaskStore = defineStore({
     setSingleTask(payload: Task[]):void {
       this.singleTask=payload[0]
     },
-    setPipesList(payload: Pipe[]): void {
-      this.pipes=payload
-    },
-    setSinglePipe(payload: Pipe[]):void {
-      this.singlePipe=payload[0]
-    },
     
-    fetchTasksList(filterPayload?: FilterPayload|Partial<FilterPayload>): Promise<ResultWithMessage> {
+    fetchTasksList(filterPayload?: FilterPayload|Partial<FilterPayload>, signal?: AbortSignal): Promise<ResultWithMessage> {
       return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/tasks`, {...this.filterBase, ...filterPayload})
+        .post(`${envConfig.API_URL}tasktracker/tasks`, {...this.filterBase, ...filterPayload}, {signal})
         .then((resp) => {
           const respdata: ResultWithMessage = resp.data;
           if (
@@ -215,44 +189,6 @@ export const useTaskStore = defineStore({
             } else {
               this.setTasksList(respdata.result.queryResult);
             }
-            return true;
-          } else {
-            return respdata.message || -1;
-          }
-        })
-        .catch((e) => errRequestHandler(e));
-    },
-    fetchPipesList(payload?: FilterPayload): Promise<ResultWithMessage> {
-      return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/pipe`, payload)
-        .then((resp) => {
-          const respdata: ResultWithMessage = resp.data;
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
-            if(payload?.filter['id']) {
-              this.setSinglePipe(respdata.result)
-            } else {
-              this.setPipesList(respdata.result);
-            }
-            return true;
-          } else {
-            return respdata.message || -1;
-          }
-        })
-        .catch((e) => errRequestHandler(e));
-    },
-    sendPipe(payload: Partial<Pipe>): Promise<boolean> {
-      let api = payload?.id ? `${envConfig.API_URL}tasktracker/pipe/${payload?.id}` : `${envConfig.API_URL}tasktracker/pipe`
-      return axiosClient
-        .put(api, payload)
-        .then((resp) => {
-          const respdata: ResultWithMessage = resp.data;
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
             return true;
           } else {
             return respdata.message || -1;

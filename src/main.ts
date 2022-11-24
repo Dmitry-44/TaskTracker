@@ -16,6 +16,7 @@ import { VTooltip } from "floating-vue";
 import "floating-vue/dist/style.css";
 import "element-plus/theme-chalk/display.css";
 import "./assets/b-spacing.css";
+import "./assets/common.css";
 import RuLocale from "element-plus/es/locale/lang/ru";
 
 const app = createApp(App);

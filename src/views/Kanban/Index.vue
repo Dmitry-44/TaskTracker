@@ -3,11 +3,14 @@ import { Plus } from "@element-plus/icons-vue";
 import TaskCard from "@/components/kanban/TaskCard.vue";
 import { useTaskStore, type FilterPayload, type Task } from "@/stores/task";
 import DetailsWindow from "../../components/kanban/DetailsWindow.vue";
-import { ref, computed, nextTick, onBeforeMount, getCurrentInstance, watch } from "vue";
+import { ref, computed, onBeforeUnmount } from "vue";
 import Filters from "../../components/kanban/Filters.vue";
 
 const store = useTaskStore()
-const $filters = ref(null)
+const $filters = ref<typeof Filters|null>(null)
+const abortController = new AbortController();
+const abortSignal = abortController.signal
+
 //GETTERS
 let tasks = computed(()=>store.getList)
 let activeTask = computed(()=>store.getActiveTask) 
@@ -20,10 +23,10 @@ let tasksFinished = computed(()=>tasks.value.filter(task=>task.status===4).sort(
 const toggleDetailsWindow = store.toggleDetailsWindow
 const setActiveTask = store.setActiveTask
 const setCreatingTask = store.setCreatingTask
-const fetchTasksList = async(payload: FilterPayload) => {return store.fetchTasksList(payload)}
+const fetchTasksList = async(payload: FilterPayload) => {return store.fetchTasksList(payload, abortSignal)}
 const takeTask = async(taskId: Partial<Task>) => { 
     console.log('taskId', taskId)
-    return store.takeTask({id:+taskId})
+    // return store.takeTask({id:+taskId})
 }
 
 const LOADING = ref(false)
@@ -41,12 +44,6 @@ let filter = ref<FilterPayload>(
         select: []
     }
 )
-//HOOKS
-onBeforeMount(async()=> {
-    LOADING.value=true
-    store.fetchPipesList()
-    LOADING.value=false
-})
 
 //METHODS
 const addTask = () => {
@@ -71,6 +68,9 @@ const filterUpdate = async(payload: FilterPayload) => {
     await fetchTasksList(payload)
     LOADING.value=false
 }
+
+//HOOKS
+onBeforeUnmount(() => abortController.abort());
 
 
 //DRAG AND DROP

@@ -116,7 +116,6 @@ const openFilters = () => {
 //HOOKS
 onBeforeMount(() => {
     getPersonalFilters()
-    sitesStore.fetchSites()
 })
 onMounted(()=> {
     applyFilters()

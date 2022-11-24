@@ -20,8 +20,8 @@ const router = createRouter({
       meta: { requiresAuth: true, rights: { mh_photobank_front: 2 } },
       children: [
         {
-          path: "/kanban",
-          name: "Канбан",
+          path: "/",
+          name: "Задачи",
           component: () => import("@/views/Kanban/Index.vue"),
           meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
         },

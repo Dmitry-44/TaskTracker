@@ -1,23 +1,20 @@
 <script setup lang="ts">
 import { Plus, Edit } from "@element-plus/icons-vue";
-import { useTaskStore } from "@/stores/task";
 import { useOperationStore } from "@/stores/operation";
+import { usePipeStore } from "@/stores/pipe";
 import { useRouter } from "vue-router";
 import { ref, computed, onBeforeMount } from "vue";
 
 const router = useRouter()
-const store = useTaskStore()
+const pipeStore = usePipeStore()
 const operationStore = useOperationStore()
 
-let pipes = computed(() => store.getPipes);
+let pipes = computed(() => pipeStore.getPipes);
 let operations = computed(() => operationStore.getOperations);
 
 const handleEdit = (id: number) => {
     router.push(`/pipes/${id}`)
 }
-onBeforeMount(() => {
-    store.fetchPipesList()
-});
 </script>
 
 <template>

@@ -27,7 +27,6 @@ const openInNewTab = () => {
     let routeData = router.resolve({path: `/tasks/${task.value.id}`})
     window.open(routeData.href, '_blank');
 }
-const fetchPipesList = () => store.fetchPipesList()
 
 // const windowTitle = computed(()=>creatingTask.value ? 'Создание задачи' : 'Редактирование задачи')
 const LOADING = ref(false)
@@ -39,11 +38,6 @@ const wasChanged = computed(()=> {
 const titleInput = ref<HTMLInputElement|any>(null)
 let taskPipe = computed(()=> PIPES.value.find(pipe=>pipe?.id===task.value?.pipe_id) || null)
 
-
-//HOOKS
-onBeforeMount(() => {
-    fetchPipesList()
-});
 
 watch(task, (newVal, oldVal)=>{
     if(oldVal.id != newVal.id) {
