@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useTaskStore, type Task } from "@/stores/task";
+import { useInterfaceStore} from "@/stores/interface";
 import { SuccessFilled, More, EditPen, CopyDocument, Delete, Notification, Link, View, Pointer} from "@element-plus/icons-vue";
 import { ref, onMounted, computed } from 'vue'
 import type { PropType } from 'vue'
@@ -20,7 +21,8 @@ const emit = defineEmits(["titleChanged"]);
 const task = ref(props.task)
 const readonlyTask = computed(()=> task.value.status===4)
 const store = useTaskStore()
-const toggleDetailsWindow = store.toggleDetailsWindow
+const interfaceStore = useInterfaceStore()
+const toggleDetailsWindow = interfaceStore.toggleDetailsWindow
 const router = useRouter()
 const setActiveTask = store.setActiveTask
 const openInNewTab = () => {

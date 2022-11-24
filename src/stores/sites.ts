@@ -1,12 +1,9 @@
 import { axiosClient } from "@/plugins/axios";
 import { envConfig } from "@/plugins/envConfig";
 import { errRequestHandler } from "@/plugins/errorResponser";
+import type { ResultWithMessage } from "@/stores/interface";
 import { defineStore } from "pinia";
 
-interface ResultWithMessage {
-    message: string;
-    result: any;
-}
 
 type Site = {
     id: number

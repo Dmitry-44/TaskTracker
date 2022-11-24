@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { type Pipe, usePipeStore} from "@/stores/pipe";
-import type { FilterPayload } from "@/stores/task";
+import type { FilterPayload } from "@/stores/interface";
 import { ref, computed, onBeforeMount } from "vue";
 import { useRouter } from "vue-router";
 import PipeCard from "../../components/kanban/PipeCard.vue";

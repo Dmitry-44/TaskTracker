@@ -1,29 +1,31 @@
 <script setup lang="ts">
 import { Plus } from "@element-plus/icons-vue";
 import TaskCard from "@/components/kanban/TaskCard.vue";
-import { useTaskStore, type FilterPayload, type Task } from "@/stores/task";
+import { useTaskStore, type Task } from "@/stores/task";
+import { useInterfaceStore, type FilterPayload, } from "@/stores/interface";
 import DetailsWindow from "../../components/kanban/DetailsWindow.vue";
 import { ref, computed, onBeforeUnmount } from "vue";
 import Filters from "../../components/kanban/Filters.vue";
 
-const store = useTaskStore()
+const taskStore = useTaskStore()
+const interfaceStore = useInterfaceStore()
 const $filters = ref<typeof Filters|null>(null)
 const abortController = new AbortController();
 const abortSignal = abortController.signal
 
 //GETTERS
-let tasks = computed(()=>store.getList)
-let activeTask = computed(()=>store.getActiveTask) 
+let tasks = computed(()=>taskStore.getList)
+let activeTask = computed(()=>taskStore.getActiveTask) 
 
 let tasksToTake = computed(()=>tasks.value.filter(task=>task.status!<=2).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
 let tasksInProcess = computed(()=>tasks.value.filter(task=>task.status===3).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
 let tasksFinished = computed(()=>tasks.value.filter(task=>task.status===4).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
 
 //ACTIONS
-const toggleDetailsWindow = store.toggleDetailsWindow
-const setActiveTask = store.setActiveTask
-const setCreatingTask = store.setCreatingTask
-const fetchTasksList = async(payload: FilterPayload) => {return store.fetchTasksList(payload, abortSignal)}
+const setActiveTask = taskStore.setActiveTask
+const toggleDetailsWindow = interfaceStore.toggleDetailsWindow
+const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess
+const fetchTasksList = async(payload: FilterPayload) => taskStore.fetchTasksList(payload, abortSignal)
 const takeTask = async(taskId: Partial<Task>) => { 
     console.log('taskId', taskId)
     // return store.takeTask({id:+taskId})
@@ -48,11 +50,11 @@ let filter = ref<FilterPayload>(
 //METHODS
 const addTask = () => {
     setActiveTask(null)
-    setCreatingTask(true)
+    toggleCreatingTaskProcess(true)
     toggleDetailsWindow(true)
 }
 const taskClickHandler = (task: Task) => {
-    setCreatingTask(false)
+    toggleCreatingTaskProcess(false)
     setActiveTask(task)
     toggleDetailsWindow(true)
 }
@@ -60,7 +62,7 @@ const clickOutsideCards = () => {
     $filters?.value?.closeFilters()
     toggleDetailsWindow(false)
     setActiveTask(null)
-    setCreatingTask(false)
+    toggleCreatingTaskProcess(false)
 }
 const filterUpdate = async(payload: FilterPayload) => {
     LOADING.value=true

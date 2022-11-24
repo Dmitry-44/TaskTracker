@@ -2,28 +2,17 @@ import { errRequestHandler } from './../plugins/errorResponser';
 import { envConfig } from './../plugins/envConfig';
 import { axiosClient } from './../plugins/axios';
 import { defineStore } from 'pinia';
-import type { FilterPayload, ResultWithMessage } from './task';
+import type { FilterPayload, SimpleObject, ResultWithMessage } from "@/stores/interface";
 
-type SimpleObject = {
-    [key: string]: any;
-}
 
 type OperationsById = {
     [key: string]: Operation
 }
-
 interface Operation {
     id: number;
     name: string;
     params: SimpleObject;
 }
-
-const operationDefault: Operation = {
-    id: -1,
-    name: '',
-    params: {}
-}
-
 type State = {
     operations: Operation[];
     singleOperation: Operation | null

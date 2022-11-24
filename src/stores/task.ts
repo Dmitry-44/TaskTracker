@@ -2,12 +2,11 @@ import { defineStore } from "pinia";
 import { axiosClient } from "@/plugins/axios";
 import { errRequestHandler } from "@/plugins/errorResponser";
 import { envConfig } from "@/plugins/envConfig";
+import { type FilterPayload, type SimpleObject, type ResultWithMessage, useInterfaceStore } from "./interface";
 
-export interface SimpleObject {
-  [key: string]: any;
-}
+
 interface Task {
-  id?: number;
+  id: number;
   title: string;
   text: string;
   created_at: number;
@@ -23,6 +22,7 @@ interface Task {
   smi_direction?: number,
 }
 const taskDefault: ActiveTask = {
+  id: -1,
   title: '',
   created_at: -1,
   text: '',
@@ -48,15 +48,6 @@ type Event = {
   selected_users: number[]
   result?: string | null
   params?: SimpleObject
-} | null
-
-interface DetailsWindow {
-  isOpened: boolean
-  creatingTask: boolean
-}
-interface ResultWithMessage {
-  message: string;
-  result: any;
 }
 interface TaskOption {
   id: number,
@@ -74,30 +65,12 @@ interface State {
   priorityOptions: TaskOption[]
   statusOptions: TaskOption[]
   eventStatusOptions: EventStatusOption[]
-  detailsWindow: DetailsWindow
   activeTask: ActiveTask,
   filterBase: FilterPayload,
   filterVersion: string
 }
-interface FilterPayload {
-  select: string[];
-  filter: SimpleObject;
-  options: {
-    onlyLimit: boolean;
-    page?: number;
-    itemsPerPage: number;
-    sortBy?: string[];
-    sortDesc?: boolean[];
-    groupBy?: string[];
-    groupDesc?: boolean[];
-    mustSort?: boolean;
-    multiSort?: boolean;
-    allCount?: number;
-    maxPages?: number;
-  };
-}
 
-export type { Task, ActiveTask, Event, FilterPayload, ResultWithMessage };
+export type { Task, ActiveTask, Event };
 
 export const useTaskStore = defineStore({
   id: "task",
@@ -119,10 +92,6 @@ export const useTaskStore = defineStore({
       {id:2,value:'В работе',color:'#f8df72'},
       {id:3,value:'Готово',color:'#67C23A'},
     ],
-    detailsWindow: {
-      isOpened: false,
-      creatingTask: false,
-    },
     activeTask: {...taskDefault},
     tasks: [],
     singleTask: null,
@@ -144,29 +113,19 @@ export const useTaskStore = defineStore({
     filterVersion: '1.0',
   }),
   getters: {
-    getList: (state): Task[] => state.tasks || [],
-    getSingleTask: (state) => {return state.singleTask},
-    getDetailsWindow:(state): DetailsWindow => state.detailsWindow,
+    getList: (state): Task[] => state.tasks,
+    getSingleTask: (state) => state.singleTask,
     getFilterVersion:(state): string => state.filterVersion,
     getPriorityOptions: (state): TaskOption[] => state.priorityOptions,
     getStatusOptions: (state): TaskOption[] => state.statusOptions,
     getActiveTask:(state)=> state.activeTask,
-    getCreatingTask:(state) => state.detailsWindow.creatingTask,
     getEventStatusOptions:(state): EventStatusOption[]=> state.eventStatusOptions
   },
   actions: {
-    toggleDetailsWindow(payload: boolean): void {
-      this.detailsWindow.isOpened = payload
-    },
     setActiveTask(task: Task | null): void {
-      if(this.activeTask?.id == task?.id && !this.detailsWindow.creatingTask)return;
+      const interfaceStore = useInterfaceStore()
+      if(this.activeTask?.id == task?.id && !interfaceStore.getIsCreatingTaskProcess)return;
       this.activeTask = task || {...taskDefault}
-    },
-    addNewTAsk(task: Task): void {
-      this.tasks.push(task)
-    },
-    setCreatingTask(bool: boolean): void {
-      this.detailsWindow.creatingTask=bool
     },
     setTasksList(payload: Task[]): void {
       this.tasks=payload

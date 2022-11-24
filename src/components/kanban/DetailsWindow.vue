@@ -1,34 +1,36 @@
 <script setup lang="ts">
-import { useTaskStore, type Task } from '@/stores/task';
-import { useOperationStore, type Operation } from '@/stores/operation';
+import { useTaskStore } from '@/stores/task';
+import { useInterfaceStore } from '@/stores/interface';
 import { Close, Pointer, Notification, SuccessFilled } from "@element-plus/icons-vue";
 import { computed } from '@vue/reactivity';
 import { nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import OperationCollapseItem from './OperationCollapseItem.vue';
+import { usePipeStore } from '@/stores/pipe';
 
-const store = useTaskStore()
+const taskStore = useTaskStore()
+const interfaceStore = useInterfaceStore()
+const pipeStore = usePipeStore()
 const router = useRouter()
 //GETTERS
-const detailsWindow = computed(()=>store.getDetailsWindow) 
-const task = computed(()=>store.getActiveTask) 
-const readonlyTask = computed(()=> task.value.status===4)
-const creatingTask = computed(()=>store.getCreatingTask)
-const PIPES = computed(()=>store.getPipes)
-const PRIORITY_OPTIONS = store.getPriorityOptions
-const STATUS_OPTIONS = store.getStatusOptions
+const detailWindowIsOpen = computed(()=>interfaceStore.getDetailWindowIsOpen) 
+const task = computed(()=>taskStore.getActiveTask) 
+const isReadonlyTask = computed(()=> task.value.status===4)
+const isCreatingTaskProcess = computed(()=>interfaceStore.isCreatingTaskProcess)
+const PIPES = computed(()=>pipeStore.getPipes)
+const PRIORITY_OPTIONS = taskStore.getPriorityOptions
+const STATUS_OPTIONS = taskStore.getStatusOptions
 
 //ACTIONS
-const toggleDetailsWindow = store.toggleDetailsWindow
-const setActiveTask = store.setActiveTask
-const setCreatingTask = store.setCreatingTask
+const toggleDetailsWindow = interfaceStore.toggleDetailsWindow
+const setActiveTask = taskStore.setActiveTask
+const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess
 
 const openInNewTab = () => {
     let routeData = router.resolve({path: `/tasks/${task.value.id}`})
     window.open(routeData.href, '_blank');
 }
 
-// const windowTitle = computed(()=>creatingTask.value ? 'Создание задачи' : 'Редактирование задачи')
 const LOADING = ref(false)
 let oldContent = ref('')
 const wasChanged = computed(()=> {
@@ -42,7 +44,7 @@ let taskPipe = computed(()=> PIPES.value.find(pipe=>pipe?.id===task.value?.pipe_
 watch(task, (newVal, oldVal)=>{
     if(oldVal.id != newVal.id) {
         oldContent.value=JSON.stringify({...task.value})
-        if(creatingTask.value){
+        if(isCreatingTaskProcess.value){
             nextTick(()=>{
                 titleInput.value.focus()
             })
@@ -52,12 +54,12 @@ watch(task, (newVal, oldVal)=>{
 
 </script>
 <template>
-    <div :class="['details', detailsWindow.isOpened?'active':'']" @click.stop>
+    <div :class="['details', detailWindowIsOpen?'active':'']" @click.stop>
         <div class="header">
             <div class="actions">
                 <el-button :loading="LOADING" :disabled="!wasChanged" type="success">Сохранить</el-button>
-                <template v-if="!creatingTask">
-                    <el-tooltip v-if="!readonlyTask" class="item" effect="dark" content="Взять задачу" placement="top-start">
+                <template v-if="!isCreatingTaskProcess">
+                    <el-tooltip v-if="!isReadonlyTask" class="item" effect="dark" content="Взять задачу" placement="top-start">
                         <el-button :icon="Pointer"></el-button>
                     </el-tooltip>
                     <el-tooltip class="item" effect="dark" content="Открыть в новой вкладке" placement="top-start">
@@ -65,7 +67,7 @@ watch(task, (newVal, oldVal)=>{
                     </el-tooltip>
                 </template>
                 <el-tooltip class="item" effect="dark" content="Закрыть" placement="top-start">
-                    <el-button class="close-btn" :icon="Close" @click.stop="toggleDetailsWindow(false),setActiveTask(null),setCreatingTask(false)"></el-button>
+                    <el-button class="close-btn" :icon="Close" @click.stop="toggleDetailsWindow(false),setActiveTask(null),toggleCreatingTaskProcess(false)"></el-button>
                 </el-tooltip>
             </div>
         </div>
@@ -73,7 +75,7 @@ watch(task, (newVal, oldVal)=>{
             <div class="title_block">
                 <input 
                 v-model="task.title"
-                :disabled="readonlyTask"
+                :disabled="isReadonlyTask"
                 class="title-input" 
                 placeholder="Ввести название задачи"
                 ref="titleInput"
@@ -85,7 +87,7 @@ watch(task, (newVal, oldVal)=>{
                     <div class="right">
                         <el-select
                         v-model="task.pipe_id"
-                        :disabled="readonlyTask || task?.status!>2"
+                        :disabled="isReadonlyTask || task?.status!>2"
                         clearable 
                         placeholder="Задача"
                         >
@@ -103,7 +105,7 @@ watch(task, (newVal, oldVal)=>{
                 <div class="row">
                     <div class="left">Приоритет</div>
                     <div class="right">
-                        <el-select v-model="task.priority" :disabled="readonlyTask" clearable placeholder="Приоритет">
+                        <el-select v-model="task.priority" :disabled="isReadonlyTask" clearable placeholder="Приоритет">
                             <el-option
                             v-for="item in PRIORITY_OPTIONS"
                             :key="item.value"
@@ -115,10 +117,10 @@ watch(task, (newVal, oldVal)=>{
                         </el-select>
                     </div>
                 </div>
-                <div class="row" v-if="!creatingTask">
+                <div class="row" v-if="!isCreatingTaskProcess">
                     <div class="left">Статус</div>
                     <div class="right">
-                        <el-select v-model="task.status" :disabled="readonlyTask" clearable placeholder="Статус" style="box-shadow:none">
+                        <el-select v-model="task.status" :disabled="isReadonlyTask" clearable placeholder="Статус" style="box-shadow:none">
                             <el-option
                             v-for="item in STATUS_OPTIONS"
                             :key="item.value"
@@ -135,7 +137,7 @@ watch(task, (newVal, oldVal)=>{
                     <div class="right text">
                         <el-input
                             v-model="task.text"
-                            :disabled="readonlyTask"
+                            :disabled="isReadonlyTask"
                             clearable
                             :autosize="{ minRows: 2, maxRows: 4 }"
                             type="textarea"

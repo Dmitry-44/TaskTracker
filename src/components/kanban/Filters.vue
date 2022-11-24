@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { useTaskStore, type FilterPayload } from '@/stores/task';
+import { useTaskStore } from '@/stores/task';
 import { useOperationStore, type Operation } from '@/stores/operation';
 import { useSitesStore } from "@/stores/sites";
+import type { FilterPayload } from '@/stores/interface';
 import { Close } from '@element-plus/icons-vue';
 import { ref, computed, watch, nextTick, onMounted, onBeforeMount } from 'vue';
 import { useUserStore } from '@/stores/user';

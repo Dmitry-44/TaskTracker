@@ -2,7 +2,7 @@ import { errRequestHandler } from '../plugins/errorResponser';
 import { envConfig } from '../plugins/envConfig';
 import { axiosClient } from '../plugins/axios';
 import { defineStore } from 'pinia';
-import type { FilterPayload, ResultWithMessage } from './task';
+import type { FilterPayload, ResultWithMessage } from "@/stores/interface";
 import type { Operation } from './operation';
 
 
