@@ -112,13 +112,13 @@ watch(task, (newVal, oldVal)=>{
             </div>
             <div class="content">
                 <div class="row">
-                    <div class="left">Задача</div>
+                    <div class="left">Пайплайн</div>
                     <div class="right">
                         <el-select
                         v-model="task.pipe_id"
                         :disabled="isReadonlyTask || task?.status!>2"
                         clearable 
-                        placeholder="Задача"
+                        placeholder="Пайплайн"
                         >
                             <el-option
                             v-for="item in PIPES"

@@ -50,7 +50,6 @@ onBeforeMount(() => {
                 <Expand />
               </el-icon>
             </el-button>
-            <el-image src="/favicon.png" class="ml-2 logo-image" />
             <span class="logo-text">Таск-трекер</span>
           </div>
           <div class="hidden-md-and-up menu-block-mobile">

@@ -1,7 +1,10 @@
 import { defineStore } from "pinia";
 import { axiosClient } from "@/plugins/axios";
 import { envConfig } from "@/plugins/envConfig";
-import type { SimpleObject } from "./photobank";
+
+interface SimpleObject {
+  [key: string]: any;
+}
 
 type User = {
   id: number;

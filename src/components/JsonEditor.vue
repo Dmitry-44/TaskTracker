@@ -35,7 +35,7 @@ const tabHandler = (e: KeyboardEvent) => {
     e.preventDefault();
     document.execCommand('insertText', false, ' '.repeat(OPTIONS.value.tabSize));
 }
-const inputHandle = (e: InputEvent) => {
+const inputHandle = (e: Event) => {
     const target = e.target as HTMLInputElement
     // if(!isJsonData(target.value))return;
     value.value=JSON.parse(target.value)
