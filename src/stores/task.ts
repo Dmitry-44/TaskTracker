@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { axiosClient } from "@/plugins/axios";
 import { errRequestHandler } from "@/plugins/errorResponser";
 import { envConfig } from "@/plugins/envConfig";
-import { type FilterPayload, type SimpleObject, type ResultWithMessage, useInterfaceStore } from "./interface";
+import { type FilterPayload, type SimpleObject, type ResultWithMessage, useInterfaceStore } from "@/stores/interface";
 
 
 interface Task {
@@ -13,11 +13,11 @@ interface Task {
   priority?: number;
   status?: number;
   pipe_id?: number;
-  event_id: number;
-  division_id: number;
-  created_by: number;
+  event_id?: number;
+  division_id?: number;
+  created_by?: number;
   events?: number[];
-  event_entities: Event[],
+  event_entities?: Event[],
   child_tasks?: Task[],
   smi_direction?: number,
 }
@@ -25,12 +25,8 @@ const taskDefault: ActiveTask = {
   id: -1,
   title: '',
   created_at: -1,
+  status: 1,
   text: '',
-  event_id: -1,
-  division_id: -1,
-  created_by: -1,
-  events: [],
-  event_entities:[],
 }
 interface ActiveTask extends Task {
   readonly?: boolean
@@ -155,9 +151,9 @@ export const useTaskStore = defineStore({
         })
         .catch((e) => errRequestHandler(e));
     },
-    upserTask(payload: Partial<Task>): Promise<boolean> {
+    upsertTask(payload: Partial<Task>): Promise<any> {
       return axiosClient
-        .put(`${envConfig.API_URL}tasktracker/smiCenterTaskUpsert`, payload)
+        .post(`${envConfig.API_URL}tasktracker/taskUpsert`, payload)
         .then((resp) => {
           const respdata: ResultWithMessage = resp.data
           if (
@@ -170,6 +166,21 @@ export const useTaskStore = defineStore({
           }
         })
         .catch((e) => errRequestHandler(e));
-  },
+    },
+    takeTask(id: number):Promise<any> {
+      return axiosClient
+        .post(`${envConfig.API_URL}tasktracker/takeTaskSmi`, {id: id})
+        .then((resp) => {
+          const respdata: ResultWithMessage = resp.data
+          if (
+            Object.prototype.hasOwnProperty.call(respdata, "message") &&
+            respdata.message === "ok"
+          ) {
+            return true;
+          } else {
+            return respdata.message || -1;
+          }
+        })
+    },
 }
 });

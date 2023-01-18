@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Event, Operation } from '@/stores/task';
+import type { Event } from '@/stores/task';
+import type { Operation } from '@/stores/operation';
 import type { PropType } from 'vue';
 
 

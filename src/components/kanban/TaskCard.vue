@@ -52,9 +52,6 @@ const titleInputBlurHandle = async() => {
     taskTitleEditing.value=false
 }
 
-const doubleTask=()=> {
-    console.log('double task')
-}
 const deleteTask=()=> {
     console.log('delete task')
 }
@@ -65,7 +62,7 @@ onMounted(()=> {
 })
 
 //ACTIONS
-const saveCard = () => taskStore.upserTask(task.value)
+const saveCard = () => taskStore.upsertTask(task.value)
 
 
 </script>

@@ -28,6 +28,7 @@ const emit = defineEmits<{
 let value = ref(props.data)
 let OPTIONS = ref(props.options)
 let valueString = ref(JSON.stringify(value.value, null, OPTIONS.value.tabSize))
+let error = ref(false)
 
 //METHODS
 const tabHandler = (e: KeyboardEvent) => {
@@ -36,21 +37,24 @@ const tabHandler = (e: KeyboardEvent) => {
 }
 const inputHandle = (e: InputEvent) => {
     const target = e.target as HTMLInputElement
+    // if(!isJsonData(target.value))return;
     value.value=JSON.parse(target.value)
     emit('update', value.value)
 }
 const format = () => {
     valueString.value=JSON.stringify(JSON.parse(JSON.stringify(value.value)), null, OPTIONS.value.tabSize)
 }
-// const isJsonData = (data: any) => {
-//     try {
-//         JSON.parse(data);
-//     } catch (e) {
-//         console.log('error parse', e)
-//         return false;
-//     }
-//     return true;
-// }
+const isJsonData = (data: any) => {
+    try {
+        JSON.parse(data);
+    } catch (e) {
+        console.log('error parse', e)
+        error.value=true
+        return false;
+    }
+    error.value=false
+    return true;
+}
 
 const getValue = () => {
     return value.value
@@ -68,7 +72,7 @@ defineExpose({
 </script>
 
 <template>
-    <div class="json-editor" :style="{'width':OPTIONS.width}">
+    <div class="json-editor" :style="{'width':OPTIONS.width}" :class="{'error': error}">
         <textarea 
         class="textarea"
         :value="valueString" 
@@ -91,7 +95,8 @@ defineExpose({
 .json-editor
     position: relative
     width: auto
-
+    .error
+        border-color: #red
 .textarea
     width: calc( 100% - 20px)
     padding-top: 45px

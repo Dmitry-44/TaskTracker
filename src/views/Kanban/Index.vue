@@ -6,6 +6,8 @@ import { useInterfaceStore, type FilterPayload, } from "@/stores/interface";
 import DetailsWindow from "../../components/kanban/DetailsWindow.vue";
 import { ref, computed, onBeforeUnmount } from "vue";
 import Filters from "../../components/kanban/Filters.vue";
+import { ElMessage } from "element-plus";
+import { errVueHandler } from "@/plugins/errorResponser";
 
 const taskStore = useTaskStore()
 const interfaceStore = useInterfaceStore()
@@ -17,18 +19,45 @@ const abortSignal = abortController.signal
 let tasks = computed(()=>taskStore.getList)
 let activeTask = computed(()=>taskStore.getActiveTask) 
 
-let tasksToTake = computed(()=>tasks.value.filter(task=>task.status!<=2).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
-let tasksInProcess = computed(()=>tasks.value.filter(task=>task.status===3).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
-let tasksFinished = computed(()=>tasks.value.filter(task=>task.status===4).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
+type withPriority={
+    priority?: number
+}
+const topPriority = <U extends withPriority>(a: U, b: U) => a.priority! - b.priority!
+
+let tasksToTake = computed(()=>tasks.value.filter(task=>task.status!<=2).sort(topPriority))
+let tasksInProcess = computed(()=>tasks.value.filter(task=>task.status===3).sort(topPriority))
+let tasksFinished = computed(()=>tasks.value.filter(task=>task.status===4).sort(topPriority))
 
 //ACTIONS
 const setActiveTask = taskStore.setActiveTask
 const toggleDetailsWindow = interfaceStore.toggleDetailsWindow
 const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess
 const fetchTasksList = async(payload: FilterPayload) => taskStore.fetchTasksList(payload, abortSignal)
-const takeTask = async(taskId: Partial<Task>) => { 
-    console.log('taskId', taskId)
-    // return store.takeTask({id:+taskId})
+const takeTask = async(taskId: Task["id"]) => { 
+    LOADING.value=true
+    const msg = ElMessage({
+        message: "Хватаю задачу..",
+        type: "success",
+        center: true,
+        duration: 1000,
+    });
+    taskStore.takeTask(taskId)
+    .then(res=>{
+        console.log('res', res)
+        if (errVueHandler(res)) {
+            ElMessage({
+                message: "Операция выполнена успешно!",
+                type: "success",
+                center: true,
+                duration: 1500,
+                showClose: true,
+            });
+        }
+    })
+    .finally(()=>{
+        LOADING.value=false
+        msg.close()
+    })
 }
 
 const LOADING = ref(false)
@@ -227,14 +256,15 @@ const dropHandler = (ev: DragEvent, area: number) => {
     display: flex
     flex-direction: column
     height: 100%
+
 .kanban-background
     background:#f9f8f8
-    width: 100%
     height: calc(100% - 70px)
     padding: 15px 50px 0px 50px
     display: flex
     flex-direction: row
     position: relative
+    // overflow-x: auto
     &>div
         flex: 0 0 auto
 
@@ -291,5 +321,9 @@ const dropHandler = (ev: DragEvent, area: number) => {
 
 .kanban-column.dragOver
     border-color: #67C23A
+
+@media screen and (max-width: 1024px)
+    .kanban-background
+        width: fit-content
 
 </style>

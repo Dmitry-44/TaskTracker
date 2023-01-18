@@ -7,6 +7,8 @@ import { nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import OperationCollapseItem from './OperationCollapseItem.vue';
 import { usePipeStore } from '@/stores/pipe';
+import { ElMessage } from 'element-plus';
+import { errVueHandler } from '@/plugins/errorResponser';
 
 const taskStore = useTaskStore()
 const interfaceStore = useInterfaceStore()
@@ -40,6 +42,33 @@ const wasChanged = computed(()=> {
 const titleInput = ref<HTMLInputElement|any>(null)
 let taskPipe = computed(()=> PIPES.value.find(pipe=>pipe?.id===task.value?.pipe_id) || null)
 
+const save = () => {
+    LOADING.value=true
+    const msg = ElMessage({
+        message: "Сохраняю задачу..",
+        type: "success",
+        center: true,
+        duration: 1000,
+    });
+    taskStore.upsertTask(task.value)
+    .then(res=>{
+        console.log('res', res)
+        if (errVueHandler(res)) {
+            ElMessage({
+                message: "Операция выполнена успешно!",
+                type: "success",
+                center: true,
+                duration: 1500,
+                showClose: true,
+            });
+        }
+    })
+    .finally(()=>{
+        LOADING.value=false
+        msg.close()
+    })
+    
+}
 
 watch(task, (newVal, oldVal)=>{
     if(oldVal.id != newVal.id) {
@@ -57,7 +86,7 @@ watch(task, (newVal, oldVal)=>{
     <div :class="['details', detailWindowIsOpen?'active':'']" @click.stop>
         <div class="header">
             <div class="actions">
-                <el-button :loading="LOADING" :disabled="!wasChanged" type="success">Сохранить</el-button>
+                <el-button :loading="LOADING" :disabled="!wasChanged" type="success" @click="save()">Сохранить</el-button>
                 <template v-if="!isCreatingTaskProcess">
                     <el-tooltip v-if="!isReadonlyTask" class="item" effect="dark" content="Взять задачу" placement="top-start">
                         <el-button :icon="Pointer"></el-button>
@@ -146,10 +175,10 @@ watch(task, (newVal, oldVal)=>{
                     </div>
                 </div>
                 <div v-if="task.pipe_id">
-                    <span class="left mt-2">Этапы</span>
+                    <span class="left mt-2">Операции</span>
                     <el-collapse>
                         <template v-for="operation in taskPipe?.operation_entities" :key="`${task.id}-${operation?.id}`">
-                            <OperationCollapseItem :operation="operation" :event="task?.event_entities.find(event=>event?.operation_id===operation?.id) || null" />
+                            <OperationCollapseItem :operation="operation" :event="task?.event_entities!.find(event=>event?.operation_id===operation?.id) || null" />
                         </template>
                     </el-collapse>
                 </div>
