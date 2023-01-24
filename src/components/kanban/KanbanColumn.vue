@@ -24,6 +24,10 @@ const props = defineProps({
     isDraggable: {
         type: Boolean,
         default: false
+    },
+    loading: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -42,7 +46,7 @@ const setActiveTask = taskStore.setActiveTask
 const toggleDetailsWindow = interfaceStore.toggleDetailsWindow
 const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess
 
-const LOADING = ref(false)
+const LOADING = ref(props.loading)
 let searchValue = ref('')
 let tasksItems = ref(props.tasks)
 
@@ -52,6 +56,12 @@ watch(
     tasksItems.value=newValue
   },
   { deep: true }
+)
+watch(
+  () => props.loading,
+  (newValue) => {
+    LOADING.value=newValue
+  }
 )
 
 //METHODS

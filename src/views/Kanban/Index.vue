@@ -127,6 +127,7 @@ const dropHandler = (ev: DragEvent, area: number) => {
                 title="К исполнению" 
                 :add-New-Task="true" 
                 :is-Draggable="true" 
+                :loading="LOADING"
                 @taskDragStart="dragstartHandler"
                 />
             </div>
@@ -140,10 +141,11 @@ const dropHandler = (ev: DragEvent, area: number) => {
                 :tasks="tasksInProcess" 
                 title="В работе" 
                 :is-Draggable="true" 
+                :loading="LOADING"
                 @taskDragStart="dragstartHandler"
                 />
             </div>
-            <KanbanColumn :tasks="tasksFinished" title="Архив" />
+            <KanbanColumn :tasks="tasksFinished" title="Архив" :loading="LOADING" />
         </div>
     </div>
 </template>
