@@ -25,5 +25,5 @@ onBeforeMount(async() => {
 </script>
 
 <template>
-    <PipeCard :pipeData=pipe :loading=LOADING :key=pipe?.id />
+    <PipeCard :pipe=pipe :loading=LOADING :key=pipe?.id />
 </template>

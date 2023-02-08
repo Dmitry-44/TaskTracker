@@ -9,7 +9,7 @@ import { errVueHandler } from "@/plugins/errorResponser";
 import { usePipeStore, type Pipe } from "@/stores/pipe";
 
 const props = defineProps({
-    pipeData: {
+    pipe: {
         type: Object as PropType<Pipe|null>,
         default: () => ({
             name: '',
@@ -23,7 +23,7 @@ const props = defineProps({
 })
 const router = useRouter()
 const user = useUserStore().getUser
-const pipe = ref(props.pipeData)
+const pipe = ref(props.pipe)
 
 const pipeStore = usePipeStore()
 const operationStore = useOperationStore()
@@ -33,11 +33,11 @@ const wasChanged = computed(()=> {
     const updatedData = JSON.parse(JSON.stringify(pipe.value))
     return oldContent.value != JSON.stringify(updatedData)
 })
-const LOADING = ref(false)
+const LOADING = toRef(props, 'loading')
 
 //HOOKS
 onMounted(()=> {
-    oldContent.value=JSON.stringify(props.pipeData)
+    oldContent.value=JSON.stringify(props.pipe)
 })
 
 //METHODS

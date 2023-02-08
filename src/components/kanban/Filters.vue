@@ -78,11 +78,15 @@ const setPersonalFilters = () => {
     delete data!.filter!.search2
     delete data!.filter!.dts
     delete data!.filter!.dtf
-    localStorage.setItem(`tasks_filter_settings_${filterVersion.value}_${user?.value?.id}`, JSON.stringify(data))
-    
+    try {
+        localStorage.setItem(`tasks_filter_settings_${filterVersion.value}_${user?.value?.id}`, JSON.stringify(data))
+    } catch(err){
+        console.log(err)
+    }
 }
 const getPersonalFilters = () => {
     let personalFiltersString = localStorage.getItem(`tasks_filter_settings_${filterVersion.value}_${user?.value?.id}`)
+    console.log('get', personalFiltersString)
     if (!personalFiltersString) {
         setPersonalFilters()
     } else {

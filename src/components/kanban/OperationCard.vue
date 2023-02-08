@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useOperationStore, type Operation } from "@/stores/operation";
-import { computed, type PropType, ref, onMounted} from "vue";
+import { computed, type PropType, ref, onMounted, toRef} from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
@@ -8,7 +8,7 @@ import JsonEditor from "@/components/JsonEditor.vue";
 
 
 const props = defineProps({
-    operationData: {
+    operation: {
         type: Object as PropType<Operation|null>,
         default: () => ({
             name: '',
@@ -24,21 +24,22 @@ const props = defineProps({
 //VARIABLES
 const router = useRouter()
 const operationStore = useOperationStore()
-const paramsEditor = ref<HTMLInputElement|any>(null)
+const paramsEditor = ref<HTMLInputElement|null>(null)
 
-let params = ref(props.operationData?.params)
-let operation = ref(props.operationData)
+let operation = ref(props.operation)
+let params = ref(operation?.value?.params)
 let oldContent = ref('')
 let wasChanged = computed(()=> {
     const updatedData = JSON.parse(JSON.stringify(operation.value))
     return oldContent.value != JSON.stringify(updatedData)
 })
-let LOADING = ref(false)
+let LOADING = toRef(props, 'loading')
 
 //HOOKS
 onMounted(()=> {
-    oldContent.value=JSON.stringify(props.operationData)
+    oldContent.value=JSON.stringify(operation)
 })
+
 
 //METHODS
 const paramUpdateHandle = (val: Object) => {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import TaskCard from './TaskCard.vue';
 import {useTaskStore, type Task} from '@/stores/task'
-import { watch, type PropType } from 'vue';
+import { toRef, type PropType } from 'vue';
 import { ref, computed } from '@vue/reactivity';
 import { Plus } from '@element-plus/icons-vue';
 import { useInterfaceStore } from '@/stores/interface';
@@ -46,23 +46,10 @@ const setActiveTask = taskStore.setActiveTask
 const toggleDetailsWindow = interfaceStore.toggleDetailsWindow
 const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess
 
-const LOADING = ref(props.loading)
+const LOADING = toRef(props, 'loading')
 let searchValue = ref('')
-let tasksItems = ref(props.tasks)
+let tasks = toRef(props, 'tasks')
 
-watch(
-  () => props.tasks,
-  (newValue) => {
-    tasksItems.value=newValue
-  },
-  { deep: true }
-)
-watch(
-  () => props.loading,
-  (newValue) => {
-    LOADING.value=newValue
-  }
-)
 
 //METHODS
 const addTask = () => {
@@ -103,10 +90,8 @@ const takeTask = async(taskId: Task["id"]) => {
 }
 
 const doSearch = () => {
-    if(searchValue.value.length===0){
-        tasksItems.value=props.tasks
-    }
-    tasksItems.value=tasksItems.value.filter(task=>task.title.concat(' ',task.text).toLowerCase().indexOf(searchValue.value.toLowerCase()) !== -1)
+    tasks.value=props.tasks
+    tasks.value=tasks.value.filter(task=>task.title.concat(' ',task.text).toLowerCase().indexOf(searchValue.value.toLowerCase()) !== -1)
 }
 
 </script>
@@ -133,7 +118,7 @@ const doSearch = () => {
                 <template #template>
                     <el-skeleton-item variant="rect" style="width: 300px; height: calc(100vh - 210px)" />
                 </template>
-                <template v-for="task in tasksItems" :key="task.id">
+                <template v-for="task in tasks" :key="task.id">
                     <TaskCard 
                     :draggable=isDraggable
                     :task="task" 
