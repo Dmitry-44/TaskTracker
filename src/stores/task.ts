@@ -130,7 +130,7 @@ export const useTaskStore = defineStore({
       this.singleTask=payload[0]
     },
     
-    fetchTasksList(filterPayload?: FilterPayload|Partial<FilterPayload>, signal?: AbortSignal): Promise<ResultWithMessage> {
+    async fetchTasksList(filterPayload?: FilterPayload|Partial<FilterPayload>, signal?: AbortSignal): Promise<string|boolean> {
       return axiosClient
         .post(`${envConfig.API_URL}tasktracker/tasks`, {...this.filterBase, ...filterPayload}, {signal})
         .then((resp) => {
@@ -151,10 +151,12 @@ export const useTaskStore = defineStore({
         })
         .catch((e) => errRequestHandler(e));
     },
-    upsertTask(payload: Partial<Task>): Promise<any> {
+    async upsertTask(payload: Partial<Task>|Task): Promise<string|boolean> {
+      console.log('upsertTask')
       return axiosClient
         .post(`${envConfig.API_URL}tasktracker/taskUpsert`, payload)
         .then((resp) => {
+          console.log('resp', resp)
           const respdata: ResultWithMessage = resp.data
           if (
             Object.prototype.hasOwnProperty.call(respdata, "message") &&
@@ -167,7 +169,7 @@ export const useTaskStore = defineStore({
         })
         .catch((e) => errRequestHandler(e));
     },
-    takeTask(id: number):Promise<any> {
+    async takeTask(id: number): Promise<string|boolean> {
       return axiosClient
         .post(`${envConfig.API_URL}tasktracker/takeTaskSmi`, {id: id})
         .then((resp) => {
@@ -181,6 +183,7 @@ export const useTaskStore = defineStore({
             return respdata.message || -1;
           }
         })
+        .catch((e) => errRequestHandler(e));
     },
 }
 });

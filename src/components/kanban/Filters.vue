@@ -86,7 +86,6 @@ const setPersonalFilters = () => {
 }
 const getPersonalFilters = () => {
     let personalFiltersString = localStorage.getItem(`tasks_filter_settings_${filterVersion.value}_${user?.value?.id}`)
-    console.log('get', personalFiltersString)
     if (!personalFiltersString) {
         setPersonalFilters()
     } else {

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import TaskCard from './TaskCard.vue';
 import {useTaskStore, type Task} from '@/stores/task'
-import { toRef, type PropType } from 'vue';
+import { toRef, type PropType, watch } from 'vue';
 import { ref, computed } from '@vue/reactivity';
-import { Plus } from '@element-plus/icons-vue';
+import { Plus, Top, Bottom, CloseBold } from '@element-plus/icons-vue';
 import { useInterfaceStore } from '@/stores/interface';
 import { ElMessage } from "element-plus";
 import { errVueHandler } from '@/plugins/errorResponser';
+import KanbanColumnFilter from './KanbanColumnFilter.vue';
 
 const props = defineProps({
     tasks: {
@@ -33,6 +34,7 @@ const props = defineProps({
 
 const emit = defineEmits<{
   (e: 'taskDragStart', ev: DragEvent, task: Task): void
+  (e: 'changeSort', sort: <T extends Task>(a:T, b:T)=>number): void,
 }>()
 
 const taskStore = useTaskStore()
@@ -48,7 +50,16 @@ const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess
 
 const LOADING = toRef(props, 'loading')
 let searchValue = ref('')
-let tasks = toRef(props, 'tasks')
+
+let tasks = ref<Task[]>([])
+
+watch(
+    ()=>props.tasks,
+    (newVal)=> {
+        tasks.value=JSON.parse(JSON.stringify(newVal))
+    },
+    {deep: true}
+)
 
 
 //METHODS
@@ -72,7 +83,6 @@ const takeTask = async(taskId: Task["id"]) => {
     });
     taskStore.takeTask(taskId)
     .then(res=>{
-        console.log('res', res)
         if (errVueHandler(res)) {
             ElMessage({
                 message: "Операция выполнена успешно!",
@@ -90,8 +100,11 @@ const takeTask = async(taskId: Task["id"]) => {
 }
 
 const doSearch = () => {
-    tasks.value=props.tasks
+    tasks.value=JSON.parse(JSON.stringify(props.tasks))
     tasks.value=tasks.value.filter(task=>task.title.concat(' ',task.text).toLowerCase().indexOf(searchValue.value.toLowerCase()) !== -1)
+}
+const setDefaultSort = () => {
+    tasks.value=JSON.parse(JSON.stringify(props.tasks))
 }
 
 </script>
@@ -99,14 +112,20 @@ const doSearch = () => {
 
 <template>
     <div class="kanban-column">
-        <div class="title">
+        <div class="title-row">
             <h3>{{ title }}</h3>
-            <el-input v-model="searchValue" clearable @input="doSearch" size="small" placeholder="Поиск" />
             <template v-if="addNewTask">
                 <el-tooltip class="item" effect="dark" content="Добавить задачу" placement="top-start">
                     <el-button size="small" :icon="Plus" @click.stop="addTask()" />
                 </el-tooltip>
             </template>
+        </div>
+        <div class="title-row">
+            <el-input v-model="searchValue" class="input-search" clearable @input="doSearch" size="small" placeholder="Поиск" />
+            <KanbanColumnFilter 
+                @changeSort="(sort)=>tasks.sort(sort)"
+                @noSort="setDefaultSort"
+            />
         </div>
         <div class="content">
             <el-skeleton
@@ -116,10 +135,10 @@ const doSearch = () => {
                 :throttle="500"
                 >
                 <template #template>
-                    <el-skeleton-item variant="rect" style="width: 300px; height: calc(100vh - 210px)" />
+                    <el-skeleton-item variant="rect" style="width: 300px; height: calc(100vh - 230px)" />
                 </template>
-                <template v-for="task in tasks" :key="task.id">
-                    <TaskCard 
+                    <TaskCard
+                    v-for="task in tasks" :key="task.id"
                     :draggable=isDraggable
                     :task="task" 
                     :active="task.id===activeTask?.id?true:false" 
@@ -127,7 +146,6 @@ const doSearch = () => {
                     @dragstart="emit('taskDragStart', $event, task)"
                     @take="takeTask($event)"
                     />
-                </template>
                 <el-button v-if="addNewTask" @click.stop="addTask()" class="column-button-footer" :icon="Plus">
                     Добавить задачу
                 </el-button>
@@ -152,10 +170,10 @@ const doSearch = () => {
     transition: box-shadow, border-color 250ms
     &:hover
         box-shadow: 0 0 0 1px #edeae9
-    .title 
+    .title-row
         align-items: center
-        border-radius: 6px
         display: flex
+        justify-content: space-between
         position: relative
         h3
             font-size: 16px
@@ -168,14 +186,22 @@ const doSearch = () => {
             position: relative
             flex-shrink: 0
             margin-right: 5px
-    .content
+            margin-block: 8px
+    > .content
         max-height: 100%
         overflow-y: auto
         overflow-x: hidden
         padding: 0px 4px
+        margin-top: 20px
+        
 .kanban-column .column-button-footer
     background-color: inherit
     margin: 0 auto
     display: flex
     border: none
+
+.input-search
+    width: 65%
+    margin-right: 8px
+    
 </style>

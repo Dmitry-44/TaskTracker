@@ -4,9 +4,10 @@ import TaskCard from "@/components/kanban/TaskCard.vue";
 import { useTaskStore, type Task } from "@/stores/task";
 import { useInterfaceStore, type FilterPayload, } from "@/stores/interface";
 import DetailsWindow from "../../components/kanban/DetailsWindow.vue";
-import { ref, computed, onBeforeUnmount } from "vue";
+import { ref, computed, onBeforeUnmount, nextTick } from "vue";
 import Filters from "../../components/kanban/Filters.vue";
 import KanbanColumn from "@/components/kanban/KanbanColumn.vue";
+import { ElMessage } from "element-plus";
 
 const taskStore = useTaskStore()
 const interfaceStore = useInterfaceStore()
@@ -18,14 +19,9 @@ const abortSignal = abortController.signal
 let tasks = computed(()=>taskStore.getList)
 let activeTask = computed(()=>taskStore.getActiveTask) 
 
-type withPriority={
-    priority?: number
-}
-const topPriority = <U extends withPriority>(a: U, b: U) => a.priority! - b.priority!
-
-let tasksToTake = computed(()=>tasks.value.filter(task=>task.status!<=2).sort(topPriority))
-let tasksInProcess = computed(()=>tasks.value.filter(task=>task.status===3).sort(topPriority))
-let tasksFinished = computed(()=>tasks.value.filter(task=>task.status===4).sort(topPriority))
+let tasksToTake = computed(()=>tasks.value.filter(task=>task.status!<=2))
+let tasksInProcess = computed(()=>tasks.value.filter(task=>task.status===3))
+let tasksFinished = computed(()=>tasks.value.filter(task=>task.status===4))
 
 //ACTIONS
 const setActiveTask = taskStore.setActiveTask
@@ -58,9 +54,43 @@ const clickOutsideCards = () => {
 }
 const filterUpdate = async(payload: FilterPayload) => {
     LOADING.value=true
-    console.log('payload', payload)
     await fetchTasksList(payload)
     LOADING.value=false
+}
+const updateTask = async(task: Task) => {
+    LOADING.value=true
+    const msg = ElMessage({
+        message: "Сохраняю задачу..",
+        type: "success",
+        center: true,
+        duration: 1000,
+    });
+    return taskStore.upsertTask(task)
+    .then(res=>{
+        if (res) {
+            ElMessage({
+                message: "Операция выполнена успешно!",
+                type: "success",
+                center: true,
+                duration: 1500,
+                showClose: true,
+            });
+            return true
+        } else {
+            ElMessage({
+                message: "Ошибка при выполнении операции!",
+                type: "error",
+                center: true,
+                duration: 1500,
+                showClose: true,
+            });
+            return false
+        }
+    })
+    .finally(()=>{
+        LOADING.value=false
+        msg.close()
+    })
 }
 
 //HOOKS
@@ -96,12 +126,22 @@ const dragleaveHandler = (ev: DragEvent) => {
     tasksToTakeArea.value.classList.remove('dragOver')
     taskInProcessArea.value.classList.remove('dragOver')
 }
-const dropHandler = (ev: DragEvent, area: number) => {
+const dropHandler = async(ev: DragEvent, area: number) => {
     ev.dataTransfer!.dropEffect = "link";
-    tasks.value.map(task=>{if(task.id===transferTask?.value?.id) {task.status=areaParams.get(area)?.status || 2}})
+    const updatedTask = tasks.value.find(task=>task.id===transferTask?.value?.id)
+    if(!!updatedTask){
+        if(updatedTask.status != areaParams.get(area)?.status) {
+            updateTask({...updatedTask, status:areaParams.get(area)?.status }).then(res=>{
+                if(res){
+                    updatedTask.status=areaParams.get(area)?.status    
+                }
+            })
+        }
+    }
     tasksToTakeArea.value.classList.remove('dragOver')
     taskInProcessArea.value.classList.remove('dragOver')
 }
+
 
 </script>
 <template>
@@ -122,12 +162,13 @@ const dropHandler = (ev: DragEvent, area: number) => {
             @drop="dropHandler($event,1)"
             ref="tasksToTakeArea" 
             >
-                <KanbanColumn 
+                <KanbanColumn
                 :tasks="tasksToTake" 
                 title="К исполнению" 
                 :add-New-Task="true" 
                 :is-Draggable="true" 
                 :loading="LOADING"
+                key="1"
                 @taskDragStart="dragstartHandler"
                 />
             </div>
@@ -142,10 +183,11 @@ const dropHandler = (ev: DragEvent, area: number) => {
                 title="В работе" 
                 :is-Draggable="true" 
                 :loading="LOADING"
+                key="2"
                 @taskDragStart="dragstartHandler"
                 />
             </div>
-            <KanbanColumn :tasks="tasksFinished" title="Архив" :loading="LOADING" />
+            <KanbanColumn :tasks="tasksFinished" title="Архив" :loading="LOADING" key="3" />
         </div>
     </div>
 </template>

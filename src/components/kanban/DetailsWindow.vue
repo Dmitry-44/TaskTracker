@@ -191,20 +191,20 @@ watch(task, (newVal, oldVal)=>{
 .details
     box-shadow: 0 0 0 1px #edeae9, 0 5px 20px 0 rgba(109, 110, 111, 0.08)
     background-color: #fff
-    // border-top: 1px solid #edeae9
     display: flex
     flex-direction: column
     right: 0
     position: fixed
     top: 60px
     bottom: 0
-    width: 0
     z-index: 600
     transition: all .8s cubic-bezier(0.23, 1, 0.32, 1)
+    width: min(700px, 60%)
+    transform: translateX(1000px)
     visibility: hidden
     &.active
         width: min(700px, 60%)
-        // transform: translateX(-100px)
+        transform: translateX(0px)
         visibility: visible
 .details .header
     height: 50px
