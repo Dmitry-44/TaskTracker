@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { axiosClient } from "@/plugins/axios";
 import { errRequestHandler } from "@/plugins/errorResponser";
 import { envConfig } from "@/plugins/envConfig";
-import { type FilterPayload, type SimpleObject, type ResultWithMessage, useInterfaceStore } from "@/stores/interface";
+import { type FilterPayload, type SimpleObject, type ResultWithMessage, useInterfaceStore, type ApiResponse, isSuccessApiResponse } from "@/stores/interface";
 
 
 interface Task {
@@ -134,20 +134,17 @@ export const useTaskStore = defineStore({
       return axiosClient
         .post(`${envConfig.API_URL}tasktracker/tasks`, {...this.filterBase, ...filterPayload}, {signal})
         .then((resp) => {
-          const respdata: ResultWithMessage = resp.data;
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
+          const respdata: ApiResponse = resp.data;
+          if(isSuccessApiResponse(respdata)) {
             if(filterPayload?.filter!['id']) {
-              this.setSingleTask(respdata.result.queryResult)
+              this.setSingleTask(respdata.result.queryResult as Task[])
             } else {
-              this.setTasksList(respdata.result.queryResult);
+              this.setTasksList(respdata.result.queryResult as Task[]);
             }
             return true;
           } else {
-            return respdata.message || -1;
-          }
+              return respdata.message || -1;
+            }
         })
         .catch((e) => errRequestHandler(e));
     },
@@ -156,12 +153,8 @@ export const useTaskStore = defineStore({
       return axiosClient
         .post(`${envConfig.API_URL}tasktracker/taskUpsert`, payload)
         .then((resp) => {
-          console.log('resp', resp)
-          const respdata: ResultWithMessage = resp.data
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
+          const respdata: ApiResponse = resp.data;
+          if(isSuccessApiResponse(respdata)) {
             return true;
           } else {
             return respdata.message || -1;
@@ -173,11 +166,8 @@ export const useTaskStore = defineStore({
       return axiosClient
         .post(`${envConfig.API_URL}tasktracker/takeTaskSmi`, {id: id})
         .then((resp) => {
-          const respdata: ResultWithMessage = resp.data
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
+          const respdata: ApiResponse = resp.data;
+          if(isSuccessApiResponse(respdata)) {
             return true;
           } else {
             return respdata.message || -1;

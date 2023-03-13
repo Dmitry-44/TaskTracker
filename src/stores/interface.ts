@@ -1,3 +1,4 @@
+import { ElMessage } from 'element-plus';
 import { defineStore } from 'pinia';
 
 interface SimpleObject {
@@ -22,6 +23,20 @@ interface FilterPayload {
     };
 }
 
+interface SuccessApiResponse {
+    message: string,
+    result: {
+        queryResult?: unknown[]
+    };
+}
+
+interface FailureApiResponse {
+    message: string,
+    result?: unknown;
+}
+
+type ApiResponse = SuccessApiResponse | FailureApiResponse
+
 interface ResultWithMessage {
     message: string;
     result: any;
@@ -32,7 +47,11 @@ type State = {
     isCreatingTaskProcess: boolean,
 }
 
-export type {SimpleObject, FilterPayload, ResultWithMessage}
+export const isSuccessApiResponse = (res: ApiResponse): res is SuccessApiResponse => res.message === 'ok'
+export const isFailureApiResponse = (res: ApiResponse): res is FailureApiResponse => res.message != 'ok'
+
+
+export type {SimpleObject, FilterPayload, ResultWithMessage, ApiResponse}
 
 export const useInterfaceStore = defineStore({
     id: "interface",
