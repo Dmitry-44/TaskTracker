@@ -3,7 +3,7 @@ import TaskCard from './TaskCard.vue';
 import {useTaskStore, type Task} from '@/stores/task'
 import { toRef, type PropType, watch } from 'vue';
 import { ref, computed } from '@vue/reactivity';
-import { Plus, Top, Bottom, CloseBold } from '@element-plus/icons-vue';
+import { Plus } from '@element-plus/icons-vue';
 import { useInterfaceStore } from '@/stores/interface';
 import { ElMessage } from "element-plus";
 import { errVueHandler } from '@/plugins/errorResponser';

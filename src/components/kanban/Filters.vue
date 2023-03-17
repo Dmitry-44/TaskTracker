@@ -20,7 +20,7 @@ const userStore = useUserStore()
 const PRIORITY_OPTIONS = computed(() => taskStore.getPriorityOptions)
 const SITES_OPTIONS = computed(() => sitesStore.getList)
 const operationsById = computed(()=> operationStore.getOperationsById)
-const DIRECTIONS_OPTIONS = computed(() => operationsById?.value[4]?.params.directionArr || [])
+const DIRECTIONS_OPTIONS = computed(() => operationsById?.value[4]?.params['directionArr'] || [])
 const filterVersion = computed(()=> taskStore.getFilterVersion)
 const user = computed(()=> userStore.getUser)
 
@@ -74,10 +74,10 @@ watch(
 //METHODS
 const setPersonalFilters = () => {
     let data = {...filterPayload.value} as Partial<FilterPayload>
-    delete data!.filter!.search1
-    delete data!.filter!.search2
-    delete data!.filter!.dts
-    delete data!.filter!.dtf
+    delete data!.filter!['search1']
+    delete data!.filter!['search2']
+    delete data!.filter!['dts']
+    delete data!.filter!['dtf']
     try {
         localStorage.setItem(`tasks_filter_settings_${filterVersion.value}_${user?.value?.id}`, JSON.stringify(data))
     } catch(err){

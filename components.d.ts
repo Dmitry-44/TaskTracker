@@ -91,9 +91,6 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     SelectOptions: typeof import('./src/components/kanban/SelectOptions.vue')['default']
     TaskCard: typeof import('./src/components/kanban/TaskCard.vue')['default']
-    UploaderCard: typeof import('./src/components/photoEditor/UploaderCard.vue')['default']
-    UploaderWatermarkCard: typeof import('./src/components/watermark/UploaderWatermarkCard.vue')['default']
-    WatermarkCard: typeof import('./src/components/watermark/WatermarkCard.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

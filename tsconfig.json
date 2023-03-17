@@ -1,12 +1,14 @@
 {
   "extends": "@vue/tsconfig/tsconfig.web.json",
-  "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "src/**/*.ts"],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
-    "target": "es2016",
+    "types": ["vite/client", "@types/jest"],
+    "target": "es6",
     "module": "ESNext",
     "moduleResolution": "node",
     "resolveJsonModule": true,

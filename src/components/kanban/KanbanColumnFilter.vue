@@ -41,6 +41,8 @@ const resetActive = () => {
 	emit("noSort")
 }
 
+const noActivePlaceholder = 'Фильтр'
+
 defineExpose({
 	setActive,
 	resetActive
@@ -50,7 +52,7 @@ defineExpose({
 <template>
   <el-dropdown trigger="click">
     <span v-if="activeOption" class="el-dropdown-link">{{ activeOption.name }}<el-icon class="el-icon--right"><component :is="activeOption.icon" /></el-icon></span>
-    <span v-else class="el-dropdown-link">Фильтр<el-icon class="el-icon--right"><arrow-down /></el-icon></span>
+    <span v-else class="el-dropdown-link">{{ noActivePlaceholder }}<el-icon class="el-icon--right"><arrow-down /></el-icon></span>
     <template #dropdown>
       <el-dropdown-menu >
 		<template v-for="(option, i) in FILTER_OPTIONS" :key="i">

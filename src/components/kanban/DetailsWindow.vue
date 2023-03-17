@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import OperationCollapseItem from '@/components/kanban/OperationCollapseItem.vue';
 import { useTaskStore } from '@/stores/task';
 import { useInterfaceStore } from '@/stores/interface';
 import { Close, Pointer, Notification, SuccessFilled } from "@element-plus/icons-vue";
 import { computed } from '@vue/reactivity';
 import { nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import OperationCollapseItem from './OperationCollapseItem.vue';
 import { usePipeStore } from '@/stores/pipe';
 import { ElMessage } from 'element-plus';
 import { errVueHandler } from '@/plugins/errorResponser';
