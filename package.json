@@ -1,5 +1,5 @@
 {
-  "name": "photobank",
+  "name": "tasktracker",
   "version": "1.2.0",
   "scripts": {
     "dev": "vite",

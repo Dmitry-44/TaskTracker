@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { useOperationStore, type Operation } from "@/stores/operation";
+import { useOperationStore } from "@/stores/operation";
+import type { Operation } from "@/types/operation";
 import { computed, type PropType, ref, toRef, onBeforeMount, onMounted, onBeforeUnmount } from "vue";
 import { Plus, Close, Delete, Bottom } from "@element-plus/icons-vue";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
-import { usePipeStore, type Pipe } from "@/stores/pipe";
+import { usePipeStore } from "@/stores/pipe";
+import type { Pipe } from "@/types/pipe";
 
 const props = defineProps({
     pipe: {

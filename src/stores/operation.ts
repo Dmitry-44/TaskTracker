@@ -2,23 +2,18 @@ import { errRequestHandler } from './../plugins/errorResponser';
 import { envConfig } from './../plugins/envConfig';
 import { axiosClient } from './../plugins/axios';
 import { defineStore } from 'pinia';
-import type { FilterPayload, SimpleObject, ResultWithMessage } from "@/stores/interface";
+import type { Operation } from "@/types/operation";
+import type { FilterPayload, ResultWithMessage } from "@/types/index";
 
 
 type OperationsById = {
     [key: string]: Operation
 }
-interface Operation {
-    id: number;
-    name: string;
-    params: SimpleObject;
-}
+
 type State = {
     operations: Operation[];
     singleOperation: Operation | null
 }
-
-export type { Operation }
 
 export const useOperationStore = defineStore({
     id: "operation",
@@ -51,9 +46,9 @@ export const useOperationStore = defineStore({
                     respdata.message === "ok"
                 ) {
                     if(payload?.filter['id']) {
-                        this.setSingleOperation(respdata.result)
+                        this.setSingleOperation(respdata.result as Operation[])
                     } else {
-                        this.setOperations(respdata.result);
+                        this.setOperations(respdata.result as Operation[]);
                     }
                     return true;
                 } else {

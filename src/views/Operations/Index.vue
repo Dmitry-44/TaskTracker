@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useOperationStore, type Operation } from "@/stores/operation";
+import { useOperationStore } from "@/stores/operation";
 import { Plus, Edit } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
 import { ref, computed, onBeforeMount } from "vue";

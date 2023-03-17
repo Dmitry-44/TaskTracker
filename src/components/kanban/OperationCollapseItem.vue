@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { type Event, useTaskStore } from '@/stores/task';
-import type{ Operation } from '@/stores/operation';
+import { useTaskStore } from '@/stores/task';
+import type { Event } from '@/types/event';
+import type { Operation } from '@/types/operation';
 import type { PropType } from 'vue';
 
 
@@ -17,7 +18,7 @@ const props = defineProps({
 
 const taskStore = useTaskStore()
 const eventStatusOptions = taskStore.getEventStatusOptions
-const statusColor = eventStatusOptions.filter(ev=>props.event?.status===ev.id)[0].color || ''
+const statusColor = eventStatusOptions.filter(ev=>props.event?.status===ev.id)[0]?.color || ''
 
 
 </script>

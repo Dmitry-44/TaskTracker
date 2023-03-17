@@ -3,7 +3,8 @@ import { SuccessFilled, More, EditPen, Pointer } from "@element-plus/icons-vue";
 import { ref, onMounted, computed, nextTick } from 'vue'
 import type { PropType } from 'vue'
 import SelectOptions from "./SelectOptions.vue";
-import { useTaskStore, type Task } from "@/stores/task";
+import { useTaskStore } from "@/stores/task";
+import type { Task } from "@/types/task";
 
 const props = defineProps({
   task: {

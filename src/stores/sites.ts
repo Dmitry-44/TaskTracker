@@ -1,14 +1,10 @@
 import { axiosClient } from "@/plugins/axios";
 import { envConfig } from "@/plugins/envConfig";
 import { errRequestHandler } from "@/plugins/errorResponser";
-import type { ResultWithMessage } from "@/stores/interface";
+import type { Site } from "@/types/site";
+import type { ResultWithMessage } from "@/types/index";
 import { defineStore } from "pinia";
 
-
-type Site = {
-    id: number
-    url: string
-}
 
 interface State {
     sites: Site[]
@@ -35,7 +31,7 @@ export const useSitesStore = defineStore({
                   Object.prototype.hasOwnProperty.call(respdata, "message") &&
                   respdata.message === "ok"
                 ) {
-                this.setSites(respdata.result);
+                this.setSites(respdata.result as Site[]);
                   return true;
                 } else {
                   return respdata.message || -1;

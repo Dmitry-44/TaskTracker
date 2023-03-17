@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useTaskStore } from '@/stores/task';
-import { useOperationStore, type Operation } from '@/stores/operation';
+import { useOperationStore } from '@/stores/operation';
 import { useSitesStore } from "@/stores/sites";
-import type { FilterPayload } from '@/stores/interface';
+import type { FilterPayload } from '@/types/index';
 import { Close } from '@element-plus/icons-vue';
 import { ref, computed, watch, nextTick, onMounted, onBeforeMount } from 'vue';
 import { useUserStore } from '@/stores/user';
@@ -209,7 +209,7 @@ defineExpose({
                         </el-option>
                     </el-select>
 
-                    <el-select 
+                    <!-- <el-select 
                     v-model="smi_direction" 
                     multiple 
                     collapse-tags
@@ -225,7 +225,7 @@ defineExpose({
                         >
                         <span>{{item.name}}</span>
                         </el-option>
-                    </el-select>
+                    </el-select> -->
                     
                     <!-- Select only for smi center???? -->
                     <el-select 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import TaskCard from './TaskCard.vue';
-import {useTaskStore, type Task} from '@/stores/task'
+import { useTaskStore } from '@/stores/task'
+import type { Task } from '@/types/task'
 import { toRef, type PropType, watch } from 'vue';
 import { ref, computed } from '@vue/reactivity';
 import { Plus } from '@element-plus/icons-vue';

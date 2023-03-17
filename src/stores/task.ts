@@ -2,24 +2,14 @@ import { defineStore } from "pinia";
 import { axiosClient } from "@/plugins/axios";
 import { errRequestHandler } from "@/plugins/errorResponser";
 import { envConfig } from "@/plugins/envConfig";
-import { type FilterPayload, type SimpleObject, type ResultWithMessage, useInterfaceStore, type ApiResponse, isSuccessApiResponse } from "@/stores/interface";
+import { type ApiResponse, isSuccessApiResponse } from "@/types/api";
+import type { FilterPayload } from "@/types/index";
+import type { Task } from "@/types/task";
+import { useInterfaceStore } from "./interface";
 
 
-interface Task {
-  id: number;
-  title: string;
-  text: string;
-  created_at: number;
-  priority?: number;
-  status?: number;
-  pipe_id?: number;
-  event_id?: number;
-  division_id?: number;
-  created_by?: number;
-  events?: number[];
-  event_entities?: Event[],
-  child_tasks?: Task[],
-  smi_direction?: number,
+interface ActiveTask extends Task {
+  readonly?: boolean
 }
 const taskDefault: ActiveTask = {
   id: -1,
@@ -28,23 +18,7 @@ const taskDefault: ActiveTask = {
   status: 1,
   text: '',
 }
-interface ActiveTask extends Task {
-  readonly?: boolean
-}
-type Event = {
-  id: number
-  task_id?: number
-  operation_id?: number
-  created: number
-  modified: number | null
-  finished?: number | null
-  u_id?: number | null
-  user_name?: string | null
-  status: number
-  selected_users: number[]
-  result?: string | null
-  params?: SimpleObject
-}
+
 interface TaskOption {
   id: number,
   value: string,
@@ -66,7 +40,7 @@ interface State {
   filterVersion: string
 }
 
-export type { Task, ActiveTask, Event };
+export type { ActiveTask };
 
 export const useTaskStore = defineStore({
   id: "task",

@@ -27,13 +27,13 @@ const emit = defineEmits<{
 //VARIABLES
 let value = ref(props.data)
 let OPTIONS = ref(props.options)
-let valueString = ref(JSON.stringify(value.value, null, OPTIONS.value.tabSize))
+let valueString = ref(JSON.stringify(value.value, null, OPTIONS.value['tabSize']))
 let error = ref(false)
 
 //METHODS
 const tabHandler = (e: KeyboardEvent) => {
     e.preventDefault();
-    document.execCommand('insertText', false, ' '.repeat(OPTIONS.value.tabSize));
+    document.execCommand('insertText', false, ' '.repeat(OPTIONS.value['tabSize']));
 }
 const inputHandle = (e: Event) => {
     const target = e.target as HTMLInputElement
@@ -42,7 +42,7 @@ const inputHandle = (e: Event) => {
     emit('update', value.value)
 }
 const format = () => {
-    valueString.value=JSON.stringify(JSON.parse(JSON.stringify(value.value)), null, OPTIONS.value.tabSize)
+    valueString.value=JSON.stringify(JSON.parse(JSON.stringify(value.value)), null, OPTIONS.value['tabSize'])
 }
 const isJsonData = (data: any) => {
     try {
@@ -72,13 +72,13 @@ defineExpose({
 </script>
 
 <template>
-    <div class="json-editor" :style="{'width':OPTIONS.width}" :class="{'error': error}">
+    <div class="json-editor" :style="{'width':OPTIONS['width']}" :class="{'error': error}">
         <textarea 
         class="textarea"
         :value="valueString" 
-        :rows="OPTIONS.rows" 
-        :readonly="OPTIONS.readonly"
-        :placeholder="OPTIONS.placeholder"
+        :rows="OPTIONS['rows']" 
+        :readonly="OPTIONS['readonly']"
+        :placeholder="OPTIONS['placeholder']"
         @keydown.tab.prevent="tabHandler($event)" 
         @input="inputHandle($event)"
         >

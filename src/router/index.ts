@@ -79,19 +79,19 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore();
   userStore.showLoader();
-  if (to.query.auth) {
+  if (to.query['auth']) {
     console.log("cookie exist");
-    document.cookie = `connect.sid=${to.query.auth};path=/;expires=${new Date(
+    document.cookie = `connect.sid=${to.query['auth']};path=/;expires=${new Date(
       Date.now() + 86400000
     ).toUTCString()}`;
   }
-  if (to.matched.some((record) => record.meta.requiresAuth)) {
+  if (to.matched.some((record) => record.meta['requiresAuth'])) {
     if (userStore.is_auth) {
-      return chechRights(userStore, to.meta.rights as rightsObj, next);
+      return chechRights(userStore, to.meta['rights'] as rightsObj, next);
     }
     return userStore.checkAuth().then((res) => {
       if (res) {
-        return chechRights(userStore, to.meta.rights as rightsObj, next);
+        return chechRights(userStore, to.meta['rights'] as rightsObj, next);
       } else {
         window.location.href = `${envConfig.CLIENT_COOKIE}/auth_service?redirect=http://${location.host}${to.fullPath}`;
       }

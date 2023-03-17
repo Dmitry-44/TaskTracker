@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { useTaskStore, type Task } from "@/stores/task";
+import { useTaskStore } from "@/stores/task";
+import type { Task } from "@/types/task";
 import { useInterfaceStore} from "@/stores/interface";
 import { SuccessFilled, More, EditPen, CopyDocument, Delete, Notification, Link, View, Pointer} from "@element-plus/icons-vue";
 import { ref, onMounted, computed } from 'vue'
