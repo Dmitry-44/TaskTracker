@@ -1,18 +1,22 @@
 <script setup lang="ts">
 import { Plus, MoreFilled } from "@element-plus/icons-vue";
-import TaskCard from "@/components/kanban/TaskCard.vue";
-import { useTaskStore, type FilterPayload, type Operation, type Task } from "@/stores/task";
+import { useTaskStore } from "@/stores/task";
+import type { FilterPayload } from "@/types/index";
+import type { Operation } from "@/types/operation";
+import type { Task } from "@/types/task";
+import type { Event } from "@/types/event";
 import { useRouter } from "vue-router";
-import DetailsWindow from "../../components/kanban/DetailsWindow.vue";
 import { onBeforeMount, ref, computed } from "vue";
 import EventsModal from "../../components/kanban/EventsModal.vue";
 import OperationColumn from "../../components/kanban/OperationColumn.vue";
+import { usePipeStore } from "@/stores/pipe";
 
 const router = useRouter()
 const taskStore = useTaskStore()
-let PIPES = computed(()=>taskStore.getPipes)
+const pipeStore = usePipeStore()
+let PIPES = computed(()=>pipeStore.getPipes)
 const LOADING = ref(false)
-const taskId = router.currentRoute.value.params.id
+const taskId = router.currentRoute.value.params['id']
 let task = computed<Task|null>(()=>taskStore.getSingleTask)
 let taskPipe = computed(()=> PIPES.value.find(pipe=>pipe?.id===task.value?.pipe_id) || null)
 const priorityOptions = useTaskStore().getPriorityOptions
@@ -90,7 +94,7 @@ const addNewEvent = (value: Operation) => {
         </div>
         <div class="kanban-background">
             <template v-for="operation in taskPipe?.operation_entities" :key="operation?.id">
-                <OperationColumn :operation="operation" :event="task?.event_entities.find(event=>event?.operation_id===operation?.id) || null" />
+                <OperationColumn :operation="operation" :event="task?.event_entities!.find(ev=>ev.operation_id===operation?.id)" />
             </template>
             <div class="kanban-column column-action" v-if="task?.status!=4">
                 <div class="wrapper">

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTaskStore } from '@/stores/task';
 import { useInterfaceStore } from '@/stores/interface';
-import { Close, Pointer, Notification, SuccessFilled } from "@element-plus/icons-vue";
+import { Close, Pointer, Notification } from "@element-plus/icons-vue";
 import { computed } from '@vue/reactivity';
 import { nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';

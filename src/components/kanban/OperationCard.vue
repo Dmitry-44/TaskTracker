@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { useOperationStore, type Operation } from "@/stores/operation";
+import { useOperationStore } from "@/stores/operation";
+import type { Operation } from "@/types/operation";
 import { computed, type PropType, ref, onMounted, toRef} from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";

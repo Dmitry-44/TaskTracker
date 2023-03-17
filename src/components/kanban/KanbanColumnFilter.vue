@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Task } from '@/stores/task';
+import type { Task } from '@/types/task';
 import { CloseBold } from '@element-plus/icons-vue';
 import { ref } from 'vue';
 

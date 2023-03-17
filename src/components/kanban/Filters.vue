@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useTaskStore } from '@/stores/task';
-import { useOperationStore, type Operation } from '@/stores/operation';
+import { useOperationStore } from '@/stores/operation';
 import { useSitesStore } from "@/stores/sites";
-import type { FilterPayload } from '@/stores/interface';
+import type { FilterPayload } from '@/types/index';
 import { Close } from '@element-plus/icons-vue';
 import { ref, computed, watch, nextTick, onMounted, onBeforeMount } from 'vue';
 import { useUserStore } from '@/stores/user';
@@ -20,7 +20,7 @@ const userStore = useUserStore()
 const PRIORITY_OPTIONS = computed(() => taskStore.getPriorityOptions)
 const SITES_OPTIONS = computed(() => sitesStore.getList)
 const operationsById = computed(()=> operationStore.getOperationsById)
-const DIRECTIONS_OPTIONS = computed(() => operationsById?.value[4]?.params.directionArr || [])
+const DIRECTIONS_OPTIONS = computed(() => operationsById?.value[4]?.params['directionArr'] || [])
 const filterVersion = computed(()=> taskStore.getFilterVersion)
 const user = computed(()=> userStore.getUser)
 
@@ -74,10 +74,10 @@ watch(
 //METHODS
 const setPersonalFilters = () => {
     let data = {...filterPayload.value} as Partial<FilterPayload>
-    delete data!.filter!.search1
-    delete data!.filter!.search2
-    delete data!.filter!.dts
-    delete data!.filter!.dtf
+    delete data!.filter!['search1']
+    delete data!.filter!['search2']
+    delete data!.filter!['dts']
+    delete data!.filter!['dtf']
     try {
         localStorage.setItem(`tasks_filter_settings_${filterVersion.value}_${user?.value?.id}`, JSON.stringify(data))
     } catch(err){
@@ -209,7 +209,7 @@ defineExpose({
                         </el-option>
                     </el-select>
 
-                    <el-select 
+                    <!-- <el-select 
                     v-model="smi_direction" 
                     multiple 
                     collapse-tags
@@ -225,7 +225,7 @@ defineExpose({
                         >
                         <span>{{item.name}}</span>
                         </el-option>
-                    </el-select>
+                    </el-select> -->
                     
                     <!-- Select only for smi center???? -->
                     <el-select 

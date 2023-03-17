@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Plus } from "@element-plus/icons-vue";
-import TaskCard from "@/components/kanban/TaskCard.vue";
-import { useTaskStore, type Task } from "@/stores/task";
-import { useInterfaceStore, type FilterPayload, } from "@/stores/interface";
+import { useTaskStore } from "@/stores/task";
+import type { Task } from "@/types/task";
+import type { FilterPayload } from "@/types/index";
+import { useInterfaceStore } from "@/stores/interface";
 import DetailsWindow from "../../components/kanban/DetailsWindow.vue";
 import { ref, computed, onBeforeUnmount, nextTick } from "vue";
 import Filters from "../../components/kanban/Filters.vue";
@@ -47,7 +47,7 @@ let filter = ref<FilterPayload>(
 
 //METHODS
 const clickOutsideCards = () => {
-    $filters?.value?.closeFilters()
+    $filters?.value?.['closeFilters']()
     toggleDetailsWindow(false)
     setActiveTask(null)
     toggleCreatingTaskProcess(false)
@@ -113,12 +113,12 @@ const dragstartHandler= (ev: DragEvent, task: Task) => {
     transferTask.value = task
     ev.dataTransfer!.effectAllowed = "link";
 }
-const dragoverHandler = (ev: DragEvent, areaId: number) => {
+const dragoverHandler = (ev: DragEvent, areaId: number):void => {
     stopAll(ev)
     ev.dataTransfer!.effectAllowed = "link"
     const area = areaParams.get(areaId)
-    if(!!transferTask.value && transferTask!.value?.status === area!.status)return false
-    if(transferTask!.value?.status === 1 && area!.status === 2)return false
+    if(!!transferTask.value && transferTask!.value?.status === area!.status)return;
+    if(transferTask!.value?.status === 1 && area!.status === 2)return;
     area?.areaRef.value.classList.add('dragOver')
 }
 const dragleaveHandler = (ev: DragEvent) => {

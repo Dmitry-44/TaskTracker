@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { useOperationStore, type Operation}  from '@/stores/operation';
+import { useOperationStore }  from '@/stores/operation';
+import type { Operation}  from '@/types/operation';
 import { computed, onBeforeMount, ref } from 'vue';
 
 

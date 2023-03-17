@@ -1,12 +1,13 @@
 <script lang="ts" setup>
-import { type Pipe, usePipeStore} from "@/stores/pipe";
-import type { FilterPayload } from "@/stores/interface";
+import { usePipeStore} from "@/stores/pipe";
+import type { Pipe } from "@/types/pipe";
+import type { FilterPayload } from "@/types/index";
 import { ref, computed, onBeforeMount } from "vue";
 import { useRouter } from "vue-router";
 import PipeCard from "../../components/kanban/PipeCard.vue";
 
 const router = useRouter()
-const paramId = router.currentRoute.value.params.id
+const paramId = router.currentRoute.value.params['id']
 const pipeStore = usePipeStore()
 
 let pipe = computed<Pipe|null>(()=>pipeStore.getSinglePipe)

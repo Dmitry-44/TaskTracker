@@ -1,12 +1,13 @@
 <script lang="ts" setup>
-import { useOperationStore, type Operation } from "@/stores/operation";
-import type { FilterPayload } from "@/stores/interface";
+import { useOperationStore } from "@/stores/operation";
+import type{ Operation } from "@/types/operation";
+import type { FilterPayload } from "@/types/index";
 import { computed, onBeforeMount, ref } from "vue";
 import { useRouter } from "vue-router";
 import OperationCard from "../../components/kanban/OperationCard.vue";
 
 const router = useRouter()
-const paramId = router.currentRoute.value.params.id
+const paramId = router.currentRoute.value.params['id']
 const operationStore = useOperationStore()
 
 let operation = computed<Operation|null>(()=>operationStore.getSingleOperation)

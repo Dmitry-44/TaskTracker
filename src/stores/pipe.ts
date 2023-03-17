@@ -2,23 +2,14 @@ import { errRequestHandler } from '../plugins/errorResponser';
 import { envConfig } from '../plugins/envConfig';
 import { axiosClient } from '../plugins/axios';
 import { defineStore } from 'pinia';
-import type { FilterPayload, ResultWithMessage } from "@/stores/interface";
-import type { Operation } from './operation';
+import type { Pipe } from "@/types/pipe";
+import type { FilterPayload, ResultWithMessage } from "@/types/index";
 
-
-interface Pipe {
-    id: number
-    name: string
-    operation_entities: Operation[]
-    value: number[]
-}
 
 type State = {
     pipes: Pipe[];
     singlePipe: Pipe | null
 }
-
-export type { Pipe }
 
 export const usePipeStore = defineStore({
     id: "pipe",
@@ -47,9 +38,9 @@ export const usePipeStore = defineStore({
                     respdata.message === "ok"
                 ) {
                     if(payload?.filter['id']) {
-                        this.setSinglePipe(respdata.result)
+                        this.setSinglePipe(respdata.result as Pipe[])
                     } else {
-                        this.setPipes(respdata.result);
+                        this.setPipes(respdata.result as Pipe[]);
                     }
                     return true;
                 } else {

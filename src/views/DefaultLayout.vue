@@ -3,7 +3,7 @@ import { ref, computed, onBeforeMount } from "vue";
 import { RouterView, useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import Menu from "@/components/MenuAside.vue";
-import { useOperationStore, type Operation } from "@/stores/operation";
+import { useOperationStore } from "@/stores/operation";
 import { useSitesStore } from "@/stores/sites";
 import { usePipeStore } from "@/stores/pipe";
 
@@ -19,7 +19,7 @@ let loading = ref(false)
 onBeforeMount(() => {
   loading.value=true
   const query = Object.assign({}, route.query);
-  delete query.auth;
+  delete query['auth'];
   router.replace({ query });
 
   const operations = operationsStore.fetchOperations()
