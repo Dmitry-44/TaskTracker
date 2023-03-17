@@ -33,6 +33,7 @@ const activeOption = ref<typeof FILTER_OPTIONS[0]|null>(null);
 
 //METHODS
 const setActive = (i: number) => {
+	if(i<0 || i>FILTER_OPTIONS.length-1)return;
 	activeOption.value = FILTER_OPTIONS[i]
 	emit("changeSort", FILTER_OPTIONS[i].filter)
 }
