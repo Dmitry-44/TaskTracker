@@ -3,7 +3,7 @@
 interface Event  {
     id: number
     task_id?: number
-    operation_id: number
+    operation_id?: number
     created: number
     modified: number | null
     finished?: number | null

@@ -18,7 +18,7 @@ const props = defineProps({
 
 const taskStore = useTaskStore()
 const eventStatusOptions = taskStore.getEventStatusOptions
-const statusColor = eventStatusOptions.filter(ev=>props.event?.status===ev.id)[0].color || ''
+const statusColor = eventStatusOptions.filter(ev=>props.event?.status===ev.id)[0]?.color || ''
 
 
 </script>

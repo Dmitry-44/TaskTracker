@@ -20,33 +20,33 @@ import RuLocale from "element-plus/es/locale/lang/ru";
 
 const app = createApp(App);
 
-Sentry.init({
-  app,
-  dsn: "https://1c6807c356754015927bb8fcf4c3f659@sentry.ttrace.ru/14",
-  environment: process.env['NODE_ENV'],
-  release: `tasktracker${
-    process.env['NODE_ENV'] === "production" ? "" : "-local"
-  }@${version}`,
-  integrations: [
-    new BrowserTracing({
-      routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-      tracingOrigins: [
-        "vlad.dev.lan",
-        "localhost",
-        /^\//,
-        "smiapi.dev.lan",
-        "api-post.ttrace.ru",
-      ],
-      shouldCreateSpanForRequest: (url) => {
-        return (
-          url.indexOf(".dev.lan") !== -1 || url.indexOf(".ttrace.ru") !== -1
-        );
-      },
-    }),
-  ],
-  trackComponents: true,
-  tracesSampleRate: 1.0,
-});
+// Sentry.init({
+//   app,
+//   dsn: "https://1c6807c356754015927bb8fcf4c3f659@sentry.ttrace.ru/14",
+//   environment: process.env['NODE_ENV'],
+//   release: `tasktracker${
+//     process.env['NODE_ENV'] === "production" ? "" : "-local"
+//   }@${version}`,
+//   integrations: [
+//     new BrowserTracing({
+//       routingInstrumentation: Sentry.vueRouterInstrumentation(router),
+//       tracingOrigins: [
+//         "vlad.dev.lan",
+//         "localhost",
+//         /^\//,
+//         "smiapi.dev.lan",
+//         "api-post.ttrace.ru",
+//       ],
+//       shouldCreateSpanForRequest: (url) => {
+//         return (
+//           url.indexOf(".dev.lan") !== -1 || url.indexOf(".ttrace.ru") !== -1
+//         );
+//       },
+//     }),
+//   ],
+//   trackComponents: true,
+//   tracesSampleRate: 1.0,
+// });
 
 app.directive("tooltip", VTooltip);
 app.use(ElementPlus, {
