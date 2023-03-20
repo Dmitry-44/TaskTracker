@@ -4,6 +4,8 @@ import { axiosClient } from './../plugins/axios';
 import { defineStore } from 'pinia';
 import type { Operation } from "@/types/operation";
 import type { FilterPayload, ResultWithMessage } from "@/types/index";
+import { GetAllOperations, SendOperation } from '@/api/operation';
+import { isSuccessApiResponse, type ApiResponse } from '@/types/api';
 
 
 type OperationsById = {
@@ -30,46 +32,37 @@ export const useOperationStore = defineStore({
           },{} as OperationsById),
     },
     actions: {
-        setOperations(payload: Operation[]):void {
+        setOperations(payload: Operation[]) {
             this.operations=payload
         },
-        setSingleOperation(payload: Operation[]|null):void {
+        setSingleOperation(payload: Operation[]|null) {
             this.singleOperation = payload===null ? null : payload[0]
         },
-        fetchOperations(payload?: FilterPayload): Promise<any> {
-            return axiosClient
-                .post(`${envConfig.API_URL}tasktracker/operations`, payload)
-                .then((resp) => {
-                const respdata: ResultWithMessage = resp.data;
-                if (
-                    Object.prototype.hasOwnProperty.call(respdata, "message") &&
-                    respdata.message === "ok"
-                ) {
-                    if(payload?.filter['id']) {
-                        this.setSingleOperation(respdata.result as Operation[])
+        fetchOperations(payload?: FilterPayload){
+            return GetAllOperations(payload)
+                .then(resp => {
+                    const respdata: ApiResponse = resp.data;
+                    if(isSuccessApiResponse(respdata)) {
+                        if(payload?.filter!['id']) {
+                            this.setSingleOperation(respdata.result as Operation[])
+                        } else {
+                            this.setOperations(respdata.result as Operation[]);
+                        }
+                        return true;
                     } else {
-                        this.setOperations(respdata.result as Operation[]);
+                        return respdata.message || -1;
                     }
-                    return true;
-                } else {
-                    return respdata.message || -1;
-                }
                 })
                 .catch((e) => errRequestHandler(e));
         },
-        sendOperation(payload: Partial<Operation>): Promise<any> {
-            const api = payload?.id ? `${envConfig.API_URL}tasktracker/operation/${payload?.id}` : `${envConfig.API_URL}tasktracker/operation`
-            return axiosClient
-              .put(api, payload)
-              .then((resp) => {
-                const respdata: ResultWithMessage = resp.data
-                if (
-                  Object.prototype.hasOwnProperty.call(respdata, "message") &&
-                  respdata.message === "ok"
-                ) {
-                  return true;
+        sendOperation(payload: Partial<Operation>){
+            return SendOperation(payload)
+              .then(resp => {
+                const respdata: ApiResponse = resp.data;
+                if(isSuccessApiResponse(respdata)) {
+                    return true;
                 } else {
-                  return respdata.message || -1;
+                    return respdata.message || -1;
                 }
               })
               .catch((e) => errRequestHandler(e));

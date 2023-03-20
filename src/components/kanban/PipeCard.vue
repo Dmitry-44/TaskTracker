@@ -9,6 +9,7 @@ import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
 import { usePipeStore } from "@/stores/pipe";
 import type { Pipe } from "@/types/pipe";
+import { pipeService } from "@/services/pipe";
 
 const props = defineProps({
     pipe: {
@@ -27,7 +28,6 @@ const router = useRouter()
 const user = useUserStore().getUser
 const pipe = ref(props.pipe)
 
-const pipeStore = usePipeStore()
 const operationStore = useOperationStore()
 let operations = computed(()=>operationStore.getOperations)
 const oldContent = ref('')
@@ -67,7 +67,7 @@ const sendPipe = () => {
         u_id: user?.id,
         value: pipe?.value?.value,
     }
-    pipeStore.sendPipe(data).then(res=>{
+    pipeService.sendPipe(data).then(res=>{
         if (errVueHandler(res)) {
             ElMessage({
                 message: "Операция выполнена успешно!",
