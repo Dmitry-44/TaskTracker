@@ -83,16 +83,16 @@ const saveCard = () => taskStore.upsertTask(task.value)
                         @blur="titleInputBlurHandle()"
                         >
                     </form>
-                    <span v-else>{{task.title}}</span>
+                    <span class="task-title" v-else>{{task?.title}}</span>
                 </span>
             </div>
             <div class="tags">
-                <div class="wrapper" v-if="task.priority">
+                <div class="wrapper" v-if="task?.priority">
                     <el-tooltip class="item" effect="dark" :content="`Приоритет: ${taskPriority.value}`" placement="top-start">
                         <el-tag :color="taskPriority.color">{{taskPriority.value}}</el-tag>
                     </el-tooltip>
                 </div>
-                <div class="wrapper" v-if="task.status">
+                <div class="wrapper" v-if="task?.status">
                     <el-tooltip class="item" effect="dark" :content="`Статус: ${taskStatus.value}`" placement="top-start">
                         <el-tag :color="taskStatus.color">{{taskStatus.value}}</el-tag>
                     </el-tooltip>
