@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { SuccessFilled, More, EditPen, Pointer } from "@element-plus/icons-vue";
-import { ref, onMounted, computed, nextTick } from 'vue'
-import type { PropType } from 'vue'
+import { ref, onMounted, computed, nextTick } from "vue";
+import type { PropType } from "vue";
 import SelectOptions from "./SelectOptions.vue";
 import { useTaskStore } from "@/stores/task";
 import type { Task } from "@/types/task";
@@ -13,109 +13,134 @@ const props = defineProps({
     require: true,
   },
   active: {
-      type: Boolean,
-      default: () => false
+    type: Boolean,
+    default: () => false,
   },
   emptyCard: {
-      type: Boolean,
-      default: () => false
+    type: Boolean,
+    default: () => false,
   },
 });
 
-const taskStore = useTaskStore()
-const task = ref(props.task)
-const readonlyTask = computed(()=> task.value.status===4)
-const priorityOptions = taskStore.getPriorityOptions
-const statusOptions = taskStore.getStatusOptions
+const taskStore = useTaskStore();
+const task = ref(props.task);
+const readonlyTask = computed(() => task.value.status === 4);
+const priorityOptions = taskStore.getPriorityOptions;
+const statusOptions = taskStore.getStatusOptions;
 
 const selectMore = ref<any | HTMLInputElement>(null);
 
-const taskTitleEditing=ref(false)
-const titleInput=ref<any | HTMLInputElement>(null)
-const changeTitle=()=> {
-    taskTitleEditing.value=true
-    nextTick(() => {
-        titleInput.value.focus();
-        titleInput.value.select();
-    });
-}
+const taskTitleEditing = ref(false);
+const titleInput = ref<any | HTMLInputElement>(null);
+const changeTitle = () => {
+  taskTitleEditing.value = true;
+  nextTick(() => {
+    titleInput.value.focus();
+    titleInput.value.select();
+  });
+};
 
-const taskPriority = computed(() => priorityOptions.filter(v=>v.id===task.value.priority)[0])
-const taskStatus = computed(() => statusOptions.filter(v=>v.id===task.value.status)[0])
-let oldContent = ref<Task|null>(null)
+const taskPriority = computed(
+  () => priorityOptions.filter((v) => v.id === task.value.priority)[0]
+);
+const taskStatus = computed(
+  () => statusOptions.filter((v) => v.id === task.value.status)[0]
+);
+const oldContent = ref<Task | null>(null);
 
-const titleInputBlurHandle = async() => {
-    await saveCard().then(res => {
-        if(res != true) {
-            task.value.title=oldContent?.value!.title
-        }
-    })
-    taskTitleEditing.value=false
-}
+const titleInputBlurHandle = async () => {
+  await saveCard().then((res) => {
+    if (res != true) {
+      task.value.title = oldContent?.value!.title;
+    }
+  });
+  taskTitleEditing.value = false;
+};
 
-const deleteTask=()=> {
-    console.log('delete task')
-}
+const deleteTask = () => {
+  console.log("delete task");
+};
 
-onMounted(()=> {
-    if(props.emptyCard)changeTitle()
-    oldContent.value={...task.value}
-})
+onMounted(() => {
+  if (props.emptyCard) changeTitle();
+  oldContent.value = { ...task.value };
+});
 
 //ACTIONS
-const saveCard = () => taskStore.upsertTask(task.value)
-
-
+const saveCard = () => taskStore.upsertTask(task.value);
 </script>
 <template>
-    <div :class="['card', active?'active':'', readonlyTask?'done':'']">
-        <div class="content">
-            <div class="title-indicator">
-                <span class="title">
-                    <form v-if="taskTitleEditing">
-                        <input 
-                        v-model="task.title"
-                        class="title-input" 
-                        type="text"
-                        placeholder="Напишите название задачи"
-                        ref="titleInput"
-                        @keydown.enter="taskTitleEditing=false"
-                        @blur="titleInputBlurHandle()"
-                        >
-                    </form>
-                    <span v-else>{{task.title}}</span>
-                </span>
-            </div>
-            <div class="tags">
-                <div class="wrapper" v-if="task.priority">
-                    <el-tooltip class="item" effect="dark" :content="`Приоритет: ${taskPriority.value}`" placement="top-start">
-                        <el-tag :color="taskPriority.color">{{taskPriority.value}}</el-tag>
-                    </el-tooltip>
-                </div>
-                <div class="wrapper" v-if="task.status">
-                    <el-tooltip class="item" effect="dark" :content="`Статус: ${taskStatus.value}`" placement="top-start">
-                        <el-tag :color="taskStatus.color">{{taskStatus.value}}</el-tag>
-                    </el-tooltip>
-                </div>
-            </div>
-            <div class="actions">
-                <div class="buttons">
-                    <el-tooltip v-if="!readonlyTask" class="item" effect="dark" content="Взять задачу" placement="top-start">
-                        <el-button :icon="Pointer" @click.stop="$emit('take',task.id)"></el-button>
-                    </el-tooltip>
-                </div>
-            </div>
+  <div :class="['card', active ? 'active' : '', readonlyTask ? 'done' : '']">
+    <div class="content">
+      <div class="title-indicator">
+        <span class="title">
+          <form v-if="taskTitleEditing">
+            <input
+              v-model="task.title"
+              class="title-input"
+              type="text"
+              placeholder="Напишите название задачи"
+              ref="titleInput"
+              @keydown.enter="taskTitleEditing = false"
+              @blur="titleInputBlurHandle()"
+            />
+          </form>
+          <span v-else>{{ task.title }}</span>
+        </span>
+      </div>
+      <div class="tags">
+        <div class="wrapper" v-if="task.priority">
+          <el-tooltip
+            class="item"
+            effect="dark"
+            :content="`Приоритет: ${taskPriority.value}`"
+            placement="top-start"
+          >
+            <el-tag :color="taskPriority.color">{{
+              taskPriority.value
+            }}</el-tag>
+          </el-tooltip>
         </div>
-        <div v-if="!taskTitleEditing" class="menu">
-            <el-button type="info" plain :icon="More" @click.stop="selectMore.toggleMenu()"></el-button>
-            <el-select class="select-more" ref="selectMore">
-                <SelectOptions 
-                :task="task"
-                @titleChanged="changeTitle()"
-                 />
-            </el-select>
+        <div class="wrapper" v-if="task.status">
+          <el-tooltip
+            class="item"
+            effect="dark"
+            :content="`Статус: ${taskStatus.value}`"
+            placement="top-start"
+          >
+            <el-tag :color="taskStatus.color">{{ taskStatus.value }}</el-tag>
+          </el-tooltip>
         </div>
+      </div>
+      <div class="actions">
+        <div class="buttons">
+          <el-tooltip
+            v-if="!readonlyTask"
+            class="item"
+            effect="dark"
+            content="Взять задачу"
+            placement="top-start"
+          >
+            <el-button
+              :icon="Pointer"
+              @click.stop="$emit('take', task.id)"
+            ></el-button>
+          </el-tooltip>
+        </div>
+      </div>
     </div>
+    <div v-if="!taskTitleEditing" class="menu">
+      <el-button
+        type="info"
+        plain
+        :icon="More"
+        @click.stop="selectMore.toggleMenu()"
+      ></el-button>
+      <el-select class="select-more" ref="selectMore">
+        <SelectOptions :task="task" @titleChanged="changeTitle()" />
+      </el-select>
+    </div>
+  </div>
 </template>
 
 <style lang="sass" scoped>
@@ -136,7 +161,7 @@ const saveCard = () => taskStore.upsertTask(task.value)
     &:hover
         border-color: #afabac
     &.done .content
-        opacity: .4 
+        opacity: .4
     &.active
         background: #f1f2fc
         border-color: #406ac4
@@ -220,6 +245,4 @@ const saveCard = () => taskStore.upsertTask(task.value)
         flex-direction: row
         flex-shrink: 1
         justify-content: flex-end
-
-
 </style>

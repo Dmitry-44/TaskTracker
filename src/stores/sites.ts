@@ -7,35 +7,34 @@ import { defineStore } from "pinia";
 import { GetAllSites } from "@/api/site";
 import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
 
-
 interface State {
-    sites: Site[]
+  sites: Site[];
 }
 
 export const useSitesStore = defineStore({
-    id: 'sites',
-    state: (): State => ({
-        sites: []
-    }),
-    getters: {
-        getList: (state) => state.sites
+  id: "sites",
+  state: (): State => ({
+    sites: [],
+  }),
+  getters: {
+    getList: (state) => state.sites,
+  },
+  actions: {
+    setSites(payload: Site[]): void {
+      this.sites = payload;
     },
-    actions: {
-        setSites(payload: Site[]): void  {
-            this.sites = payload
-        },
-        fetchSites() {
-            return GetAllSites()
-				.then(resp => {
-					const respdata: ApiResponse = resp.data;
-					if(isSuccessApiResponse(respdata)) {
-						this.setSites(respdata.result as Site[]);
-						return true;
-					} else {
-						return respdata.message || -1;
-					}
-				})
-              	.catch((e) => errRequestHandler(e));
-        }
-    }
-})
+    fetchSites() {
+      return GetAllSites()
+        .then((resp) => {
+          const respdata: ApiResponse = resp.data;
+          if (isSuccessApiResponse(respdata)) {
+            this.setSites(respdata.result as Site[]);
+            return true;
+          } else {
+            return respdata.message || -1;
+          }
+        })
+        .catch((e) => errRequestHandler(e));
+    },
+  },
+});

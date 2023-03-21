@@ -3,10 +3,9 @@ import { axiosClient } from "@/plugins/axios";
 import { envConfig } from "@/plugins/envConfig";
 import type { User } from "@/types/user";
 
-
 interface State {
   is_auth: boolean;
-  user: User|null;
+  user: User | null;
   globalLoader: boolean;
 }
 

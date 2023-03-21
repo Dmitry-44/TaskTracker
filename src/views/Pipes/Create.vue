@@ -3,5 +3,5 @@ import PipeCard from "../../components/kanban/PipeCard.vue";
 </script>
 
 <template>
-    <PipeCard />
+  <PipeCard />
 </template>

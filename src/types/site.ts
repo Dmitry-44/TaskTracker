@@ -1,5 +1,4 @@
-
 export type Site = {
-    id: number
-    url: string
-}
+  id: number;
+  url: string;
+};
