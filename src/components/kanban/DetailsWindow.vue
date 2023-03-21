@@ -1,35 +1,38 @@
 <script setup lang="ts">
-import { useTaskStore, type Task } from '@/stores/task';
-import { Close, Pointer, Notification, SuccessFilled } from "@element-plus/icons-vue";
+import { useTaskStore } from '@/stores/task';
+import { useInterfaceStore } from '@/stores/interface';
+import { Close, Pointer, Notification } from "@element-plus/icons-vue";
 import { computed } from '@vue/reactivity';
 import { nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import OperationCollapseItem from './OperationCollapseItem.vue';
+import { usePipeStore } from '@/stores/pipe';
+import { ElMessage } from 'element-plus';
+import { errVueHandler } from '@/plugins/errorResponser';
 
-const store = useTaskStore()
+const taskStore = useTaskStore()
+const interfaceStore = useInterfaceStore()
+const pipeStore = usePipeStore()
 const router = useRouter()
 //GETTERS
-const detailsWindow = computed(()=>store.getDetailsWindow) 
-const task = computed(()=>store.getActiveTask) 
-const readonlyTask = computed(()=> task.value.status===4)
-const creatingTask = computed(()=>store.getCreatingTask)
-const PIPES = computed(()=>store.getPipes)
-const OPERATIONS = computed(()=>store.getOperations)
-const PRIORITY_OPTIONS = store.getPriorityOptions
-const STATUS_OPTIONS = store.getStatusOptions
+const detailWindowIsOpen = computed(()=>interfaceStore.getDetailWindowIsOpen) 
+const task = computed(()=>taskStore.getActiveTask) 
+const isReadonlyTask = computed(()=> task.value.status===4)
+const isCreatingTaskProcess = computed(()=>interfaceStore.isCreatingTaskProcess)
+const PIPES = computed(()=>pipeStore.getPipes)
+const PRIORITY_OPTIONS = taskStore.getPriorityOptions
+const STATUS_OPTIONS = taskStore.getStatusOptions
 
 //ACTIONS
-const toggleDetailsWindow = store.toggleDetailsWindow
-const setActiveTask = store.setActiveTask
-const setCreatingTask = store.setCreatingTask
+const toggleDetailsWindow = interfaceStore.toggleDetailsWindow
+const setActiveTask = taskStore.setActiveTask
+const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess
 
 const openInNewTab = () => {
     let routeData = router.resolve({path: `/tasks/${task.value.id}`})
     window.open(routeData.href, '_blank');
 }
-const fetchPipesList = () => store.fetchPipesList()
 
-// const windowTitle = computed(()=>creatingTask.value ? 'Создание задачи' : 'Редактирование задачи')
 const LOADING = ref(false)
 let oldContent = ref('')
 const wasChanged = computed(()=> {
@@ -39,38 +42,61 @@ const wasChanged = computed(()=> {
 const titleInput = ref<HTMLInputElement|any>(null)
 let taskPipe = computed(()=> PIPES.value.find(pipe=>pipe?.id===task.value?.pipe_id) || null)
 
+const save = () => {
+    LOADING.value=true
+    const msg = ElMessage({
+        message: "Сохраняю задачу..",
+        type: "success",
+        center: true,
+        duration: 1000,
+    });
+    taskStore.upsertTask(task.value)
+    .then(res=>{
+        console.log('res', res)
+        if (errVueHandler(res)) {
+            ElMessage({
+                message: "Операция выполнена успешно!",
+                type: "success",
+                center: true,
+                duration: 1500,
+                showClose: true,
+            });
+        }
+    })
+    .finally(()=>{
+        LOADING.value=false
+        msg.close()
+    })
+    
+}
 
-//HOOKS
-onBeforeMount(() => {
-    fetchPipesList()
-    store.fetchOperationsList()
-});
-watch(creatingTask, async (newVal, oldVal) => {
-    if(newVal){
+watch(task, (newVal, oldVal)=>{
+    if(oldVal.id != newVal.id) {
         oldContent.value=JSON.stringify({...task.value})
-        setTimeout(() => {
-            titleInput.value.focus()
-        }, 500);
+        if(isCreatingTaskProcess.value){
+            nextTick(()=>{
+                titleInput.value.focus()
+            })
+        }
     }
 })
 
-
 </script>
 <template>
-    <div :class="['details', detailsWindow.isOpened?'active':'']" @click.stop>
+    <div :class="['details', detailWindowIsOpen?'active':'']" @click.stop>
         <div class="header">
             <div class="actions">
-                <template v-if="!creatingTask">
-                    <el-tooltip v-if="!readonlyTask" class="item" effect="dark" content="Взять задачу" placement="top-start">
+                <el-button :loading="LOADING" :disabled="!wasChanged" type="success" @click="save()">Сохранить</el-button>
+                <template v-if="!isCreatingTaskProcess">
+                    <el-tooltip v-if="!isReadonlyTask" class="item" effect="dark" content="Взять задачу" placement="top-start">
                         <el-button :icon="Pointer"></el-button>
                     </el-tooltip>
                     <el-tooltip class="item" effect="dark" content="Открыть в новой вкладке" placement="top-start">
                         <el-button :icon="Notification" @click.stop="openInNewTab()"></el-button>
                     </el-tooltip>
                 </template>
-                <el-button v-else :loading="LOADING" :disabled="!wasChanged" type="success">Сохранить</el-button>
                 <el-tooltip class="item" effect="dark" content="Закрыть" placement="top-start">
-                    <el-button class="close-btn" :icon="Close" @click.stop="toggleDetailsWindow(false),setActiveTask(null),setCreatingTask(false)"></el-button>
+                    <el-button class="close-btn" :icon="Close" @click.stop="toggleDetailsWindow(false),setActiveTask(null),toggleCreatingTaskProcess(false)"></el-button>
                 </el-tooltip>
             </div>
         </div>
@@ -78,7 +104,7 @@ watch(creatingTask, async (newVal, oldVal) => {
             <div class="title_block">
                 <input 
                 v-model="task.title"
-                :disabled="readonlyTask"
+                :disabled="isReadonlyTask"
                 class="title-input" 
                 placeholder="Ввести название задачи"
                 ref="titleInput"
@@ -86,13 +112,13 @@ watch(creatingTask, async (newVal, oldVal) => {
             </div>
             <div class="content">
                 <div class="row">
-                    <div class="left">Задача</div>
+                    <div class="left">Пайплайн</div>
                     <div class="right">
                         <el-select
                         v-model="task.pipe_id"
-                        :disabled="readonlyTask || task?.status!>2"
+                        :disabled="isReadonlyTask || task?.status!>2"
                         clearable 
-                        placeholder="Задача"
+                        placeholder="Пайплайн"
                         >
                             <el-option
                             v-for="item in PIPES"
@@ -108,7 +134,7 @@ watch(creatingTask, async (newVal, oldVal) => {
                 <div class="row">
                     <div class="left">Приоритет</div>
                     <div class="right">
-                        <el-select v-model="task.priority" :disabled="readonlyTask" clearable placeholder="Приоритет">
+                        <el-select v-model="task.priority" :disabled="isReadonlyTask" clearable placeholder="Приоритет">
                             <el-option
                             v-for="item in PRIORITY_OPTIONS"
                             :key="item.value"
@@ -120,10 +146,10 @@ watch(creatingTask, async (newVal, oldVal) => {
                         </el-select>
                     </div>
                 </div>
-                <div class="row" v-if="!creatingTask">
+                <div class="row" v-if="!isCreatingTaskProcess">
                     <div class="left">Статус</div>
                     <div class="right">
-                        <el-select v-model="task.status" :disabled="readonlyTask" clearable placeholder="Статус" style="box-shadow:none">
+                        <el-select v-model="task.status" :disabled="isReadonlyTask" clearable placeholder="Статус" style="box-shadow:none">
                             <el-option
                             v-for="item in STATUS_OPTIONS"
                             :key="item.value"
@@ -140,7 +166,7 @@ watch(creatingTask, async (newVal, oldVal) => {
                     <div class="right text">
                         <el-input
                             v-model="task.text"
-                            :disabled="readonlyTask"
+                            :disabled="isReadonlyTask"
                             clearable
                             :autosize="{ minRows: 2, maxRows: 4 }"
                             type="textarea"
@@ -149,10 +175,10 @@ watch(creatingTask, async (newVal, oldVal) => {
                     </div>
                 </div>
                 <div v-if="task.pipe_id">
-                    <span class="left mt-2">Этапы</span>
+                    <span class="left mt-2">Операции</span>
                     <el-collapse>
                         <template v-for="operation in taskPipe?.operation_entities" :key="`${task.id}-${operation?.id}`">
-                            <OperationCollapseItem :operation="operation" :event="task?.event_entities.find(event=>event?.operation_id===operation?.id) || null" />
+                            <OperationCollapseItem :operation="operation" :event="task?.event_entities!.find(event=>event?.operation_id===operation?.id) || null" />
                         </template>
                     </el-collapse>
                 </div>
@@ -165,20 +191,20 @@ watch(creatingTask, async (newVal, oldVal) => {
 .details
     box-shadow: 0 0 0 1px #edeae9, 0 5px 20px 0 rgba(109, 110, 111, 0.08)
     background-color: #fff
-    // border-top: 1px solid #edeae9
     display: flex
     flex-direction: column
     right: 0
     position: fixed
     top: 60px
     bottom: 0
-    width: 0
     z-index: 600
     transition: all .8s cubic-bezier(0.23, 1, 0.32, 1)
+    width: min(700px, 60%)
+    transform: translateX(1000px)
     visibility: hidden
     &.active
         width: min(700px, 60%)
-        // transform: translateX(-100px)
+        transform: translateX(0px)
         visibility: visible
 .details .header
     height: 50px

@@ -4,7 +4,7 @@ https://pinia.vuejs.org/cookbook/migration-vuex.html#usage-inside-components
 # Дока дизайнера
 https://element-plus.org/en-US/component/icon.html#icon-collection
 
-# photobank
+# tasktracker
 
 This template should help get you started developing with Vue 3 in Vite.
 

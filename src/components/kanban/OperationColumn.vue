@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Event, Operation } from '@/stores/task';
+import type { Event } from '@/types/event';
+import type { Operation } from '@/types/operation';
 import type { PropType } from 'vue';
 
 
@@ -9,7 +10,7 @@ const props = defineProps({
         default:()=>null
     },
     event: {
-        type: Object as PropType<Event>,
+        type: Object as PropType<Event|undefined>,
         default:()=>null
     }
 })

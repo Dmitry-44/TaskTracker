@@ -3,23 +3,37 @@ import { ref, computed, onBeforeMount } from "vue";
 import { RouterView, useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import Menu from "@/components/MenuAside.vue";
-import Io from "@/plugins/io";
+import { useOperationStore } from "@/stores/operation";
+import { useSitesStore } from "@/stores/sites";
+import { usePipeStore } from "@/stores/pipe";
+import { pipeService } from "@/services/pipe";
+
 const isCollapse = ref(true);
 const route = useRoute();
 const router = useRouter();
 const UserStore = useUserStore();
 const userInfo = computed(() => UserStore.getUser);
 const logout = () => UserStore.logout();
-onBeforeMount(() => {
-  const query = Object.assign({}, route.query);
-  delete query.auth;
-  router.replace({ query });
-});
+const operationsStore = useOperationStore()
 const loader = computed(() => UserStore.getLoader);
+let loading = ref(false)
+onBeforeMount(async() => {
+  loading.value=true
+  const query = Object.assign({}, route.query);
+  delete query['auth'];
+  router.replace({ query });
+
+  const operations = operationsStore.fetchOperations()
+  const pipes = await pipeService.fetchPipes()
+  const sites = useSitesStore().fetchSites()
+  Promise.allSettled([operations, pipes, sites]).then(() => loading.value=false)
+});
+
+
 </script>
 
 <template>
-  <div class="common-layout" v-loading="loader">
+  <div class="common-layout">
     <el-container>
       <el-header class="navbar">
         <el-container class="toolbar first">
@@ -37,7 +51,6 @@ const loader = computed(() => UserStore.getLoader);
                 <Expand />
               </el-icon>
             </el-button>
-            <el-image src="/favicon.png" class="ml-2 logo-image" />
             <span class="logo-text">Таск-трекер</span>
           </div>
           <div class="hidden-md-and-up menu-block-mobile">
@@ -67,7 +80,13 @@ const loader = computed(() => UserStore.getLoader);
           <Menu :is-collapse="isCollapse" />
         </el-aside>
         <el-container>
-          <el-main class="content">
+          <div
+            class="loader_block"
+            v-if="loading"
+            v-loading="loading" 
+            >
+          </div>
+          <el-main v-else class="content" >
             <RouterView />
           </el-main>
         </el-container>

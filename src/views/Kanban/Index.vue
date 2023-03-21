@@ -1,30 +1,33 @@
 <script setup lang="ts">
-import { Plus } from "@element-plus/icons-vue";
-import TaskCard from "@/components/kanban/TaskCard.vue";
-import { useTaskStore, type FilterPayload, type Task } from "@/stores/task";
+import { useTaskStore } from "@/stores/task";
+import type { Task } from "@/types/task";
+import type { FilterPayload } from "@/types/index";
+import { useInterfaceStore } from "@/stores/interface";
 import DetailsWindow from "../../components/kanban/DetailsWindow.vue";
-import { ref, computed, nextTick, onBeforeMount, getCurrentInstance, watch } from "vue";
+import { ref, computed, onBeforeUnmount, nextTick } from "vue";
 import Filters from "../../components/kanban/Filters.vue";
+import KanbanColumn from "@/components/kanban/KanbanColumn.vue";
+import { ElMessage } from "element-plus";
 
-const store = useTaskStore()
-const $filters = ref(null)
+const taskStore = useTaskStore()
+const interfaceStore = useInterfaceStore()
+const $filters = ref<typeof Filters|null>(null)
+const abortController = new AbortController();
+const abortSignal = abortController.signal
+
 //GETTERS
-let tasks = computed(()=>store.getList)
-let activeTask = computed(()=>store.getActiveTask) 
+let tasks = computed(()=>taskStore.getList)
+let activeTask = computed(()=>taskStore.getActiveTask) 
 
-let tasksToTake = computed(()=>tasks.value.filter(task=>task.status!<=2).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
-let tasksInProcess = computed(()=>tasks.value.filter(task=>task.status===3).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
-let tasksFinished = computed(()=>tasks.value.filter(task=>task.status===4).sort((taskA,taskB)=>taskA.priority!-taskB.priority!))
+let tasksToTake = computed(()=>tasks.value.filter(task=>task.status!<=2))
+let tasksInProcess = computed(()=>tasks.value.filter(task=>task.status===3))
+let tasksFinished = computed(()=>tasks.value.filter(task=>task.status===4))
 
 //ACTIONS
-const toggleDetailsWindow = store.toggleDetailsWindow
-const setActiveTask = store.setActiveTask
-const setCreatingTask = store.setCreatingTask
-const fetchTasksList = async(payload: FilterPayload) => {return store.fetchTasksList(payload)}
-const takeTask = async(taskId: Partial<Task>) => { 
-    console.log('taskId', taskId)
-    return store.takeTask({id:+taskId})
-}
+const setActiveTask = taskStore.setActiveTask
+const toggleDetailsWindow = interfaceStore.toggleDetailsWindow
+const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess
+const fetchTasksList = async(payload: FilterPayload) => taskStore.fetchTasksList(payload, abortSignal)
 
 const LOADING = ref(false)
 
@@ -41,37 +44,57 @@ let filter = ref<FilterPayload>(
         select: []
     }
 )
-//HOOKS
-onBeforeMount(async()=> {
-    store.fetchOperationsList()
-    LOADING.value=true
-    store.fetchPipesList()
-    LOADING.value=false
-})
 
 //METHODS
-const addTask = () => {
-    setActiveTask(null)
-    setCreatingTask(true)
-    toggleDetailsWindow(true)
-}
-const taskClickHandler = (task: Task) => {
-    setCreatingTask(false)
-    setActiveTask(task)
-    toggleDetailsWindow(true)
-}
 const clickOutsideCards = () => {
-    $filters?.value?.closeFilters()
+    $filters?.value?.['closeFilters']()
     toggleDetailsWindow(false)
     setActiveTask(null)
-    setCreatingTask(false)
+    toggleCreatingTaskProcess(false)
 }
 const filterUpdate = async(payload: FilterPayload) => {
     LOADING.value=true
-    console.log('payload', payload)
     await fetchTasksList(payload)
     LOADING.value=false
 }
+const updateTask = async(task: Task) => {
+    LOADING.value=true
+    const msg = ElMessage({
+        message: "Сохраняю задачу..",
+        type: "success",
+        center: true,
+        duration: 1000,
+    });
+    return taskStore.upsertTask(task)
+    .then(res=>{
+        if (res) {
+            ElMessage({
+                message: "Операция выполнена успешно!",
+                type: "success",
+                center: true,
+                duration: 1500,
+                showClose: true,
+            });
+            return true
+        } else {
+            ElMessage({
+                message: "Ошибка при выполнении операции!",
+                type: "error",
+                center: true,
+                duration: 1500,
+                showClose: true,
+            });
+            return false
+        }
+    })
+    .finally(()=>{
+        LOADING.value=false
+        msg.close()
+    })
+}
+
+//HOOKS
+onBeforeUnmount(() => abortController.abort());
 
 
 //DRAG AND DROP
@@ -90,12 +113,12 @@ const dragstartHandler= (ev: DragEvent, task: Task) => {
     transferTask.value = task
     ev.dataTransfer!.effectAllowed = "link";
 }
-const dragoverHandler = (ev: DragEvent, areaId: number) => {
+const dragoverHandler = (ev: DragEvent, areaId: number):void => {
     stopAll(ev)
     ev.dataTransfer!.effectAllowed = "link"
     const area = areaParams.get(areaId)
-    if(!!transferTask.value && transferTask!.value?.status === area!.status)return false
-    if(transferTask!.value?.status === 1 && area!.status === 2)return false
+    if(!!transferTask.value && transferTask!.value?.status === area!.status)return;
+    if(transferTask!.value?.status === 1 && area!.status === 2)return;
     area?.areaRef.value.classList.add('dragOver')
 }
 const dragleaveHandler = (ev: DragEvent) => {
@@ -103,12 +126,22 @@ const dragleaveHandler = (ev: DragEvent) => {
     tasksToTakeArea.value.classList.remove('dragOver')
     taskInProcessArea.value.classList.remove('dragOver')
 }
-const dropHandler = (ev: DragEvent, area: number) => {
+const dropHandler = async(ev: DragEvent, area: number) => {
     ev.dataTransfer!.dropEffect = "link";
-    tasks.value.map(task=>{if(task.id===transferTask?.value?.id) {task.status=areaParams.get(area)?.status || 2}})
+    const updatedTask = tasks.value.find(task=>task.id===transferTask?.value?.id)
+    if(!!updatedTask){
+        if(updatedTask.status != areaParams.get(area)?.status) {
+            updateTask({...updatedTask, status:areaParams.get(area)?.status }).then(res=>{
+                if(res){
+                    updatedTask.status=areaParams.get(area)?.status    
+                }
+            })
+        }
+    }
     tasksToTakeArea.value.classList.remove('dragOver')
     taskInProcessArea.value.classList.remove('dragOver')
 }
+
 
 </script>
 <template>
@@ -123,99 +156,38 @@ const dropHandler = (ev: DragEvent, area: number) => {
         </div>
         <div class="kanban-background" @click.stop="clickOutsideCards()">
             <DetailsWindow />
-            <div class="kanban-column" 
+            <div class="draggable-area"
             @dragover="dragoverHandler($event, 1)" 
             @dragleave="dragleaveHandler($event)" 
             @drop="dropHandler($event,1)"
             ref="tasksToTakeArea" 
             >
-                <div class="title">
-                    <h3>К исполнению</h3>
-                    <el-tooltip class="item" effect="dark" content="Добавить задачу" placement="top-start">
-                        <el-button size="small" :icon="Plus" @click.stop="addTask()" />
-                    </el-tooltip>
-                </div>
-                <div class="content">
-                    <el-skeleton
-                        style="width: 300px"
-                        :loading="LOADING"
-                        animated
-                        :throttle="500"
-                        >
-                        <template #template>
-                            <el-skeleton-item variant="rect" style="width: 300px; height: calc(100vh - 210px)" />
-                        </template>
-                        <template v-for="task in tasksToTake" :key="task.id">
-                            <TaskCard 
-                            draggable="true"
-                            :task="task" 
-                            :active="task.id===activeTask?.id?true:false" 
-                            @click.stop="taskClickHandler(task)"
-                            @dragstart="dragstartHandler($event, task)" 
-                            @take="takeTask($event)"
-                            />
-                        </template>
-                        <el-button @click.stop="addTask()" class="column-button-footer" :icon="Plus">
-                            Добавить задачу
-                        </el-button>
-                    </el-skeleton>
-                </div>
+                <KanbanColumn
+                :tasks="tasksToTake" 
+                title="К исполнению" 
+                :add-New-Task="true" 
+                :is-Draggable="true" 
+                :loading="LOADING"
+                key="1"
+                @taskDragStart="dragstartHandler"
+                />
             </div>
-            <div class="kanban-column" 
+            <div class="draggable-area"
             @dragover="dragoverHandler($event,2)" 
             @dragleave="dragleaveHandler($event)" 
             @drop="dropHandler($event,2)"
-            ref="taskInProcessArea" 
+            ref="taskInProcessArea"
             >
-                <div class="title">
-                    <h3>В работе</h3>
-                </div>
-                <div class="content">
-                    <el-skeleton
-                    style="width: 300px"
-                    :loading="LOADING"
-                    animated
-                    :throttle="500"
-                    >
-                    <template #template>
-                        <el-skeleton-item variant="rect" style="width: 300px; height: calc(100vh - 210px)" />
-                    </template>
-                    <template v-for="task in tasksInProcess" :key="task.id">
-                        <TaskCard 
-                        draggable="true"
-                        :task="task" 
-                        :active="task.id===activeTask?.id?true:false"
-                        @click.stop="taskClickHandler(task)"
-                        @dragstart="dragstartHandler($event, task)" 
-                        />
-                    </template>
-                    </el-skeleton>
-                </div>
+                <KanbanColumn 
+                :tasks="tasksInProcess" 
+                title="В работе" 
+                :is-Draggable="true" 
+                :loading="LOADING"
+                key="2"
+                @taskDragStart="dragstartHandler"
+                />
             </div>
-            <div class="kanban-column">
-                <div class="title">
-                    <h3>Архив</h3>
-                </div>
-                <div class="content">
-                    <el-skeleton
-                    style="width: 300px"
-                    :loading="LOADING"
-                    animated
-                    :throttle="500"
-                    >
-                    <template #template>
-                        <el-skeleton-item variant="rect" style="width: 300px; height: calc(100vh - 210px)" />
-                    </template>
-                    <template v-for="task in tasksFinished" :key="task.id">
-                        <TaskCard 
-                        :task="task" 
-                        :active="task.id===activeTask?.id?true:false"
-                        @click.stop="taskClickHandler(task)"
-                        />
-                    </template>
-                    </el-skeleton>
-                </div>
-            </div>
+            <KanbanColumn :tasks="tasksFinished" title="Архив" :loading="LOADING" key="3" />
         </div>
     </div>
 </template>
@@ -226,9 +198,9 @@ const dropHandler = (ev: DragEvent, area: number) => {
     display: flex
     flex-direction: column
     height: 100%
+
 .kanban-background
     background:#f9f8f8
-    width: 100%
     height: calc(100% - 70px)
     padding: 15px 50px 0px 50px
     display: flex
@@ -246,49 +218,17 @@ const dropHandler = (ev: DragEvent, area: number) => {
     border-bottom: 1px solid #edeae9
 .filters-wrapper
     display: flex
-    margin-left: auto
-.kanban-column
-    display: flex
-    flex-direction: column
-    border-radius: 6px
-    position: relative
-    flex: 0 0 304px
-    width: 310px
-    max-height: calc(100% - 10px)
-    max-width: 304px
-    padding: 0 12px
-    border: 2px solid #f9f8f8
-    transition: box-shadow, border-color 250ms
-    &:hover
-        box-shadow: 0 0 0 1px #edeae9
-    .title 
-        align-items: center
-        border-radius: 6px
-        // cursor: pointer;
-        display: flex
-        position: relative
-        h3
-            font-size: 16px
-            line-height: 20px
-            // font-weight: 500
-            overflow: hidden
-            text-overflow: ellipsis
-            white-space: nowrap
-            margin-right: auto
-            display: inline-block
-            position: relative
-    .content
-        max-height: 100%
-        overflow-y: auto
-        overflow-x: hidden
-        padding: 0px 4px
-.kanban-column .column-button-footer
-    background-color: inherit
-    margin: 0 auto
-    display: flex
-    border: none
+    margin-right: auto
 
-.kanban-column.dragOver
-    border-color: #67C23A
+.draggable-area
+    max-height: calc(100% - 10px)
+    border-radius: 6px
+    transition: all .2s 
+.draggable-area.dragOver
+    outline: 2px solid #67C23A
+
+@media screen and (max-width: 1024px)
+    .kanban-background
+        width: fit-content
 
 </style>

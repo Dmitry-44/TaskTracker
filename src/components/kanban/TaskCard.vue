@@ -3,7 +3,8 @@ import { SuccessFilled, More, EditPen, Pointer } from "@element-plus/icons-vue";
 import { ref, onMounted, computed, nextTick } from 'vue'
 import type { PropType } from 'vue'
 import SelectOptions from "./SelectOptions.vue";
-import { useTaskStore, type Task } from "@/stores/task";
+import { useTaskStore } from "@/stores/task";
+import type { Task } from "@/types/task";
 
 const props = defineProps({
   task: {
@@ -21,10 +22,11 @@ const props = defineProps({
   },
 });
 
+const taskStore = useTaskStore()
 const task = ref(props.task)
 const readonlyTask = computed(()=> task.value.status===4)
-const priorityOptions = useTaskStore().getPriorityOptions
-const statusOptions = useTaskStore().getStatusOptions
+const priorityOptions = taskStore.getPriorityOptions
+const statusOptions = taskStore.getStatusOptions
 
 const selectMore = ref<any | HTMLInputElement>(null);
 
@@ -38,23 +40,30 @@ const changeTitle=()=> {
     });
 }
 
-const taskPriority = computed(() => {
-    return priorityOptions.filter(v=>v.id===task.value.priority)[0]
-})
-const taskStatus = computed(() => {
-    return statusOptions.filter(v=>v.id===task.value.status)[0]
-})
+const taskPriority = computed(() => priorityOptions.filter(v=>v.id===task.value.priority)[0])
+const taskStatus = computed(() => statusOptions.filter(v=>v.id===task.value.status)[0])
+let oldContent = ref<Task|null>(null)
 
-const doubleTask=()=> {
-    console.log('double task')
+const titleInputBlurHandle = async() => {
+    await saveCard().then(res => {
+        if(res != true) {
+            task.value.title=oldContent?.value!.title
+        }
+    })
+    taskTitleEditing.value=false
 }
+
 const deleteTask=()=> {
     console.log('delete task')
 }
 
 onMounted(()=> {
     if(props.emptyCard)changeTitle()
+    oldContent.value={...task.value}
 })
+
+//ACTIONS
+const saveCard = () => taskStore.upsertTask(task.value)
 
 
 </script>
@@ -71,18 +80,11 @@ onMounted(()=> {
                         placeholder="Напишите название задачи"
                         ref="titleInput"
                         @keydown.enter="taskTitleEditing=false"
-                        @blur="taskTitleEditing=false"
+                        @blur="titleInputBlurHandle()"
                         >
                     </form>
                     <span v-else>{{task.title}}</span>
                 </span>
-                <!-- <el-tooltip class="item" effect="dark" :content="task.status===4 ? 'Задача не завершена' : 'Задача завершена'" placement="top-start">
-                    <div class="indicator" @click.stop="task.status=4">
-                        <el-icon :color="task.status===4 ? '#67C23A' : ''">
-                            <SuccessFilled />
-                        </el-icon>
-                    </div>
-                </el-tooltip> -->
             </div>
             <div class="tags">
                 <div class="wrapper" v-if="task.priority">

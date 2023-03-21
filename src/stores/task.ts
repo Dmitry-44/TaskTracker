@@ -2,74 +2,23 @@ import { defineStore } from "pinia";
 import { axiosClient } from "@/plugins/axios";
 import { errRequestHandler } from "@/plugins/errorResponser";
 import { envConfig } from "@/plugins/envConfig";
+import { type ApiResponse, isSuccessApiResponse } from "@/types/api";
+import type { FilterPayload } from "@/types/index";
+import type { Task } from "@/types/task";
+import { useInterfaceStore } from "./interface";
 
-export interface SimpleObject {
-  [key: string]: any;
-}
-interface Task {
-  id?: number;
-  title: string;
-  text: string;
-  created_at: number;
-  priority?: number;
-  status?: number;
-  pipe_id?: number;
-  event_id: number;
-  division_id: number;
-  created_by: number;
-  events?: number[];
-  event_entities: Event[],
-  child_tasks?: Task[],
-  smi_direction?: number,
-}
-const taskDefault: ActiveTask = {
-  title: '',
-  created_at: -1,
-  text: '',
-  event_id: -1,
-  division_id: -1,
-  created_by: -1,
-  events: [],
-  event_entities:[],
-}
+
 interface ActiveTask extends Task {
   readonly?: boolean
 }
-type Event = {
-  id: number
-  task_id?: number
-  operation_id?: number
-  created: number
-  modified: number | null
-  finished?: number | null
-  u_id?: number | null
-  user_name?: string | null
-  status: number
-  selected_users: number[]
-  result?: string | null
-  params?: SimpleObject
-} | null
-
-type Pipe = {
-  id: number
-  name: string
-  operation_entities: Operation[]
-  value: number[]
-} | null
-
-type Operation = {
-  id: number;
-  name: string
-  params: SimpleObject
-} | null
-interface DetailsWindow {
-  isOpened: boolean
-  creatingTask: boolean
+const taskDefault: ActiveTask = {
+  id: -1,
+  title: '',
+  created_at: -1,
+  status: 1,
+  text: '',
 }
-interface ResultWithMessage {
-  message: string;
-  result: any;
-}
+
 interface TaskOption {
   id: number,
   value: string,
@@ -86,43 +35,12 @@ interface State {
   priorityOptions: TaskOption[]
   statusOptions: TaskOption[]
   eventStatusOptions: EventStatusOption[]
-  detailsWindow: DetailsWindow
   activeTask: ActiveTask,
-  pipes: Pipe[],
-  singlePipe: Pipe
-  operations: Operation[],
-  singleOperation: Operation,
   filterBase: FilterPayload,
   filterVersion: string
 }
-interface FilterPayload {
-  select: string[];
-  filter: SimpleObject;
-  options: {
-    onlyLimit: boolean;
-    page?: number;
-    itemsPerPage: number;
-    sortBy?: string[];
-    sortDesc?: boolean[];
-    groupBy?: string[];
-    groupDesc?: boolean[];
-    mustSort?: boolean;
-    multiSort?: boolean;
-    allCount?: number;
-    maxPages?: number;
-  };
-}
 
-interface OperationsById {
-  [key: string]: Operation
-}
-interface PaginationBack {
-  allCount: number;
-  maxPages: number;
-  page: number;
-}
-
-export type { Task, ActiveTask, Event, Pipe, Operation, FilterPayload, ResultWithMessage, OperationsById };
+export type { ActiveTask };
 
 export const useTaskStore = defineStore({
   id: "task",
@@ -144,17 +62,9 @@ export const useTaskStore = defineStore({
       {id:2,value:'В работе',color:'#f8df72'},
       {id:3,value:'Готово',color:'#67C23A'},
     ],
-    detailsWindow: {
-      isOpened: false,
-      creatingTask: false,
-    },
     activeTask: {...taskDefault},
     tasks: [],
     singleTask: null,
-    pipes: [],
-    singlePipe: null,
-    operations: [],
-    singleOperation: null,
     filterBase: {
       select: [],
       filter: {},
@@ -173,37 +83,19 @@ export const useTaskStore = defineStore({
     filterVersion: '1.0',
   }),
   getters: {
-    getList: (state): Task[] => state.tasks || [],
-    getSingleTask: (state) => {return state.singleTask},
-    getDetailsWindow:(state): DetailsWindow => state.detailsWindow,
+    getList: (state): Task[] => state.tasks,
+    getSingleTask: (state) => state.singleTask,
     getFilterVersion:(state): string => state.filterVersion,
     getPriorityOptions: (state): TaskOption[] => state.priorityOptions,
     getStatusOptions: (state): TaskOption[] => state.statusOptions,
     getActiveTask:(state)=> state.activeTask,
-    getPipes:(state): Pipe[] => state.pipes,
-    getSinglePipe:(state): Pipe => state.singlePipe,
-    getOperations:(state): Operation[] => state.operations,
-    getSingleOperation:(state): Operation => state.singleOperation,
-    getCreatingTask:(state) => state.detailsWindow.creatingTask,
-    getOperationsById:(state): OperationsById => state.operations.reduce((acc,el) => {
-      acc[el?.id!] = el
-      return acc
-    },{} as OperationsById),
     getEventStatusOptions:(state): EventStatusOption[]=> state.eventStatusOptions
   },
   actions: {
-    toggleDetailsWindow(payload: boolean): void {
-      this.detailsWindow.isOpened = payload
-    },
     setActiveTask(task: Task | null): void {
-      if(this.activeTask?.id == task?.id && !this.detailsWindow.creatingTask)return;
+      const interfaceStore = useInterfaceStore()
+      if(this.activeTask?.id == task?.id && !interfaceStore.getIsCreatingTaskProcess)return;
       this.activeTask = task || {...taskDefault}
-    },
-    addNewTAsk(task: Task): void {
-      this.tasks.push(task)
-    },
-    setCreatingTask(bool: boolean): void {
-      this.detailsWindow.creatingTask=bool
     },
     setTasksList(payload: Task[]): void {
       this.tasks=payload
@@ -211,54 +103,32 @@ export const useTaskStore = defineStore({
     setSingleTask(payload: Task[]):void {
       this.singleTask=payload[0]
     },
-    setOperationsList(payload: Operation[]): void {
-      this.operations=payload
-    },
-    setSingleOperation(payload: Operation[]): void {
-      this.singleOperation=payload[0]
-    },
-    setPipesList(payload: Pipe[]): void {
-      this.pipes=payload
-    },
-    setSinglePipe(payload: Pipe[]):void {
-      this.singlePipe=payload[0]
-    },
     
-    fetchTasksList(filterPayload?: FilterPayload|Partial<FilterPayload>): Promise<ResultWithMessage> {
+    async fetchTasksList(filterPayload?: FilterPayload|Partial<FilterPayload>, signal?: AbortSignal): Promise<string|boolean> {
       return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/tasks`, {...this.filterBase, ...filterPayload})
+        .post(`${envConfig.API_URL}tasktracker/tasks`, {...this.filterBase, ...filterPayload}, {signal})
         .then((resp) => {
-          const respdata: ResultWithMessage = resp.data;
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
+          const respdata: ApiResponse = resp.data;
+          if(isSuccessApiResponse(respdata)) {
             if(filterPayload?.filter!['id']) {
-              this.setSingleTask(respdata.result.queryResult)
+              this.setSingleTask(respdata.result.queryResult as Task[])
             } else {
-              this.setTasksList(respdata.result.queryResult);
+              this.setTasksList(respdata.result.queryResult as Task[]);
             }
             return true;
           } else {
-            return respdata.message || -1;
-          }
-        })
-        .catch((e) => errRequestHandler(e));
-    },
-    fetchOperationsList(payload?: FilterPayload): Promise<ResultWithMessage> {
-      return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/operations`, payload)
-        .then((resp) => {
-          const respdata: ResultWithMessage = resp.data;
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
-            if(payload?.filter['id']) {
-              this.setSingleOperation(respdata.result)
-            } else {
-              this.setOperationsList(respdata.result);
+              return respdata.message || -1;
             }
+        })
+        .catch((e) => errRequestHandler(e));
+    },
+    async upsertTask(payload: Partial<Task>|Task): Promise<string|boolean> {
+      console.log('upsertTask')
+      return axiosClient
+        .post(`${envConfig.API_URL}tasktracker/taskUpsert`, payload)
+        .then((resp) => {
+          const respdata: ApiResponse = resp.data;
+          if(isSuccessApiResponse(respdata)) {
             return true;
           } else {
             return respdata.message || -1;
@@ -266,20 +136,12 @@ export const useTaskStore = defineStore({
         })
         .catch((e) => errRequestHandler(e));
     },
-    fetchPipesList(payload?: FilterPayload): Promise<ResultWithMessage> {
+    async takeTask(id: number): Promise<string|boolean> {
       return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/pipe`, payload)
+        .post(`${envConfig.API_URL}tasktracker/takeTaskSmi`, {id: id})
         .then((resp) => {
-          const respdata: ResultWithMessage = resp.data;
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
-            if(payload?.filter['id']) {
-              this.setSinglePipe(respdata.result)
-            } else {
-              this.setPipesList(respdata.result);
-            }
+          const respdata: ApiResponse = resp.data;
+          if(isSuccessApiResponse(respdata)) {
             return true;
           } else {
             return respdata.message || -1;
@@ -287,55 +149,5 @@ export const useTaskStore = defineStore({
         })
         .catch((e) => errRequestHandler(e));
     },
-    sendPipe(payload: Partial<Pipe>): Promise<boolean> {
-      let api = payload?.id ? `${envConfig.API_URL}tasktracker/pipe/${payload?.id}` : `${envConfig.API_URL}tasktracker/pipe`
-      return axiosClient
-        .put(api, payload)
-        .then((resp) => {
-          const respdata: ResultWithMessage = resp.data;
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
-            return true;
-          } else {
-            return respdata.message || -1;
-          }
-        })
-        .catch((e) => errRequestHandler(e));
-    },
-    sendOperation(payload: Partial<Operation>): Promise<boolean> {
-      let api = payload?.id ? `${envConfig.API_URL}tasktracker/operation/${payload?.id}` : `${envConfig.API_URL}tasktracker/operation`
-      return axiosClient
-        .put(api, payload)
-        .then((resp) => {
-          const respdata: ResultWithMessage = resp.data
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
-            return true;
-          } else {
-            return respdata.message || -1;
-          }
-        })
-        .catch((e) => errRequestHandler(e));
-    },
-    takeTask(payload: Partial<Task>): Promise<ResultWithMessage> {
-      return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/takeTaskSmi`, payload)
-        .then((resp) => {
-          const respdata: ResultWithMessage = resp.data
-          if (
-            Object.prototype.hasOwnProperty.call(respdata, "message") &&
-            respdata.message === "ok"
-          ) {
-            return true;
-          } else {
-            return respdata.message || -1;
-          }
-        })
-        .catch((e) => errRequestHandler(e));
-    }
-  },
+}
 });

@@ -1,29 +1,56 @@
 <script lang="ts" setup>
-import { type Pipe, useTaskStore, type FilterPayload, type ResultWithMessage } from "@/stores/task";
+import { usePipeStore} from "@/stores/pipe";
+import type { Pipe } from "@/types/pipe";
+import type { FilterPayload } from "@/types/index";
 import { ref, computed, onBeforeMount } from "vue";
 import { useRouter } from "vue-router";
 import PipeCard from "../../components/kanban/PipeCard.vue";
+import { pipeService } from "@/services/pipe";
+import { ElMessage } from "element-plus";
 
 const router = useRouter()
-const paramId = router.currentRoute.value.params.id
-const store = useTaskStore()
+const paramId = router.currentRoute.value.params['id']
+const pipeStore = usePipeStore()
 
-let pipe = computed<Pipe>(()=>store.getSinglePipe)
+let pipe = computed<Pipe|null>(()=>pipeStore.getSinglePipe)
 let LOADING = ref(false)
 
-const fetchPipeById = () => {
-    const payload: FilterPayload = {select:[],filter:{'id':paramId}, options:{onlyLimit:true,itemsPerPage:1}}
-    return store.fetchPipesList(payload)
-}
 
 onBeforeMount(async() => {
-  LOADING.value=true
-  await fetchPipeById()
-  await store.fetchOperationsList()
-  LOADING.value=false
+	console.log("onBeforeMount")
+	const payload: FilterPayload = {select:[],filter:{'id':paramId}, options:{onlyLimit:true,itemsPerPage:1}}
+	pipeService
+		.fetchPipes(payload)
+			.then(res=>{
+				LOADING.value=true
+				console.log('res', res)
+				// if (!errVueHandler(res)) {
+				// 	console.log('asdasdasdas')
+				// 	ElMessage({
+				// 		message: "Данные не найдены!",
+				// 		type: "error",
+				// 		center: true,
+				// 		duration: 1500,
+				// 		showClose: true,
+				// 	});
+				// 	if(!pipe?.value?.id)router.push('/pipes')
+				// }
+				LOADING.value=false
+			})
 });
 </script>
 
+<!-- //TO DO -->
 <template>
-    <PipeCard :pipeData=pipe :loading=LOADING :key=pipe?.id />
+	<el-skeleton
+	style="width: 300px"
+	:loading="LOADING"
+	animated
+	:throttle="500"
+	>
+	<template #template>
+		<el-skeleton-item variant="rect" style="width: 300px; height: calc(100vh - 230px)" />
+	</template>
+    <PipeCard v-if="pipe" :pipe=pipe :loading=LOADING :key=pipe?.id />
+	</el-skeleton>
 </template>

@@ -1,17 +1,12 @@
 import { defineStore } from "pinia";
 import { axiosClient } from "@/plugins/axios";
 import { envConfig } from "@/plugins/envConfig";
-import type { SimpleObject } from "./photobank";
+import type { User } from "@/types/user";
 
-type User = {
-  id: number;
-  fio: string;
-  rights: SimpleObject;
-} | null;
 
 interface State {
   is_auth: boolean;
-  user: User;
+  user: User|null;
   globalLoader: boolean;
 }
 
@@ -23,9 +18,9 @@ export const useUserStore = defineStore({
     globalLoader: true,
   }),
   getters: {
-    getRights: (state): SimpleObject => state?.user?.rights || {},
-    getUser: (state): User => state.user,
-    getLoader: (state): boolean => state.globalLoader,
+    getRights: (state) => state?.user?.rights || {},
+    getUser: (state) => state.user,
+    getLoader: (state) => state.globalLoader,
   },
   actions: {
     showLoader() {

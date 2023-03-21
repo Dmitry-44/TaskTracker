@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { useTaskStore, type Operation } from "@/stores/task";
-import { computed, type PropType, ref, toRef, onBeforeMount, onMounted, onBeforeUnmount, watch, type ComputedRef } from "vue";
-import { Plus, Close, Delete, Bottom } from "@element-plus/icons-vue";
+import { useOperationStore } from "@/stores/operation";
+import type { Operation } from "@/types/operation";
+import { computed, type PropType, ref, onMounted, toRef} from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
-import JsonEditor from "../JsonEditor.vue";
+import JsonEditor from "@/components/JsonEditor.vue";
 
 
 const props = defineProps({
-    operationData: {
-        type: Object as PropType<Operation>,
+    operation: {
+        type: Object as PropType<Operation|null>,
         default: () => ({
             name: '',
             params: {}
@@ -24,22 +24,23 @@ const props = defineProps({
 
 //VARIABLES
 const router = useRouter()
-const store = useTaskStore()
-const paramsEditor = ref<HTMLInputElement|any>(null)
+const operationStore = useOperationStore()
+const paramsEditor = ref<HTMLInputElement|null>(null)
 
-let params = ref(props.operationData?.params)
-let operation = ref(props.operationData)
+let operation = ref(props.operation)
+let params = ref(operation?.value?.params)
 let oldContent = ref('')
 let wasChanged = computed(()=> {
     const updatedData = JSON.parse(JSON.stringify(operation.value))
     return oldContent.value != JSON.stringify(updatedData)
 })
-let LOADING = ref(false)
+let LOADING = toRef(props, 'loading')
 
 //HOOKS
 onMounted(()=> {
-    oldContent.value=JSON.stringify(props.operationData)
+    oldContent.value=JSON.stringify(operation)
 })
+
 
 //METHODS
 const paramUpdateHandle = (val: Object) => {
@@ -50,7 +51,7 @@ const sendOperation = () => {
     LOADING.value=true
     const msg = ElMessage({
         message: "Сохранение...",
-        type: "warning",
+        type: "success",
         center: true,
         duration: 1000,
     });
@@ -59,7 +60,7 @@ const sendOperation = () => {
         name: operation?.value?.name,
         params: operation?.value?.params,
     }
-    store.sendOperation(data).then(res=>{
+    operationStore.sendOperation(data).then(res=>{
         if (errVueHandler(res)) {
             ElMessage({
                 message: "Операция выполнена успешно!",
@@ -91,7 +92,7 @@ const sendOperation = () => {
         </template>
         <div>
             <h4>Заголовок</h4>
-            <el-input class="card-name mb-4" label="Заголовок" v-model="operation.name" placeholder="Название" />
+            <el-input class="card-name mb-4" label="Заголовок" v-model="operation!.name" placeholder="Название" />
         </div>
         <div>
             <h4>Параметры</h4>

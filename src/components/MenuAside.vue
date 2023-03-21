@@ -28,15 +28,9 @@ const rights = computed(() => UserStore.getRights);
   >
     <el-menu-item index="/">
       <el-icon>
-        <Folder />
-      </el-icon>
-      <template #title>Фотографии</template>
-    </el-menu-item>
-    <el-menu-item index="/kanban">
-      <el-icon>
         <DataAnalysis />
       </el-icon>
-      <template #title>Канбан</template>
+      <template #title>Задачи</template>
     </el-menu-item>
     <el-menu-item index="/operations">
       <el-icon>

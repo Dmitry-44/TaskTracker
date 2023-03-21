@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { useTaskStore, type Operation}  from '@/stores/task';
+import { useOperationStore }  from '@/stores/operation';
+import type { Operation}  from '@/types/operation';
 import { computed, onBeforeMount, ref } from 'vue';
 
 
@@ -18,30 +19,15 @@ const emit = defineEmits<{
   (e: 'update', value: Operation): void
 }>()
 
-const taskStore = useTaskStore()
-const OPERATIONS = computed(()=>taskStore.getOperations)
+const operationStore = useOperationStore()
+const OPERATIONS = computed(()=>operationStore.getOperations)
 let LOADING = ref(false)
-
-const fetchOperationsList = async() => {
-    taskStore.fetchOperationsList().then(res=> {
-        if (
-            Object.prototype.hasOwnProperty.call(res, "message") &&
-            res.message === "ok"
-          ) {
-            taskStore.setOperationsList(res.result);
-            return true;
-          } else {
-            return res.message || -1;
-          }
-    })
-}
 
 let activeEventId = ref(null)
 let activeEvent = computed<Operation|null>(()=> OPERATIONS.value.find(oper=>oper?.id===activeEventId.value) || null)
 
 onBeforeMount(async()=> {
     LOADING.value=true
-    await fetchOperationsList()
     LOADING.value=false
 })
 
