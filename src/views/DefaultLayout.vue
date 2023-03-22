@@ -24,7 +24,7 @@ onBeforeMount(async () => {
   router.replace({ query });
 
   const operations = operationsStore.fetchOperations();
-  const pipes = await pipeService.fetchPipes();
+  const pipes = await pipeService.fetchAndSetPipes();
   const sites = useSitesStore().fetchSites();
   Promise.allSettled([operations, pipes, sites]).then(
     () => (loading.value = false)

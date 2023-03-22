@@ -1,4 +1,4 @@
-import { isResultWithPagination } from "./../types/api";
+import { isResultWithPagination } from "../types/api";
 import PipeApi from "@/api/pipe";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
 import { usePipeStore } from "@/stores/pipe";
