@@ -17,7 +17,7 @@ import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
 import { usePipeStore } from "@/stores/pipe";
 import type { Pipe } from "@/types/pipe";
-import { pipeService } from "@/services/pipe";
+import { pipeService } from "@/services/index";
 
 const props = defineProps({
   pipe: {

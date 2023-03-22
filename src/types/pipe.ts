@@ -10,8 +10,8 @@ interface Pipe {
 }
 
 interface IPipeRepo {
-  GetAllPipes(payload?: FilterPayload): Promise<ApiResponse>;
-  SendPipe(payload: Partial<Pipe> | Pipe): Promise<ApiResponse>;
+  GetPipes(payload?: FilterPayload): Promise<ApiResponse<Pipe>>;
+  SendPipe(payload: Partial<Pipe> | Pipe): Promise<ApiResponse<Pipe>>;
 }
 
 export type { Pipe, IPipeRepo };

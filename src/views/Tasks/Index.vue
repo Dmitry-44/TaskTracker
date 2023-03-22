@@ -10,6 +10,7 @@ import { onBeforeMount, ref, computed } from "vue";
 import EventsModal from "../../components/kanban/EventsModal.vue";
 import OperationColumn from "../../components/kanban/OperationColumn.vue";
 import { usePipeStore } from "@/stores/pipe";
+import { taskService } from "@/services/index";
 
 const router = useRouter();
 const taskStore = useTaskStore();
@@ -31,13 +32,13 @@ const taskPriority = computed(() => {
 const taskStatus = computed(() => {
   return statusOptions.filter((v) => v.id === task?.value!.status)[0];
 });
-const fetchTaskById = (payload: FilterPayload) => {
-  return taskStore.fetchTasksList(payload);
-};
+// const fetchTaskById = (payload: FilterPayload) => {
+//   return taskStore.fetchTasksList(payload);
+// };
 
 onBeforeMount(async () => {
   LOADING.value = true;
-  await fetchTaskById({
+  await taskService.fetchTasks({
     filter: { id: Number(taskId) },
     options: { onlyLimit: true, itemsPerPage: 1 },
     select: [],

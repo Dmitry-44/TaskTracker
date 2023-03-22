@@ -1,4 +1,6 @@
 import type { Event } from "@/types/event";
+import type { FilterPayload } from ".";
+import type { ApiResponse } from "./api";
 
 interface Task {
   id: number;
@@ -17,4 +19,10 @@ interface Task {
   smi_direction?: number;
 }
 
-export type { Task };
+interface ITaskRepo {
+  	GetTasks(filterPayload?: Partial<FilterPayload>, signal?: AbortSignal): Promise<ApiResponse<Task>>
+	UpsertTask(payload: Partial<Task>): Promise<ApiResponse<Task>>
+	TakeTask(id: number): Promise<ApiResponse<Task>>
+}
+
+export type { Task, ITaskRepo };

@@ -5,8 +5,7 @@ import { useUserStore } from "@/stores/user";
 import Menu from "@/components/MenuAside.vue";
 import { useOperationStore } from "@/stores/operation";
 import { useSitesStore } from "@/stores/sites";
-import { usePipeStore } from "@/stores/pipe";
-import { pipeService } from "@/services/pipe";
+import { pipeService } from "@/services/index";
 
 const isCollapse = ref(true);
 const route = useRoute();
@@ -24,7 +23,7 @@ onBeforeMount(async () => {
   router.replace({ query });
 
   const operations = operationsStore.fetchOperations();
-  const pipes = await pipeService.fetchAndSetPipes();
+  const pipes = await pipeService.fetchPipes();
   const sites = useSitesStore().fetchSites();
   Promise.allSettled([operations, pipes, sites]).then(
     () => (loading.value = false)

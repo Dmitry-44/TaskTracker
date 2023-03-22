@@ -9,6 +9,7 @@ import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
+import { taskService } from "@/services/index";
 
 const taskStore = useTaskStore();
 const interfaceStore = useInterfaceStore();
@@ -54,10 +55,9 @@ const save = () => {
     center: true,
     duration: 1000,
   });
-  taskStore
+  taskService
     .upsertTask(task.value)
-    .then((res) => {
-      console.log("res", res);
+    .then(res => {
       if (errVueHandler(res)) {
         ElMessage({
           message: "Операция выполнена успешно!",

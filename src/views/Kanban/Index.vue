@@ -8,6 +8,7 @@ import { ref, computed, onBeforeUnmount, nextTick } from "vue";
 import Filters from "../../components/kanban/Filters.vue";
 import KanbanColumn from "@/components/kanban/KanbanColumn.vue";
 import { ElMessage } from "element-plus";
+import { taskService } from "@/services/index";
 
 const taskStore = useTaskStore();
 const interfaceStore = useInterfaceStore();
@@ -33,8 +34,6 @@ const tasksFinished = computed(() =>
 const setActiveTask = taskStore.setActiveTask;
 const toggleDetailsWindow = interfaceStore.toggleDetailsWindow;
 const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess;
-const fetchTasksList = async (payload: FilterPayload) =>
-  taskStore.fetchTasksList(payload, abortSignal);
 
 const LOADING = ref(false);
 
@@ -59,7 +58,7 @@ const clickOutsideCards = () => {
 };
 const filterUpdate = async (payload: FilterPayload) => {
   LOADING.value = true;
-  await fetchTasksList(payload);
+  await taskService.fetchTasks(payload);
   LOADING.value = false;
 };
 const updateTask = async (task: Task) => {
@@ -70,9 +69,9 @@ const updateTask = async (task: Task) => {
     center: true,
     duration: 1000,
   });
-  return taskStore
+  return taskService
     .upsertTask(task)
-    .then((res) => {
+    .then(res => {
       if (res) {
         ElMessage({
           message: "Операция выполнена успешно!",

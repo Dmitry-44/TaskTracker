@@ -1,41 +1,39 @@
 import { isResultWithPagination } from "./../types/api";
-import PipeApi from "@/api/pipe";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
 import { usePipeStore } from "@/stores/pipe";
 import type { FilterPayload } from "@/types";
 import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
 import type { IPipeRepo, Pipe } from "@/types/pipe";
-import PipeRepo from "@/api/pipe";
 
 
 const pipeStore = usePipeStore();
 
-class PipeService {
-	_pipeRepo;
+export default class PipeService {
+	pipeRepo;
 
 	constructor(pipeRepo: IPipeRepo) {
-		this._pipeRepo = pipeRepo;
+		this.pipeRepo = pipeRepo;
 	}
 
-	fetchPipes = (payload?: FilterPayload) => this._pipeRepo.GetAllPipes(payload)
-
-	fetchAndSetPipes = (payload?: FilterPayload) => {
-		return this.fetchPipes(payload)
+	fetchPipes = (payload?: FilterPayload) => {
+		return this.pipeRepo.GetPipes(payload)
 			.then(respdata => {
 				if (isSuccessApiResponse(respdata)) {
 					if (payload?.filter!["id"]) {
-						if (!isResultWithPagination(respdata.result)) {
+						if (isResultWithPagination(respdata.result)) {
+							pipeStore.setSinglePipe(respdata.result.queryResult[0])
+						} else {
 							const payload =
 								respdata.result.length > 0
-									? (respdata.result[0] as Pipe)
+									? respdata.result[0]
 									: null;
 							pipeStore.setSinglePipe(payload);
 						}
 					} else {
 						if (isResultWithPagination(respdata.result)) {
-							pipeStore.setPipes(respdata.result.queryResult as Pipe[]);
+							pipeStore.setPipes(respdata.result.queryResult);
 						} else {
-							pipeStore.setPipes(respdata.result as Pipe[]);
+							pipeStore.setPipes(respdata.result);
 						}
 					}
 					return true;
@@ -47,7 +45,7 @@ class PipeService {
 	}
 
 	sendPipe = (payload: Partial<Pipe> | Pipe) => {
-		return this._pipeRepo
+		return this.pipeRepo
 			.SendPipe(payload)
 			.then((respdata) => {
 				if (isSuccessApiResponse(respdata)) {
@@ -59,6 +57,3 @@ class PipeService {
 			.catch(err => errRequestHandler(err));
 	};
 }
-
-const pipeRepo = new PipeRepo();
-export const pipeService = new PipeService(pipeRepo);

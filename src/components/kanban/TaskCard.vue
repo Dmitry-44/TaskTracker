@@ -5,6 +5,9 @@ import type { PropType } from "vue";
 import SelectOptions from "./SelectOptions.vue";
 import { useTaskStore } from "@/stores/task";
 import type { Task } from "@/types/task";
+import { taskService } from "@/services/index";
+import { ElMessage } from "element-plus";
+import { errVueHandler } from "@/plugins/errorResponser";
 
 const props = defineProps({
   task: {
@@ -39,6 +42,7 @@ const changeTitle = () => {
     titleInput.value.select();
   });
 };
+const LOADING = ref(false);
 
 const taskPriority = computed(
   () => priorityOptions.filter((v) => v.id === task.value.priority)[0]
@@ -49,11 +53,8 @@ const taskStatus = computed(
 const oldContent = ref<Task | null>(null);
 
 const titleInputBlurHandle = async () => {
-  await saveCard().then((res) => {
-    if (res != true) {
-      task.value.title = oldContent?.value!.title;
-    }
-  });
+  console.log('task.value', task.value)
+  await save()
   taskTitleEditing.value = false;
 };
 
@@ -67,7 +68,32 @@ onMounted(() => {
 });
 
 //ACTIONS
-const saveCard = () => taskStore.upsertTask(task.value);
+const save = async() => {
+  LOADING.value = true;
+  const msg = ElMessage({
+    message: "Сохраняю задачу..",
+    type: "success",
+    center: true,
+    duration: 1000,
+  });
+  taskService
+    .upsertTask(task.value)
+    .then((res) => {
+      if (errVueHandler(res)) {
+        ElMessage({
+          message: "Операция выполнена успешно!",
+          type: "success",
+          center: true,
+          duration: 1500,
+          showClose: true,
+        });
+      }
+    })
+    .finally(() => {
+      LOADING.value = false;
+      msg.close();
+    });
+};
 </script>
 <template>
   <div :class="['card', active ? 'active' : '', readonlyTask ? 'done' : '']">

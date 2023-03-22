@@ -1,41 +1,49 @@
 import { isResultWithPagination } from "../types/api";
 import PipeApi from "@/api/pipe";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
-import { usePipeStore } from "@/stores/pipe";
 import type { FilterPayload } from "@/types";
 import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
 import type { IPipeRepo, Pipe } from "@/types/pipe";
 import PipeRepo from "@/api/pipe";
+import type { ITaskRepo, Task } from "@/types/task";
+import TaskRepo from "@/api/task";
+import { useTaskStore } from "@/stores/task";
 
 
-const pipeStore = usePipeStore();
+const taskStore = useTaskStore();
 
-class PipeService {
-	_pipeRepo;
+export default class TaskService {
 
-	constructor(pipeRepo: IPipeRepo) {
-		this._pipeRepo = pipeRepo;
+	taskRepo;
+
+	constructor(taskRepo: ITaskRepo) {
+		this.taskRepo = taskRepo;
 	}
 
-	fetchPipes = (payload?: FilterPayload) => this._pipeRepo.GetAllPipes(payload)
+	getFilterBase(){
+		return TaskRepo.filterBase
+	}
 
-	fetchAndSetPipes = (payload?: FilterPayload) => {
-		return this.fetchPipes(payload)
+	fetchTasks (payload?: FilterPayload | Partial<FilterPayload>, signal?: AbortSignal) {
+		return this.taskRepo
+			.GetTasks(payload, signal)
 			.then(respdata => {
 				if (isSuccessApiResponse(respdata)) {
 					if (payload?.filter!["id"]) {
-						if (!isResultWithPagination(respdata.result)) {
+						if (isResultWithPagination(respdata.result)) {
+							taskStore.setSingleTask(respdata.result.queryResult[0]);
+						} else {
 							const payload =
-								respdata.result.length > 0
-									? (respdata.result[0] as Pipe)
-									: null;
-							pipeStore.setSinglePipe(payload);
+							respdata.result.length > 0
+								? respdata.result[0]
+								: null;
+							taskStore.setSingleTask(payload);
 						}
 					} else {
 						if (isResultWithPagination(respdata.result)) {
-							pipeStore.setPipes(respdata.result.queryResult as Pipe[]);
+							taskStore.setTasksList(respdata.result.queryResult);
 						} else {
-							pipeStore.setPipes(respdata.result as Pipe[]);
+							taskStore.setTasksList(respdata.result);
 						}
 					}
 					return true;
@@ -46,9 +54,9 @@ class PipeService {
 			.catch(err => errRequestHandler(err))
 	}
 
-	sendPipe = (payload: Partial<Pipe> | Pipe) => {
-		return this._pipeRepo
-			.SendPipe(payload)
+	upsertTask(payload: Partial<Task> | Task) {
+		return this.taskRepo
+			.UpsertTask(payload)
 			.then((respdata) => {
 				if (isSuccessApiResponse(respdata)) {
 					return true;
@@ -57,8 +65,19 @@ class PipeService {
 				}
 			})
 			.catch(err => errRequestHandler(err));
-	};
-}
+	}
 
-const pipeRepo = new PipeRepo();
-export const pipeService = new PipeService(pipeRepo);
+	takeTask(id: number) {
+		return this.taskRepo
+			.TakeTask(id)
+			.then((respdata) => {
+				if (isSuccessApiResponse(respdata)) {
+					return true;
+				} else {
+					return respdata.message || -1;
+				}
+			})
+			.catch(err => errRequestHandler(err));
+	}
+
+}

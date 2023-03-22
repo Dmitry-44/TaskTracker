@@ -1,30 +1,24 @@
-interface SuccessApiResponse {
+interface SuccessApiResponse<T> {
   message: string;
-  result: ApiResult;
+  result: ApiResult<T>;
 }
 
-type ResultWithPagination = {
+type ResultWithPagination<T> = {
   pagination: { [key: string]: any };
-  queryResult: any[];
+  queryResult: T[];
 };
 interface FailureApiResponse {
   message: string;
   result?: unknown;
 }
 
-type ApiResult = ResultWithPagination | any[];
+type ApiResult<T> = ResultWithPagination<T> | T[];
 
-type ApiResponse = SuccessApiResponse | FailureApiResponse;
+type ApiResponse<T> = SuccessApiResponse<T> | FailureApiResponse;
 
 //TYPE GUARDS
-export const isSuccessApiResponse = (
-  res: ApiResponse
-): res is SuccessApiResponse => res.message === "ok";
-export const isFailureApiResponse = (
-  res: ApiResponse
-): res is FailureApiResponse => res.message != "ok";
-export const isResultWithPagination = (
-  res: ApiResult
-): res is ResultWithPagination => res.hasOwnProperty("pagination");
+export const isSuccessApiResponse = <T>(res: ApiResponse<T>): res is SuccessApiResponse<T> => res.message === "ok";
+export const isFailureApiResponse = <T>(res: ApiResponse<T>): res is FailureApiResponse => res.message != "ok";
+export const isResultWithPagination = <T>(res: ApiResult<T>): res is ResultWithPagination<T> => res.hasOwnProperty("pagination");
 
 export type { ApiResponse, SuccessApiResponse, FailureApiResponse };

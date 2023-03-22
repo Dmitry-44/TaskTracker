@@ -5,52 +5,24 @@ import type { FilterPayload } from "@/types/index";
 import { ref, computed, onBeforeMount, type Ref } from "vue";
 import { useRouter } from "vue-router";
 import PipeCard from "../../components/kanban/PipeCard.vue";
-import { pipeService } from "@/services/pipe";
-import { ElMessage } from "element-plus";
-import { isSuccessApiResponse } from "@/types/api";
-import { errVueHandler } from "@/plugins/errorResponser";
+import { pipeService } from "@/services/index";
 
 const router = useRouter();
 const paramId = router.currentRoute.value.params["id"];
 const pipeStore = usePipeStore();
-// const pipe = computed<Pipe | null>(() => pipeStore.getSinglePipe);
+const pipe = computed<Pipe | null>(() => pipeStore.getSinglePipe);
 const LOADING = ref(false);
 
-let pipe: Ref<Pipe|null> = ref(null)
-const loading =true
-onBeforeMount(async () => {
-  const payload: FilterPayload = {
-    select: [],
-    filter: { id: paramId },
-    options: { onlyLimit: true, itemsPerPage: 1 },
-  };
 
-  pipeService.fetchPipes(payload)
-		.then(respdata => {
-			LOADING.value = true;
-			if (isSuccessApiResponse(respdata)) {
-				const res = respdata.result as Pipe[]
-				pipe.value =
-					res.length > 0
-					? res[0]
-					: null;
-				return true;
-			} else {
-				return respdata.message || -1;
-			}
-  		})
-		.then(res=>{
-			if (!errVueHandler(res)) {
-				ElMessage({
-					message: "Данные не найдены!",
-					type: "error",
-					center: true,
-					duration: 1500,
-					showClose: true,
-				});
-			}
-		})
-		.catch((e) => {errVueHandler(e)})
+onBeforeMount(async () => {
+	const payload: FilterPayload = {
+		select: [],
+		filter: { id: paramId },
+		options: { onlyLimit: true, itemsPerPage: 1 },
+	};
+	LOADING.value = false
+	pipeService
+		.fetchPipes(payload)
 		.finally(()=>{LOADING.value = false})
 
 });

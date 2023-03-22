@@ -9,6 +9,7 @@ import { useInterfaceStore } from "@/stores/interface";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
 import KanbanColumnFilter from "./KanbanColumnFilter.vue";
+import { taskService } from "@/services/index";
 
 const props = defineProps({
   tasks: {
@@ -81,13 +82,21 @@ const takeTask = async (taskId: Task["id"]) => {
     center: true,
     duration: 1000,
   });
-  taskStore
+  taskService
     .takeTask(taskId)
-    .then((res) => {
+    .then(res => {
       if (errVueHandler(res)) {
         ElMessage({
           message: "Операция выполнена успешно!",
           type: "success",
+          center: true,
+          duration: 1500,
+          showClose: true,
+        })
+      } else {
+        ElMessage({
+          message: "Что-то пошло не так",
+          type: "error",
           center: true,
           duration: 1500,
           showClose: true,
