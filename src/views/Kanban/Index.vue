@@ -31,7 +31,7 @@ const tasksFinished = computed(() =>
 );
 
 //ACTIONS
-const setActiveTask = taskStore.setActiveTask;
+const setActiveTask = taskService.setActiveTask;
 const toggleDetailsWindow = interfaceStore.toggleDetailsWindow;
 const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess;
 

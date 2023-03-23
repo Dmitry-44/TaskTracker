@@ -46,7 +46,7 @@ const interfaceStore = useInterfaceStore();
 const activeTask = computed(() => taskStore.getActiveTask);
 
 //ACTIONS
-const setActiveTask = taskStore.setActiveTask;
+const setActiveTask = taskService.setActiveTask;
 const toggleDetailsWindow = interfaceStore.toggleDetailsWindow;
 const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess;
 

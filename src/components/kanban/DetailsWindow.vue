@@ -18,7 +18,7 @@ const router = useRouter();
 //GETTERS
 const detailWindowIsOpen = computed(() => interfaceStore.getDetailWindowIsOpen);
 const task = computed(() => taskStore.getActiveTask);
-const isReadonlyTask = computed(() => task.value.status === 4);
+const isReadonlyTask = computed(() => task.value?.status === 4);
 const isCreatingTaskProcess = computed(
   () => interfaceStore.isCreatingTaskProcess
 );
@@ -28,11 +28,11 @@ const STATUS_OPTIONS = taskStore.getStatusOptions;
 
 //ACTIONS
 const toggleDetailsWindow = interfaceStore.toggleDetailsWindow;
-const setActiveTask = taskStore.setActiveTask;
+// const setActiveTask = taskService.setActiveTask;
 const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess;
 
 const openInNewTab = () => {
-  const routeData = router.resolve({ path: `/tasks/${task.value.id}` });
+  const routeData = router.resolve({ path: `/tasks/${task.value?.id}` });
   window.open(routeData.href, "_blank");
 };
 
@@ -48,6 +48,7 @@ const taskPipe = computed(
 );
 
 const save = () => {
+  if(!task.value)return
   LOADING.value = true;
   const msg = ElMessage({
     message: "Сохраняю задачу..",
@@ -75,7 +76,7 @@ const save = () => {
 };
 
 watch(task, (newVal, oldVal) => {
-  if (oldVal.id != newVal.id) {
+  if (oldVal?.id != newVal?.id) {
     oldContent.value = JSON.stringify({ ...task.value });
     if (isCreatingTaskProcess.value) {
       nextTick(() => {
@@ -128,15 +129,15 @@ watch(task, (newVal, oldVal) => {
             class="close-btn"
             :icon="Close"
             @click.stop="
-              toggleDetailsWindow(false),
-                setActiveTask(null),
+                toggleDetailsWindow(false),
+                taskService.setActiveTask(null),
                 toggleCreatingTaskProcess(false)
             "
           ></el-button>
         </el-tooltip>
       </div>
     </div>
-    <div class="body">
+    <div v-if="task" class="body">
       <div class="title_block">
         <input
           v-model="task.title"

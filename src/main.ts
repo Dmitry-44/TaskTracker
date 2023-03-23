@@ -54,6 +54,7 @@ app.use(ElementPlus, {
 });
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 app.use(createPinia());
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 app.use(router);
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

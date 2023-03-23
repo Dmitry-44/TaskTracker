@@ -6,6 +6,7 @@ import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
 import JsonEditor from "@/components/JsonEditor.vue";
+import { operationService } from "@/services";
 
 const props = defineProps({
   operation: {
@@ -23,7 +24,6 @@ const props = defineProps({
 
 //VARIABLES
 const router = useRouter();
-const operationStore = useOperationStore();
 const paramsEditor = ref<HTMLInputElement | null>(null);
 
 const operation = ref(props.operation);
@@ -58,21 +58,22 @@ const sendOperation = () => {
     name: operation?.value?.name,
     params: operation?.value?.params,
   };
-  operationStore.sendOperation(data).then((res) => {
-    if (errVueHandler(res)) {
-      ElMessage({
-        message: "Операция выполнена успешно!",
-        type: "success",
-        center: true,
-        duration: 1500,
-        showClose: true,
-      });
-      if (!operation?.value?.id) router.push("/operations");
-      oldContent.value = JSON.stringify(operation.value);
-    }
-    LOADING.value = false;
-    msg.close();
-  });
+  operationService.sendOperation(data)
+    .then(res => {
+      if (errVueHandler(res)) {
+        ElMessage({
+          message: "Операция выполнена успешно!",
+          type: "success",
+          center: true,
+          duration: 1500,
+          showClose: true,
+        });
+        if (!operation?.value?.id) router.push("/operations");
+        oldContent.value = JSON.stringify(operation.value);
+      }
+      LOADING.value = false;
+      msg.close();
+    });
 };
 </script>
 

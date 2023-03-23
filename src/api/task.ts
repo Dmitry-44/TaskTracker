@@ -23,6 +23,15 @@ export default class TaskRepo implements ITaskRepo {
 		},
 	}
 
+	static emptyTask: Task = 
+	{
+		id: -1,
+		title: "",
+		created_at: -1,
+		status: 1,
+		text: "",
+	}
+
 
 	GetTasks(filterPayload?: Partial<FilterPayload> | undefined, signal?: AbortSignal | undefined): Promise<ApiResponse<Task>> {
 		return axiosClient
@@ -31,15 +40,17 @@ export default class TaskRepo implements ITaskRepo {
 				{ ...TaskRepo.filterBase, ...filterPayload },
 				{ signal }
 			)
-			.then((res) => res.data)
+			.then(res => res.data)
 	}
 	UpsertTask(payload: Partial<Task>): Promise<ApiResponse<Task>> {
 		return axiosClient
 			.post(`${envConfig.API_URL}tasktracker/taskUpsert`, payload)
+			.then(res => res.data)
 	}
 
 	TakeTask(id: number): Promise<ApiResponse<Task>> {
 		return axiosClient
         	.post(`${envConfig.API_URL}tasktracker/takeTaskSmi`, { id: id })
+			.then(res => res.data)
 	}
 }

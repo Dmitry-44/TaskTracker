@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useTaskStore } from "@/stores/task";
 import type { Task } from "@/types/task";
 import { useInterfaceStore } from "@/stores/interface";
 import {
@@ -16,6 +15,7 @@ import {
 import { ref, onMounted, computed } from "vue";
 import type { PropType } from "vue";
 import { useRouter } from "vue-router";
+import { taskService } from "@/services";
 
 const props = defineProps({
   task: {
@@ -31,11 +31,10 @@ const props = defineProps({
 const emit = defineEmits(["titleChanged"]);
 const task = ref(props.task);
 const readonlyTask = computed(() => task.value.status === 4);
-const store = useTaskStore();
 const interfaceStore = useInterfaceStore();
 const toggleDetailsWindow = interfaceStore.toggleDetailsWindow;
 const router = useRouter();
-const setActiveTask = store.setActiveTask;
+const setActiveTask = taskService.setActiveTask;
 const openInNewTab = () => {
   const routeData = router.resolve({ path: `/tasks/${task.value.id}` });
   window.open(routeData.href, "_blank");

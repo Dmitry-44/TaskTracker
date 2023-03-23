@@ -1,16 +1,15 @@
+import { useInterfaceStore } from './../stores/interface';
 import { isResultWithPagination } from "../types/api";
-import PipeApi from "@/api/pipe";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
 import type { FilterPayload } from "@/types";
 import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
-import type { IPipeRepo, Pipe } from "@/types/pipe";
-import PipeRepo from "@/api/pipe";
 import type { ITaskRepo, Task } from "@/types/task";
 import TaskRepo from "@/api/task";
 import { useTaskStore } from "@/stores/task";
 
 
 const taskStore = useTaskStore();
+const interfaceStore = useInterfaceStore();
 
 export default class TaskService {
 
@@ -18,10 +17,6 @@ export default class TaskService {
 
 	constructor(taskRepo: ITaskRepo) {
 		this.taskRepo = taskRepo;
-	}
-
-	getFilterBase(){
-		return TaskRepo.filterBase
 	}
 
 	fetchTasks (payload?: FilterPayload | Partial<FilterPayload>, signal?: AbortSignal) {
@@ -78,6 +73,18 @@ export default class TaskService {
 				}
 			})
 			.catch(err => errRequestHandler(err));
+	}
+
+	setActiveTask(payload: Task|null){
+			const activeTask = taskStore.getActiveTask
+			if (
+				activeTask?.id == payload?.id &&
+				!interfaceStore.getIsCreatingTaskProcess
+			)
+				return;
+			payload  
+				? taskStore.setActiveTask(payload)
+				: taskStore.setActiveTask(Object.assign({},TaskRepo.emptyTask));
 	}
 
 }

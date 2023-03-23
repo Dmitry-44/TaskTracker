@@ -1,19 +1,8 @@
+import  TaskRepo  from '@/api/task';
 import { defineStore } from "pinia";
 import type { FilterPayload } from "@/types/index";
 import type { Task } from "@/types/task";
-import { useInterfaceStore } from "./interface";
-import { taskService } from "@/services/index";
 
-interface ActiveTask extends Task {
-	readonly?: boolean;
-}
-const taskDefault: ActiveTask = {
-	id: -1,
-	title: "",
-	created_at: -1,
-	status: 1,
-	text: "",
-};
 
 interface TaskOption {
 	id: number;
@@ -31,12 +20,11 @@ interface State {
 	priorityOptions: TaskOption[];
 	statusOptions: TaskOption[];
 	eventStatusOptions: EventStatusOption[];
-	activeTask: ActiveTask;
+	activeTask: Task;
 	filterBase: FilterPayload;
 	filterVersion: string;
 }
 
-export type { ActiveTask };
 
 export const useTaskStore = defineStore({
 	id: "task",
@@ -58,10 +46,10 @@ export const useTaskStore = defineStore({
 			{ id: 2, value: "В работе", color: "#f8df72" },
 			{ id: 3, value: "Готово", color: "#67C23A" },
 		],
-		activeTask: { ...taskDefault },
+		activeTask: Object.assign({}, TaskRepo.emptyTask),
 		tasks: [],
 		singleTask: null,
-		filterBase: taskService.getFilterBase(),
+		filterBase: structuredClone(TaskRepo.filterBase),
 		filterVersion: "1.0",
 	}),
 	getters: {
@@ -74,20 +62,17 @@ export const useTaskStore = defineStore({
 		getEventStatusOptions: (state): EventStatusOption[] =>state.eventStatusOptions,
 	},
 	actions: {
-		setActiveTask(task: Task | null): void {
-			const interfaceStore = useInterfaceStore();
-			if (
-				this.activeTask?.id == task?.id &&
-				!interfaceStore.getIsCreatingTaskProcess
-			)
-				return;
-			this.activeTask = task || { ...taskDefault };
+		setActiveTask(payload: Task): void {
+			this.activeTask = payload;
 		},
 		setTasksList(payload: Task[]): void {
 			this.tasks = payload;
 		},
 		setSingleTask(payload: Task | null): void {
 			this.singleTask = payload;
+		},
+		setFilterBase(payload: FilterPayload){
+			this.filterBase = payload
 		}
 	},
 });

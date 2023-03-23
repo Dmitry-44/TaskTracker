@@ -35,8 +35,10 @@ const selectMore = ref<any | HTMLInputElement>(null);
 
 const taskTitleEditing = ref(false);
 const titleInput = ref<any | HTMLInputElement>(null);
+let currentTitle = ''
 const changeTitle = () => {
   taskTitleEditing.value = true;
+  currentTitle=task.value.title
   nextTick(() => {
     titleInput.value.focus();
     titleInput.value.select();
@@ -52,11 +54,18 @@ const taskStatus = computed(
 );
 const oldContent = ref<Task | null>(null);
 
-const titleInputBlurHandle = async () => {
-  console.log('task.value', task.value)
+const submitNewTitle = async () => {
+  if(currentTitle===task.value.title.trim()){
+    return
+  }
   await save()
   taskTitleEditing.value = false;
 };
+
+const titleInputBlurHandle = () => {
+  task.value.title=currentTitle
+  taskTitleEditing.value = false;
+}
 
 const deleteTask = () => {
   console.log("delete task");
@@ -107,7 +116,7 @@ const save = async() => {
               type="text"
               placeholder="Напишите название задачи"
               ref="titleInput"
-              @keydown.enter="taskTitleEditing = false"
+              @keydown.enter="submitNewTitle"
               @blur="titleInputBlurHandle()"
             />
           </form>

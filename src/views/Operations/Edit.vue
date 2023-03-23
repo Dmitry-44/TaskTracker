@@ -5,6 +5,7 @@ import type { FilterPayload } from "@/types/index";
 import { computed, onBeforeMount, ref } from "vue";
 import { useRouter } from "vue-router";
 import OperationCard from "../../components/kanban/OperationCard.vue";
+import { operationService } from "@/services";
 
 const router = useRouter();
 const paramId = router.currentRoute.value.params["id"];
@@ -21,7 +22,7 @@ const fetchOperationById = () => {
     filter: { id: paramId },
     options: { onlyLimit: true, itemsPerPage: 1 },
   };
-  return operationStore.fetchOperations(payload);
+  return operationService.fetchOperations(payload);
 };
 onBeforeMount(async () => {
   LOADING.value = true;
@@ -31,9 +32,19 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <OperationCard
+
+  <el-skeleton style="width: 300px" :loading="LOADING" animated :throttle="500">
+    <template #template>
+      <el-skeleton-item
+        variant="rect"
+        style="width: 300px; height: calc(100vh - 230px)"
+      />
+    </template>
+    <OperationCard
+    v-if="operation"
     :operation="operation"
     :loading="LOADING"
     :key="operation?.id"
   />
+  </el-skeleton>
 </template>

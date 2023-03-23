@@ -22,8 +22,8 @@ const task = computed<Task | null>(() => taskStore.getSingleTask);
 const taskPipe = computed(
   () => PIPES.value.find((pipe) => pipe?.id === task.value?.pipe_id) || null
 );
-const priorityOptions = useTaskStore().getPriorityOptions;
-const statusOptions = useTaskStore().getStatusOptions;
+const priorityOptions = taskStore.getPriorityOptions;
+const statusOptions = taskStore.getStatusOptions;
 const eventsModalOpened = ref(false);
 const newEventId = ref();
 const taskPriority = computed(() => {

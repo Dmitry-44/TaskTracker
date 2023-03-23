@@ -1,7 +1,15 @@
-interface Operation {
-  id: number;
-  name: string;
-  params: { [key: string]: any };
+import type { FilterPayload } from ".";
+import type { ApiResponse } from "./api";
+
+type Operation = {
+	id: number;
+	name: string;
+	params: { [key: string]: any };
 }
 
-export type { Operation };
+interface IOperationRepo {
+	GetOperations(payload?: FilterPayload): Promise<ApiResponse<Operation>>
+	SendOperation(payload: Partial<Operation>): Promise<ApiResponse<Operation>>
+}
+
+export type { Operation, IOperationRepo };
