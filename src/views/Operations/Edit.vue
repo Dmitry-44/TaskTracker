@@ -4,7 +4,7 @@ import type { Operation } from "@/types/operation";
 import type { FilterPayload } from "@/types/index";
 import { computed, onBeforeMount, ref } from "vue";
 import { useRouter } from "vue-router";
-import OperationCard from "../../components/kanban/OperationCard.vue";
+import OperationCard from "../../components/OperationCard.vue";
 import { operationService } from "@/services";
 
 const router = useRouter();

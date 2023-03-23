@@ -4,7 +4,7 @@ import type { Pipe } from "@/types/pipe";
 import type { FilterPayload } from "@/types/index";
 import { ref, computed, onBeforeMount, type Ref } from "vue";
 import { useRouter } from "vue-router";
-import PipeCard from "../../components/kanban/PipeCard.vue";
+import PipeCard from "../../components/PipeCard.vue";
 import { pipeService } from "@/services/index";
 
 const router = useRouter();

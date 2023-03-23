@@ -25,7 +25,6 @@ export default defineConfig({
   ],
   build: {
     sourcemap: true,
-    target: "CommonJS"
   },
   resolve: {
     alias: {

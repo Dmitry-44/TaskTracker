@@ -3,10 +3,10 @@ import { useTaskStore } from "@/stores/task";
 import type { Task } from "@/types/task";
 import type { FilterPayload } from "@/types/index";
 import { useInterfaceStore } from "@/stores/interface";
-import DetailsWindow from "../../components/kanban/DetailsWindow.vue";
+import DetailsWindow from "../../components/DetailsWindow.vue";
 import { ref, computed, onBeforeUnmount, nextTick } from "vue";
-import Filters from "../../components/kanban/Filters.vue";
-import KanbanColumn from "@/components/kanban/KanbanColumn.vue";
+import Filters from "../../components/Filters.vue";
+import KanbanColumn from "@/components/KanbanColumn.vue";
 import { ElMessage } from "element-plus";
 import { taskService } from "@/services/index";
 

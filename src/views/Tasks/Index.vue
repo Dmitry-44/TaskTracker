@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { Plus, MoreFilled } from "@element-plus/icons-vue";
 import { useTaskStore } from "@/stores/task";
-import type { FilterPayload } from "@/types/index";
 import type { Operation } from "@/types/operation";
 import type { Task } from "@/types/task";
-import type { Event } from "@/types/event";
 import { useRouter } from "vue-router";
 import { onBeforeMount, ref, computed } from "vue";
-import EventsModal from "../../components/kanban/EventsModal.vue";
-import OperationColumn from "../../components/kanban/OperationColumn.vue";
+import EventsModal from "../../components/EventsModal.vue";
+import OperationColumn from "../../components/OperationColumn.vue";
 import { usePipeStore } from "@/stores/pipe";
 import { taskService } from "@/services/index";
 
@@ -32,9 +30,6 @@ const taskPriority = computed(() => {
 const taskStatus = computed(() => {
   return statusOptions.filter((v) => v.id === task?.value!.status)[0];
 });
-// const fetchTaskById = (payload: FilterPayload) => {
-//   return taskStore.fetchTasksList(payload);
-// };
 
 onBeforeMount(async () => {
   LOADING.value = true;
@@ -107,7 +102,7 @@ const addNewEvent = (value: Operation) => {};
               </el-link>
               <span>Создана</span>
               <el-tag>{{
-                new Date(task!.created_at * 1000).toLocaleString()
+                new Date(task?.created_at! * 1000).toLocaleString()
               }}</el-tag>
               <el-tag>{{ task?.created_by }}</el-tag>
             </el-dropdown-menu>
