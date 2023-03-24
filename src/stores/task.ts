@@ -1,6 +1,5 @@
 import  TaskRepo  from '@/api/task';
 import { defineStore } from "pinia";
-import type { FilterPayload } from "@/types/index";
 import type { Task } from "@/types/task";
 
 

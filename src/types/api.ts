@@ -21,4 +21,23 @@ export const isSuccessApiResponse = <T>(res: ApiResponse<T>): res is SuccessApiR
 export const isFailureApiResponse = <T>(res: ApiResponse<T>): res is FailureApiResponse => res.message != "ok";
 export const isResultWithPagination = <T>(res: ApiResult<T>): res is ResultWithPagination<T> => res.hasOwnProperty("pagination");
 
-export type { ApiResponse, SuccessApiResponse, FailureApiResponse };
+
+interface FilterPayload {
+	select: string[];
+	filter: { [key: string]: any };
+	options: {
+		onlyLimit: boolean;
+		page?: number;
+		itemsPerPage: number;
+		sortBy?: string[];
+		sortDesc?: boolean[];
+		groupBy?: string[];
+		groupDesc?: boolean[];
+		mustSort?: boolean;
+		multiSort?: boolean;
+		allCount?: number;
+		maxPages?: number;
+	};
+}
+
+export type { ApiResponse, SuccessApiResponse, FailureApiResponse, FilterPayload };

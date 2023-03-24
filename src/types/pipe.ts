@@ -1,5 +1,5 @@
 import type { Operation } from "@/types/operation";
-import type { FilterPayload } from ".";
+import type { FilterPayload } from "@/types/api";
 import type { ApiResponse } from "./api";
 
 interface Pipe {
@@ -11,7 +11,7 @@ interface Pipe {
 
 interface IPipeRepo {
   GetPipes(payload?: FilterPayload): Promise<ApiResponse<Pipe>>;
-  SendPipe(payload: Partial<Pipe> | Pipe): Promise<ApiResponse<Pipe>>;
+  SendPipe(payload: Partial<Pipe>): Promise<ApiResponse<Pipe>>;
 }
 
 export type { Pipe, IPipeRepo };

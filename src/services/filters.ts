@@ -1,5 +1,5 @@
 import { useUserStore } from '@/stores/user';
-import type { FilterPayload } from '@/types';
+import type { FilterPayload } from '@/types/api';
 
 const userStore = useUserStore()
 

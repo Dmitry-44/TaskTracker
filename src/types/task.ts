@@ -1,5 +1,5 @@
 import type { Event } from "@/types/event";
-import type { FilterPayload } from ".";
+import type { FilterPayload } from "@/types/api";
 import type { ApiResponse } from "./api";
 
 interface Task {

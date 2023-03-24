@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
 import { useSitesStore } from "@/stores/sites";
-import type { FilterPayload } from "@/types/index";
+import type { FilterPayload } from "@/types/api";
 import { Close } from "@element-plus/icons-vue";
 import { ref, computed, watch, nextTick, onMounted, onBeforeMount, type Ref } from "vue";
 import { searchFiltersService } from "@/services/index";

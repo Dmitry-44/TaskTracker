@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
 import type { Task } from "@/types/task";
-import type { FilterPayload } from "@/types/index";
+import type { FilterPayload } from "@/types/api";
 import { useInterfaceStore } from "@/stores/interface";
 import DetailsWindow from "../../components/DetailsWindow.vue";
 import { ref, computed, onBeforeUnmount, nextTick } from "vue";
