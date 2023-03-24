@@ -21,8 +21,6 @@ interface State {
 	statusOptions: TaskOption[];
 	eventStatusOptions: EventStatusOption[];
 	activeTask: Task;
-	filterBase: FilterPayload;
-	filterVersion: string;
 }
 
 
@@ -49,13 +47,10 @@ export const useTaskStore = defineStore({
 		activeTask: Object.assign({}, TaskRepo.emptyTask),
 		tasks: [],
 		singleTask: null,
-		filterBase: structuredClone(TaskRepo.filterBase),
-		filterVersion: "1.0",
 	}),
 	getters: {
 		getList: (state): Task[] => state.tasks,
 		getSingleTask: (state) => state.singleTask,
-		getFilterVersion: (state): string => state.filterVersion,
 		getPriorityOptions: (state): TaskOption[] => state.priorityOptions,
 		getStatusOptions: (state): TaskOption[] => state.statusOptions,
 		getActiveTask: (state) => state.activeTask,
@@ -71,8 +66,5 @@ export const useTaskStore = defineStore({
 		setSingleTask(payload: Task | null): void {
 			this.singleTask = payload;
 		},
-		setFilterBase(payload: FilterPayload){
-			this.filterBase = payload
-		}
 	},
 });

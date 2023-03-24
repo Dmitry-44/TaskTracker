@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
-import { useOperationStore } from "@/stores/operation";
 import { useSitesStore } from "@/stores/sites";
 import type { FilterPayload } from "@/types/index";
 import { Close } from "@element-plus/icons-vue";
-import { ref, computed, watch, nextTick, onMounted, onBeforeMount } from "vue";
-import { useUserStore } from "@/stores/user";
+import { ref, computed, watch, nextTick, onMounted, onBeforeMount, type Ref } from "vue";
+import { searchFiltersService } from "@/services/index";
 
 const emit = defineEmits<{
   (e: "update", value: FilterPayload): void;
@@ -14,29 +13,16 @@ const emit = defineEmits<{
 //CONSTANTS
 const sitesStore = useSitesStore();
 const taskStore = useTaskStore();
-const operationStore = useOperationStore();
-const userStore = useUserStore();
 const PRIORITY_OPTIONS = computed(() => taskStore.getPriorityOptions);
 const SITES_OPTIONS = computed(() => sitesStore.getList);
-const operationsById = computed(() => operationStore.getOperationsById);
-const DIRECTIONS_OPTIONS = computed(
-  () => operationsById?.value[4]?.params["directionArr"] || []
-);
-const filterVersion = computed(() => taskStore.getFilterVersion);
-const user = computed(() => userStore.getUser);
+// const operationsById = computed(() => operationStore.getOperationsById);
+// const DIRECTIONS_OPTIONS = computed(
+//   () => operationsById?.value[4]?.params["directionArr"] || []
+// );
 
 //VARIABLES
 const filterIsOpen = ref(false);
-const priority = ref([]);
-const smi_direction = ref([]);
-const site_ids = ref([]);
-const search1 = ref(null);
-const search2 = ref(null);
-
-const date = ref([
-  new Date(new Date().getTime() - 86400 * 1000).toLocaleDateString("en-CA"),
-  new Date().toISOString().substr(0, 10),
-]);
+const date = ref(searchFiltersService.date)
 const dateInt = computed(() => {
   const dtss = Math.round(new Date(date.value[0]).getTime() / 1000);
   const dtff = Math.round(new Date(date.value[1]).getTime() / 1000);
@@ -46,79 +32,47 @@ const dateInt = computed(() => {
   };
 });
 
-const filterPayload = computed(() => {
-  return {
+const filterPayload: Ref<FilterPayload> = ref(
+  Object.assign(
+  {
+    ...searchFiltersService.filtersBase
+  },
+  {
     filter: {
-      pipe_id: null,
-      priority: priority.value,
-      ...dateInt.value,
-      smi_direction: smi_direction.value,
-      site_ids: site_ids.value,
-      search1: search1.value,
-      search2: search2.value,
-    },
-    options: {
-      onlyLimit: true,
-      itemsPerPage: 100,
-    },
-    select: [],
-  };
-});
+      dts: dateInt.value.dts,
+      dtf: dateInt.value.dtf,
+    }
+  }
+))
 
 watch(
-  () => dateInt,
+  () => date.value,
   () => {
-    nextTick(() => {
-      emit("update", filterPayload.value);
-    });
-  },
-  { deep: true }
+    filterPayload.value.filter['dts'] = dateInt.value.dts
+    filterPayload.value.filter['dtf'] = dateInt.value.dtf
+    emit("update", filterPayload.value);
+  }
 );
 
 //METHODS
-const setPersonalFilters = () => {
-  const data = { ...filterPayload.value } as Partial<FilterPayload>;
-  delete data!.filter!["search1"];
-  delete data!.filter!["search2"];
-  delete data!.filter!["dts"];
-  delete data!.filter!["dtf"];
-  try {
-    localStorage.setItem(
-      `tasks_filter_settings_${filterVersion.value}_${user?.value?.id}`,
-      JSON.stringify(data)
-    );
-  } catch (err) {
-    console.log(err);
-  }
-};
+const setPersonalFilters = () => searchFiltersService.setPersonalFilters(filterPayload.value)
 const getPersonalFilters = () => {
-  const personalFiltersString = localStorage.getItem(
-    `tasks_filter_settings_${filterVersion.value}_${user?.value?.id}`
-  );
-  if (!personalFiltersString) {
+  const personalFilters = searchFiltersService.getPersonalFilters()
+  if (!personalFilters) {
     setPersonalFilters();
   } else {
-    const personalFilters = JSON.parse(personalFiltersString);
-    priority.value = personalFilters.filter.priority;
-    site_ids.value = personalFilters.filter.site_ids;
-    smi_direction.value = personalFilters.filter.smi_direction;
+    filterPayload.value.filter['priority'] = personalFilters.filter['priority'];
+    filterPayload.value.filter['site_ids'] = personalFilters.filter['site_ids'];
+    filterPayload.value.filter['smi_direction'] = personalFilters.filter['smi_direction'];
   }
 };
 const applyFilters = () => {
-  if (search1.value === "") {
-    search1.value = null;
-  }
+  searchFiltersService.applyFilters(filterPayload.value)
   emit("update", filterPayload.value);
-  setPersonalFilters();
   closeFilters();
 };
-const resetFilters = () => {
-  search1.value = null;
-  search2.value = null;
-  priority.value = [];
-  smi_direction.value = [];
-  site_ids.value = [];
-};
+const resetFilters = () => searchFiltersService.resetFilters(filterPayload.value)
+
 const closeFilters = () => {
   filterIsOpen.value = false;
 };
@@ -208,17 +162,17 @@ defineExpose({
         </template>
         <div class="body">
           <el-input
-            v-model="search1"
+            v-model="filterPayload.filter['search1']"
             class="my-1"
             placeholder="Поиск по заголовку"
           />
           <el-input
-            v-model="search2"
+            v-model="filterPayload.filter['search2']"
             class="my-1"
             placeholder="Поиск по описанию"
           />
           <el-select
-            v-model="priority"
+            v-model="filterPayload.filter['priority']"
             multiple
             collapse-tags
             placeholder="Любой приоритет"
@@ -255,7 +209,7 @@ defineExpose({
 
           <!-- Select only for smi center???? -->
           <el-select
-            v-model="site_ids"
+            v-model="filterPayload.filter['site_ids']"
             multiple
             collapse-tags
             placeholder="Все сайты"

@@ -18,7 +18,7 @@ const abortSignal = abortController.signal;
 
 //GETTERS
 const tasks = computed(() => taskStore.getList);
-const activeTask = computed(() => taskStore.getActiveTask);
+const LOADING = ref(false);
 
 const tasksToTake = computed(() =>
   tasks.value.filter((task) => task.status! <= 2)
@@ -35,19 +35,6 @@ const setActiveTask = taskService.setActiveTask;
 const toggleDetailsWindow = interfaceStore.toggleDetailsWindow;
 const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess;
 
-const LOADING = ref(false);
-
-const filter = ref<FilterPayload>({
-  filter: {
-    pipe_id: null,
-    priority: [],
-  },
-  options: {
-    onlyLimit: false,
-    itemsPerPage: 40,
-  },
-  select: [],
-});
 
 //METHODS
 const clickOutsideCards = () => {
@@ -58,7 +45,7 @@ const clickOutsideCards = () => {
 };
 const filterUpdate = async (payload: FilterPayload) => {
   LOADING.value = true;
-  await taskService.fetchTasks(payload);
+  await taskService.fetchTasks(payload, abortSignal);
   LOADING.value = false;
 };
 const updateTask = async (task: Task) => {
