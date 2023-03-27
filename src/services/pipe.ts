@@ -1,7 +1,7 @@
 import { isResultWithPagination } from "./../types/api";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
 import { usePipeStore } from "@/stores/pipe";
-import type { FilterPayload } from "@/types";
+import type { FilterPayload } from "@/types/api";
 import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
 import type { IPipeRepo, Pipe } from "@/types/pipe";
 
@@ -44,7 +44,7 @@ export default class PipeService {
 			.catch(err => errRequestHandler(err))
 	}
 
-	sendPipe = (payload: Partial<Pipe> | Pipe) => {
+	sendPipe = (payload: Partial<Pipe>) => {
 		return this.pipeRepo
 			.SendPipe(payload)
 			.then((respdata) => {

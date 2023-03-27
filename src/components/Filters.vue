@@ -4,7 +4,7 @@ import { useSitesStore } from "@/stores/sites";
 import type { FilterPayload } from "@/types/api";
 import { Close } from "@element-plus/icons-vue";
 import { ref, computed, watch, nextTick, onMounted, onBeforeMount, type Ref } from "vue";
-import { searchFiltersService } from "@/services/index";
+import { searchFiltersService } from "@/services";
 
 const emit = defineEmits<{
   (e: "update", value: FilterPayload): void;
@@ -20,6 +20,7 @@ const SITES_OPTIONS = computed(() => sitesStore.getList);
 //   () => operationsById?.value[4]?.params["directionArr"] || []
 // );
 
+
 //VARIABLES
 const filterIsOpen = ref(false);
 const date = ref(searchFiltersService.date)
@@ -32,40 +33,23 @@ const dateInt = computed(() => {
   };
 });
 
-const filterPayload: Ref<FilterPayload> = ref(
-  Object.assign(
-  {
-    ...searchFiltersService.filtersBase
-  },
-  {
-    filter: {
-      dts: dateInt.value.dts,
-      dtf: dateInt.value.dtf,
-    }
-  }
-))
+const filterPayload: Ref<FilterPayload> = ref(searchFiltersService.getPersonalFilters())
+addDataFilter()
+
 
 watch(
   () => date.value,
   () => {
-    filterPayload.value.filter['dts'] = dateInt.value.dts
-    filterPayload.value.filter['dtf'] = dateInt.value.dtf
+    addDataFilter()
     emit("update", filterPayload.value);
   }
 );
 
 //METHODS
-const setPersonalFilters = () => searchFiltersService.setPersonalFilters(filterPayload.value)
-const getPersonalFilters = () => {
-  const personalFilters = searchFiltersService.getPersonalFilters()
-  if (!personalFilters) {
-    setPersonalFilters();
-  } else {
-    filterPayload.value.filter['priority'] = personalFilters.filter['priority'];
-    filterPayload.value.filter['site_ids'] = personalFilters.filter['site_ids'];
-    filterPayload.value.filter['smi_direction'] = personalFilters.filter['smi_direction'];
-  }
-};
+function addDataFilter() {
+  filterPayload.value.filter['dts'] = dateInt.value.dts
+  filterPayload.value.filter['dtf'] = dateInt.value.dtf
+}
 const applyFilters = () => {
   searchFiltersService.applyFilters(filterPayload.value)
   emit("update", filterPayload.value);
@@ -81,9 +65,6 @@ const openFilters = () => {
 };
 
 //HOOKS
-onBeforeMount(() => {
-  getPersonalFilters();
-});
 onMounted(() => {
   applyFilters();
 });

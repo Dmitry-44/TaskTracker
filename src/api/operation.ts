@@ -1,5 +1,5 @@
 import { envConfig } from "@/plugins/envConfig";
-import type { FilterPayload } from "@/types";
+import type { FilterPayload } from "@/types/api";
 import type { ApiResponse } from "@/types/api";
 import type { IOperationRepo, Operation } from "@/types/operation";
 import { axiosClient } from "../plugins/axios";

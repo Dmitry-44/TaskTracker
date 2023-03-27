@@ -26,9 +26,9 @@ interface FilterPayload {
 	select: string[];
 	filter: { [key: string]: any };
 	options: {
-		onlyLimit: boolean;
+		onlyLimit?: boolean;
 		page?: number;
-		itemsPerPage: number;
+		itemsPerPage?: number;
 		sortBy?: string[];
 		sortDesc?: boolean[];
 		groupBy?: string[];

@@ -6,7 +6,7 @@ import SiteRepo from '@/api/site';
 import SiteService from './sites';
 import OperationRepo from '@/api/operation';
 import OperationService from './operation';
-import SearchFiltersService from './filters';
+import SearchFiltersService from '@/services/searchFilters';
 
 
 export const taskService = new TaskService(new TaskRepo());

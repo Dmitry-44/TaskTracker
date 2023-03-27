@@ -1,5 +1,5 @@
 import { envConfig } from "@/plugins/envConfig";
-import type { FilterPayload } from "@/types";
+import type { FilterPayload } from "@/types/api";
 import type { ApiResponse } from "@/types/api";
 import type { ITaskRepo, Task } from "@/types/task";
 import { axiosClient } from "../plugins/axios";
@@ -33,7 +33,7 @@ export default class TaskRepo implements ITaskRepo {
 	}
 
 
-	GetTasks(filterPayload?: Partial<FilterPayload> | undefined, signal?: AbortSignal | undefined): Promise<ApiResponse<Task>> {
+	GetTasks(filterPayload?: Partial<FilterPayload>, signal?: AbortSignal | undefined): Promise<ApiResponse<Task>> {
 		return axiosClient
 			.post(
 				`${envConfig.API_URL}tasktracker/tasks`,

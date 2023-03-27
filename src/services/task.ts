@@ -1,7 +1,7 @@
 import { useInterfaceStore } from './../stores/interface';
 import { isResultWithPagination } from "../types/api";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
-import type { FilterPayload } from "@/types";
+import type { FilterPayload } from "@/types/api";
 import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
 import type { ITaskRepo, Task } from "@/types/task";
 import TaskRepo from "@/api/task";
@@ -49,7 +49,7 @@ export default class TaskService {
 			.catch(err => errRequestHandler(err))
 	}
 
-	upsertTask(payload: Partial<Task> | Task) {
+	upsertTask(payload: Partial<Task>) {
 		return this.taskRepo
 			.UpsertTask(payload)
 			.then((respdata) => {

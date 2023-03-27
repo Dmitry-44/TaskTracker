@@ -5,6 +5,8 @@ const userStore = useUserStore()
 
 export default class SearchFiltersService {
 
+	constructor(){}
+
 	LOCAL_STORAGE_PRE_KEY='tasks_filter_settings'
 	FILTER_VERSION = '1.0'
 
@@ -60,15 +62,17 @@ export default class SearchFiltersService {
 
 	getPersonalFilters() {
 		try {
-			const diltersString = localStorage.getItem(this.getLocalStorageKey())
-			if(!diltersString){
-				return null
+			const filtersString = localStorage.getItem(this.getLocalStorageKey())
+			if(!filtersString){
+				this.setPersonalFilters(this.filtersBase)
+				return this.filtersBase
 			} else {
-				return JSON.parse(diltersString) as FilterPayload
+				const filter = JSON.parse(filtersString) as FilterPayload
+				return filter
 			}
 		} catch (err) {
 			console.log(err)
-			return null
+			return this.filtersBase
 		}
 	}
 
