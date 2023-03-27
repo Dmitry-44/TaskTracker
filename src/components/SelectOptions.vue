@@ -16,40 +16,31 @@ import { ref, onMounted, computed } from "vue";
 import type { PropType } from "vue";
 import { useRouter } from "vue-router";
 import { taskService } from "@/services";
+import TaskRepo from "@/api/task";
 
 const props = defineProps({
   task: {
     type: Object as PropType<Task>,
-    default: () => ({
-      id: -1000,
-      title: "Создание новой задачи",
-      done: false,
-    }),
+    default: () => TaskRepo.emptyTask,
     require: true,
   },
 });
 const emit = defineEmits(["titleChanged"]);
 const task = ref(props.task);
 const readonlyTask = computed(() => task.value.status === 4);
-const interfaceStore = useInterfaceStore();
-const toggleDetailsWindow = interfaceStore.toggleDetailsWindow;
-const router = useRouter();
-const setActiveTask = taskService.setActiveTask;
-const openInNewTab = () => {
-  const routeData = router.resolve({ path: `/tasks/${task.value.id}` });
-  window.open(routeData.href, "_blank");
-};
 
-const copyTaskLink = () => {
-  const routeData = router.resolve({ path: `/tasks/${task.value.id}` });
-  console.log("routeData", routeData);
-  navigator.clipboard.writeText(`aaaa`).catch((err) => {
-    console.log(err);
-  });
-};
+const router = useRouter();
+
+// const copyTaskLink = () => {
+//   const routeData = router.resolve({ path: `/tasks/${task.value.id}` });
+//   console.log("routeData", routeData);
+//   navigator.clipboard.writeText(`aaaa`).catch((err) => {
+//     console.log(err);
+//   });
+// };
 </script>
 <template>
-  <el-option value="" @click="openInNewTab()">
+  <el-option value="" @click="taskService.openTaskInNewTab(task)">
     <el-icon><Notification /></el-icon>
     <span style="margin-left: 10px">Открыть в новой вкладке</span>
   </el-option>
@@ -61,7 +52,7 @@ const copyTaskLink = () => {
     <el-icon><EditPen /></el-icon>
     <span style="margin-left: 10px">Изменить название задачи</span>
   </el-option>
-  <el-option value="" @click="setActiveTask(task), toggleDetailsWindow(true)">
+  <el-option value="" @click="taskService.clickTask(task)">
     <el-icon><View /></el-icon>
     <span style="margin-left: 10px">Открыть сведения</span>
   </el-option>

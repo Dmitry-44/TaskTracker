@@ -1,3 +1,4 @@
+import router from '@/router';
 import { useInterfaceStore } from './../stores/interface';
 import { isResultWithPagination } from "../types/api";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
@@ -76,15 +77,39 @@ export default class TaskService {
 	}
 
 	setActiveTask(payload: Task|null){
-			const activeTask = taskStore.getActiveTask
-			if (
-				activeTask?.id == payload?.id &&
-				!interfaceStore.getIsCreatingTaskProcess
-			)
-				return;
-			payload  
-				? taskStore.setActiveTask(payload)
-				: taskStore.setActiveTask(Object.assign({},TaskRepo.emptyTask));
+		const activeTask = taskStore.getActiveTask
+		if (
+			activeTask?.id == payload?.id &&
+			!interfaceStore.getIsCreatingTaskProcess
+		)
+			return;
+		payload  
+			? taskStore.setActiveTask(payload)
+			: taskStore.setActiveTask(Object.assign({},TaskRepo.emptyTask));
 	}
 
+	clickTask(task: Task) {
+		taskStore.setActiveTask(task)
+		interfaceStore.toggleCreatingTaskProcess(false)
+		interfaceStore.toggleDetailsWindow(true)
+	}
+
+	createNewTask(){
+		interfaceStore.toggleCreatingTaskProcess(true)
+		taskStore.setActiveTask(TaskRepo.emptyTask)
+		interfaceStore.toggleDetailsWindow(true)
+	}
+
+	closeDetailWindow(){
+		interfaceStore.toggleDetailsWindow(false),
+		this.setActiveTask(TaskRepo.emptyTask),
+		interfaceStore.toggleCreatingTaskProcess(false)
+	}
+
+	openTaskInNewTab(task: Task){
+		const routeData = router.resolve({ path: `/tasks/${task.id}` });
+  		window.open(routeData.href, "_blank");
+	}
+
+	
 }

@@ -40,15 +40,10 @@ const emit = defineEmits<{
 }>();
 
 const taskStore = useTaskStore();
-const interfaceStore = useInterfaceStore();
 
 //GETTERS
 const activeTask = computed(() => taskStore.getActiveTask);
 
-//ACTIONS
-const setActiveTask = taskService.setActiveTask;
-const toggleDetailsWindow = interfaceStore.toggleDetailsWindow;
-const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess;
 
 const LOADING = toRef(props, "loading");
 const searchValue = ref("");
@@ -64,16 +59,6 @@ watch(
 );
 
 //METHODS
-const addTask = () => {
-  setActiveTask(null);
-  toggleCreatingTaskProcess(true);
-  toggleDetailsWindow(true);
-};
-const taskClickHandler = (task: Task) => {
-  toggleCreatingTaskProcess(false);
-  setActiveTask(task);
-  toggleDetailsWindow(true);
-};
 const takeTask = async (taskId: Task["id"]) => {
   LOADING.value = true;
   const msg = ElMessage({
@@ -135,7 +120,7 @@ const setDefaultSort = () => {
           content="Добавить задачу"
           placement="top-start"
         >
-          <el-button size="small" :icon="Plus" @click.stop="addTask()" />
+          <el-button size="small" :icon="Plus" @click.stop="taskService.createNewTask()" />
         </el-tooltip>
       </template>
     </div>
@@ -172,13 +157,13 @@ const setDefaultSort = () => {
           :draggable="isDraggable"
           :task="task"
           :active="task.id === activeTask?.id ? true : false"
-          @click.stop="taskClickHandler(task)"
+          @click.stop="taskService.clickTask(task)"
           @dragstart="emit('taskDragStart', $event, task)"
           @take="takeTask($event)"
         />
         <el-button
           v-if="addNewTask"
-          @click.stop="addTask()"
+          @click.stop="taskService.createNewTask()"
           class="column-button-footer"
           :icon="Plus"
         >

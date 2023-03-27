@@ -3,8 +3,7 @@ import { useTaskStore } from "@/stores/task";
 import { useInterfaceStore } from "@/stores/interface";
 import { Close, Pointer, Notification } from "@element-plus/icons-vue";
 import { computed } from "vue";
-import { nextTick, onBeforeMount, onMounted, ref, watch } from "vue";
-import { useRouter } from "vue-router";
+import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
 import { ElMessage } from "element-plus";
@@ -14,7 +13,7 @@ import { taskService } from "@/services/index";
 const taskStore = useTaskStore();
 const interfaceStore = useInterfaceStore();
 const pipeStore = usePipeStore();
-const router = useRouter();
+
 //GETTERS
 const detailWindowIsOpen = computed(() => interfaceStore.getDetailWindowIsOpen);
 const task = computed(() => taskStore.getActiveTask);
@@ -26,27 +25,19 @@ const PIPES = computed(() => pipeStore.getPipes);
 const PRIORITY_OPTIONS = taskStore.getPriorityOptions;
 const STATUS_OPTIONS = taskStore.getStatusOptions;
 
-//ACTIONS
-const toggleDetailsWindow = interfaceStore.toggleDetailsWindow;
-// const setActiveTask = taskService.setActiveTask;
-const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess;
-
-const openInNewTab = () => {
-  const routeData = router.resolve({ path: `/tasks/${task.value?.id}` });
-  window.open(routeData.href, "_blank");
-};
-
+//VARIABLES
 const LOADING = ref(false);
 const oldContent = ref("");
 const wasChanged = computed(() => {
   const updatedData = JSON.parse(JSON.stringify(task.value));
   return oldContent.value != JSON.stringify(updatedData);
 });
-const titleInput = ref<HTMLInputElement | any>(null);
+const detailWindowTitleInput = ref<HTMLInputElement|null>(null);
 const taskPipe = computed(
   () => PIPES.value.find((pipe) => pipe?.id === task.value?.pipe_id) || null
 );
 
+//METHODS
 const save = () => {
   if(!task.value)return
   LOADING.value = true;
@@ -75,16 +66,8 @@ const save = () => {
     });
 };
 
-watch(task, (newVal, oldVal) => {
-  if (oldVal?.id != newVal?.id) {
-    oldContent.value = JSON.stringify({ ...task.value });
-    if (isCreatingTaskProcess.value) {
-      nextTick(() => {
-        titleInput.value.focus();
-      });
-    }
-  }
-});
+
+
 </script>
 <template>
   <div :class="['details', detailWindowIsOpen ? 'active' : '']" @click.stop>
@@ -115,7 +98,7 @@ watch(task, (newVal, oldVal) => {
           >
             <el-button
               :icon="Notification"
-              @click.stop="openInNewTab()"
+              @click.stop="taskService.openTaskInNewTab(task)"
             ></el-button>
           </el-tooltip>
         </template>
@@ -128,11 +111,7 @@ watch(task, (newVal, oldVal) => {
           <el-button
             class="close-btn"
             :icon="Close"
-            @click.stop="
-                toggleDetailsWindow(false),
-                taskService.setActiveTask(null),
-                toggleCreatingTaskProcess(false)
-            "
+            @click.stop="taskService.closeDetailWindow()"
           ></el-button>
         </el-tooltip>
       </div>
@@ -144,7 +123,7 @@ watch(task, (newVal, oldVal) => {
           :disabled="isReadonlyTask"
           class="title-input"
           placeholder="Ввести название задачи"
-          ref="titleInput"
+          ref="detailWindowTitleInput"
         />
       </div>
       <div class="content">
