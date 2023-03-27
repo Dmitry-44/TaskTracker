@@ -8,7 +8,7 @@ import { Plus, Top, Bottom, CloseBold } from "@element-plus/icons-vue";
 import { useInterfaceStore } from "@/stores/interface";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
-import KanbanColumnFilter from "./KanbanColumnFilter.vue";
+import KanbanColumnFilter from "./KanbanColumnSortPicker.vue";
 import { taskService } from "@/services/index";
 
 const props = defineProps({
@@ -36,14 +36,12 @@ const props = defineProps({
 
 const emit = defineEmits<{
   (e: "taskDragStart", ev: DragEvent, task: Task): void;
-  (e: "changeSort", sort: <T extends Task>(a: T, b: T) => number): void;
 }>();
 
 const taskStore = useTaskStore();
 
 //GETTERS
 const activeTask = computed(() => taskStore.getActiveTask);
-
 
 const LOADING = toRef(props, "loading");
 const searchValue = ref("");
@@ -95,14 +93,7 @@ const takeTask = async (taskId: Task["id"]) => {
 };
 
 const doSearch = () => {
-  tasks.value = JSON.parse(JSON.stringify(props.tasks));
-  tasks.value = tasks.value.filter(
-    (task) =>
-      task.title
-        .concat(" ", task.text)
-        .toLowerCase()
-        .indexOf(searchValue.value.toLowerCase()) !== -1
-  );
+  tasks.value = taskService.searchTasks(props.tasks, searchValue.value)
 };
 const setDefaultSort = () => {
   tasks.value = JSON.parse(JSON.stringify(props.tasks));

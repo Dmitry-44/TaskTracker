@@ -2,46 +2,20 @@
 import type { Task } from "@/types/task";
 import { CloseBold } from "@element-plus/icons-vue";
 import { ref } from "vue";
+import { sortOptions } from "@/services/sortService"
 
 const emit = defineEmits<{
   (e: "changeSort", sort: <T extends Task>(a: T, b: T) => number): void;
   (e: "noSort"): void;
 }>();
 
-const topPriority = <U extends Task>(a: U, b: U) => a.priority! - b.priority!;
-const lowPriority = <U extends Task>(a: U, b: U) => b.priority! - a.priority!;
-const topStatus = <U extends Task>(a: U, b: U) => a.status! - b.status!;
-const lowStatus = <U extends Task>(a: U, b: U) => b.status! - a.status!;
-
-const FILTER_OPTIONS = [
-  {
-    icon: "Top",
-    name: "Приоритет",
-    filter: topPriority,
-  },
-  {
-    icon: "Bottom",
-    name: "Приоритет",
-    filter: lowPriority,
-  },
-  {
-    icon: "Top",
-    name: "Статус",
-    filter: topStatus,
-  },
-  {
-    icon: "Bottom",
-    name: "Статус",
-    filter: lowStatus,
-  },
-];
-
-const activeOption = ref<typeof FILTER_OPTIONS[0] | null>(null);
+const SORT_OPTIONS = sortOptions
+const activeOption = ref<typeof SORT_OPTIONS[0] | null>(null);
 
 //METHODS
 const setActive = (i: number) => {
-  activeOption.value = FILTER_OPTIONS[i];
-  emit("changeSort", FILTER_OPTIONS[i].filter);
+  activeOption.value = SORT_OPTIONS[i];
+  emit("changeSort", activeOption.value.filter);
 };
 const resetActive = () => {
   activeOption.value = null;
@@ -66,7 +40,7 @@ defineExpose({
     ></span>
     <template #dropdown>
       <el-dropdown-menu>
-        <template v-for="(option, i) in FILTER_OPTIONS" :key="i">
+        <template v-for="(option, i) in SORT_OPTIONS" :key="i">
           <el-dropdown-item :icon="option.icon" @click="setActive(i)">{{
             option.name
           }}</el-dropdown-item>

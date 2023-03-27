@@ -71,6 +71,8 @@ declare module '@vue/runtime-core' {
     JsonEditor: typeof import('./src/components/JsonEditor.vue')['default']
     KanbanColumn: typeof import('./src/components/KanbanColumn.vue')['default']
     KanbanColumnFilter: typeof import('./src/components/KanbanColumnFilter.vue')['default']
+    KanbanColumnSort: typeof import('./src/components/KanbanColumnSort.vue')['default']
+    KanbanColumnSortPicker: typeof import('./src/components/KanbanColumnSortPicker.vue')['default']
     MenuAside: typeof import('./src/components/MenuAside.vue')['default']
     MultiEditor: typeof import("./src/components/photoEditor/MultiEditor.vue")["default"]
     OperationCard: typeof import('./src/components/OperationCard.vue')['default']

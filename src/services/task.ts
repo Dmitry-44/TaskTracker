@@ -36,11 +36,12 @@ export default class TaskService {
 							taskStore.setSingleTask(payload);
 						}
 					} else {
-						if (isResultWithPagination(respdata.result)) {
-							taskStore.setTasksList(respdata.result.queryResult);
-						} else {
-							taskStore.setTasksList(respdata.result);
-						}
+						const tasks = 
+							isResultWithPagination(respdata.result)
+							? respdata.result.queryResult
+							: respdata.result
+
+						taskStore.setTasksList(tasks);
 					}
 					return true;
 				} else {
@@ -111,5 +112,14 @@ export default class TaskService {
   		window.open(routeData.href, "_blank");
 	}
 
-	
+	searchTasks(tasksList: Task[], search: string) {
+		let tasks = JSON.parse(JSON.stringify(tasksList)) as Task[];
+		return tasks.filter(
+			(task) =>
+			task.title
+				.concat(" ", task.text)
+				.toLowerCase()
+				.indexOf(search.toLowerCase()) !== -1
+		);
+	}
 }
