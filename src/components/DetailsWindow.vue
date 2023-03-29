@@ -2,7 +2,7 @@
 import { useTaskStore } from "@/stores/task";
 import { useInterfaceStore } from "@/stores/interface";
 import { Close, Pointer, Notification } from "@element-plus/icons-vue";
-import { computed } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
@@ -35,6 +35,19 @@ const wasChanged = computed(() => {
 const detailWindowTitleInput = ref<HTMLInputElement|null>(null);
 const taskPipe = computed(
   () => PIPES.value.find((pipe) => pipe?.id === task.value?.pipe_id) || null
+);
+
+onMounted(()=>{
+  oldContent.value=JSON.stringify(task.value);
+})
+
+watch(
+  () => task.value,
+  (newVal, oldVal) => {
+    if(newVal.id!=oldVal.id){
+      oldContent.value=JSON.stringify(task.value)
+    }
+  }
 );
 
 //METHODS
