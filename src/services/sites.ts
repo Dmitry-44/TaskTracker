@@ -1,17 +1,18 @@
 import { isResultWithPagination } from './../types/api';
 import { errRequestHandler } from '@/plugins/errorResponser';
-import { useSitesStore } from '@/stores/sites';
 import { isSuccessApiResponse } from '@/types/api';
 import type { ISiteRepo } from '@/types/site';
+import type PiniaSiteAdapter from '@/adapters/piniaSiteAdapter';
 
 
-const siteStore = useSitesStore()
 
 export default class SiteService {
 	siteRepo;
+	siteStore;
 
-	constructor(siteRepo: ISiteRepo) {
+	constructor(siteRepo: ISiteRepo, siteStore: PiniaSiteAdapter) {
 		this.siteRepo = siteRepo;
+		this.siteStore = siteStore
 	}
 
 	fetchSites = () => {
@@ -20,9 +21,9 @@ export default class SiteService {
 			.then((respdata) => {
 				if (isSuccessApiResponse(respdata)) {
                     if (isResultWithPagination(respdata.result)) {
-                        siteStore.setSites(respdata.result.queryResult);
+                        this.siteStore.setSites(respdata.result.queryResult);
                     } else {
-                        siteStore.setSites(respdata.result);
+                        this.siteStore.setSites(respdata.result);
                     }
 					return true;
 				} else {

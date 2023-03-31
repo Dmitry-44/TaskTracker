@@ -22,6 +22,12 @@ export const useUserStore = defineStore({
     getLoader: (state) => state.globalLoader,
   },
   actions: {
+    setUser(payload: User|null){
+      this.user=payload
+    },
+    setIsAuth(payload: boolean){
+      this.is_auth=payload
+    },
     showLoader() {
       this.globalLoader = true;
     },

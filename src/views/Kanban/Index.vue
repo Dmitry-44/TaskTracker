@@ -8,13 +8,15 @@ import { ref, computed, onBeforeUnmount, nextTick } from "vue";
 import Filters from "../../components/Filters.vue";
 import KanbanColumn from "@/components/KanbanColumn.vue";
 import { ElMessage } from "element-plus";
-import { taskService } from "@/services/index";
+import { services } from "@/main";
+
 
 const taskStore = useTaskStore();
 const interfaceStore = useInterfaceStore();
 const $filters = ref<typeof Filters | null>(null);
 const abortController = new AbortController();
 const abortSignal = abortController.signal;
+const TaskService = services.Task
 
 //GETTERS
 const tasks = computed(() => taskStore.getList);
@@ -31,7 +33,7 @@ const tasksFinished = computed(() =>
 );
 
 //ACTIONS
-const setActiveTask = taskService.setActiveTask;
+const setActiveTask = TaskService.setActiveTask;
 const toggleDetailsWindow = interfaceStore.toggleDetailsWindow;
 const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess;
 
@@ -40,12 +42,12 @@ const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess;
 const clickOutsideCards = () => {
   $filters?.value?.["closeFilters"]();
   toggleDetailsWindow(false);
-  setActiveTask(null);
+  TaskService.setActiveTask(null)
   toggleCreatingTaskProcess(false);
 };
 const filterUpdate = async (payload: FilterPayload) => {
   LOADING.value = true;
-  await taskService.fetchTasks(payload, abortSignal);
+  await TaskService.fetchTasks(payload, abortSignal);
   LOADING.value = false;
 };
 const updateTask = async (task: Task) => {
@@ -56,7 +58,7 @@ const updateTask = async (task: Task) => {
     center: true,
     duration: 1000,
   });
-  return taskService
+  return TaskService
     .upsertTask(task)
     .then(res => {
       if (res) {

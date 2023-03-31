@@ -5,9 +5,9 @@ import type { PropType } from "vue";
 import SelectOptions from "./SelectOptions.vue";
 import { useTaskStore } from "@/stores/task";
 import type { Task } from "@/types/task";
-import { taskService } from "@/services/index";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
+import { services } from "@/main";
 
 const props = defineProps({
   task: {
@@ -32,6 +32,7 @@ const priorityOptions = taskStore.getPriorityOptions;
 const statusOptions = taskStore.getStatusOptions;
 
 const selectMore = ref<any | HTMLInputElement>(null);
+const TaskService = services.Task
 
 const taskTitleEditing = ref(false);
 const titleInput = ref<any | HTMLInputElement>(null);
@@ -85,7 +86,7 @@ const save = async() => {
     center: true,
     duration: 1000,
   });
-  taskService
+  TaskService
     .upsertTask(task.value)
     .then((res) => {
       if (errVueHandler(res)) {

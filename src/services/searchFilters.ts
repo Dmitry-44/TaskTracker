@@ -1,11 +1,15 @@
+import type PiniaUserAdapter from '@/adapters/piniaUserAdapter';
 import { useUserStore } from '@/stores/user';
 import type { FilterPayload } from '@/types/api';
 
-const userStore = useUserStore()
 
 export default class SearchFiltersService {
 
-	constructor(){}
+	userStore;
+	
+	constructor(userStore: PiniaUserAdapter){
+		this.userStore = userStore
+	}
 
 	LOCAL_STORAGE_PRE_KEY='tasks_filter_settings'
 	FILTER_VERSION = '1.0'
@@ -36,7 +40,7 @@ export default class SearchFiltersService {
 		]
 
 	getLocalStorageKey(){
-		const user = userStore.getUser
+		const user = this.userStore.getUser()
 		if (!user) {
 			console.log('user is not found')
 			return ''

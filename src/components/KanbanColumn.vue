@@ -9,7 +9,8 @@ import { useInterfaceStore } from "@/stores/interface";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
 import KanbanColumnFilter from "./KanbanColumnSortPicker.vue";
-import { taskService } from "@/services/index";
+import { services } from "@/main";
+
 
 const props = defineProps({
   tasks: {
@@ -39,6 +40,7 @@ const emit = defineEmits<{
 }>();
 
 const taskStore = useTaskStore();
+const TaskService = services.Task
 
 //GETTERS
 const activeTask = computed(() => taskStore.getActiveTask);
@@ -65,7 +67,7 @@ const takeTask = async (taskId: Task["id"]) => {
     center: true,
     duration: 1000,
   });
-  taskService
+  TaskService
     .takeTask(taskId)
     .then(res => {
       if (errVueHandler(res)) {
@@ -93,7 +95,7 @@ const takeTask = async (taskId: Task["id"]) => {
 };
 
 const doSearch = () => {
-  tasks.value = taskService.searchTasks(props.tasks, searchValue.value)
+  tasks.value = TaskService.searchTasks(props.tasks, searchValue.value)
 };
 const setDefaultSort = () => {
   tasks.value = JSON.parse(JSON.stringify(props.tasks));
@@ -111,7 +113,7 @@ const setDefaultSort = () => {
           content="Добавить задачу"
           placement="top-start"
         >
-          <el-button size="small" :icon="Plus" @click.stop="taskService.createNewTask()" />
+          <el-button size="small" :icon="Plus" @click.stop="TaskService.createNewTask()" />
         </el-tooltip>
       </template>
     </div>
@@ -148,13 +150,13 @@ const setDefaultSort = () => {
           :draggable="isDraggable"
           :task="task"
           :active="task.id === activeTask?.id ? true : false"
-          @click.stop="taskService.clickTask(task)"
+          @click.stop="TaskService.clickTask(task)"
           @dragstart="emit('taskDragStart', $event, task)"
           @take="takeTask($event)"
         />
         <el-button
           v-if="addNewTask"
-          @click.stop="taskService.createNewTask()"
+          @click.stop="TaskService.createNewTask()"
           class="column-button-footer"
           :icon="Plus"
         >

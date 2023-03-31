@@ -4,15 +4,17 @@ import { usePipeStore } from "@/stores/pipe";
 import type { FilterPayload } from "@/types/api";
 import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
 import type { IPipeRepo, Pipe } from "@/types/pipe";
+import type PiniaPipeAdapter from "@/adapters/piniaPipeAdapter";
 
 
-const pipeStore = usePipeStore();
 
 export default class PipeService {
 	pipeRepo;
+	pipeStore;
 
-	constructor(pipeRepo: IPipeRepo) {
+	constructor(pipeRepo: IPipeRepo, pipeStore: PiniaPipeAdapter) {
 		this.pipeRepo = pipeRepo;
+		this.pipeStore = pipeStore;
 	}
 
 	fetchPipes = (payload?: FilterPayload) => {
@@ -21,19 +23,19 @@ export default class PipeService {
 				if (isSuccessApiResponse(respdata)) {
 					if (payload?.filter!["id"]) {
 						if (isResultWithPagination(respdata.result)) {
-							pipeStore.setSinglePipe(respdata.result.queryResult[0])
+							this.pipeStore.setSinglePipe(respdata.result.queryResult[0])
 						} else {
 							const payload =
 								respdata.result.length > 0
 									? respdata.result[0]
 									: null;
-							pipeStore.setSinglePipe(payload);
+							this.pipeStore.setSinglePipe(payload);
 						}
 					} else {
 						if (isResultWithPagination(respdata.result)) {
-							pipeStore.setPipes(respdata.result.queryResult);
+							this.pipeStore.setPipes(respdata.result.queryResult);
 						} else {
-							pipeStore.setPipes(respdata.result);
+							this.pipeStore.setPipes(respdata.result);
 						}
 					}
 					return true;

@@ -4,7 +4,8 @@ import { useSitesStore } from "@/stores/sites";
 import type { FilterPayload } from "@/types/api";
 import { Close } from "@element-plus/icons-vue";
 import { ref, computed, watch, nextTick, onMounted, onBeforeMount, type Ref } from "vue";
-import { searchFiltersService } from "@/services";
+import { services } from "@/main";
+
 
 const emit = defineEmits<{
   (e: "update", value: FilterPayload): void;
@@ -15,6 +16,7 @@ const sitesStore = useSitesStore();
 const taskStore = useTaskStore();
 const PRIORITY_OPTIONS = computed(() => taskStore.getPriorityOptions);
 const SITES_OPTIONS = computed(() => sitesStore.getList);
+const FilterService = services.Filters
 // const operationsById = computed(() => operationStore.getOperationsById);
 // const DIRECTIONS_OPTIONS = computed(
 //   () => operationsById?.value[4]?.params["directionArr"] || []
@@ -23,7 +25,7 @@ const SITES_OPTIONS = computed(() => sitesStore.getList);
 
 //VARIABLES
 const filterIsOpen = ref(false);
-const date = ref(searchFiltersService.date)
+const date = ref(FilterService.date)
 const dateInt = computed(() => {
   const dtss = Math.round(new Date(date.value[0]).getTime() / 1000);
   const dtff = Math.round(new Date(date.value[1]).getTime() / 1000);
@@ -33,7 +35,7 @@ const dateInt = computed(() => {
   };
 });
 
-const filterPayload: Ref<FilterPayload> = ref(searchFiltersService.getPersonalFilters())
+const filterPayload: Ref<FilterPayload> = ref(FilterService.getPersonalFilters())
 addDataFilter()
 
 
@@ -51,11 +53,11 @@ function addDataFilter() {
   filterPayload.value.filter['dtf'] = dateInt.value.dtf
 }
 const applyFilters = () => {
-  searchFiltersService.applyFilters(filterPayload.value)
+  FilterService.applyFilters(filterPayload.value)
   emit("update", filterPayload.value);
   closeFilters();
 };
-const resetFilters = () => searchFiltersService.resetFilters(filterPayload.value)
+const resetFilters = () => FilterService.resetFilters(filterPayload.value)
 
 const closeFilters = () => {
   filterIsOpen.value = false;

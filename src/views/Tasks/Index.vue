@@ -8,11 +8,13 @@ import { onBeforeMount, ref, computed } from "vue";
 import EventsModal from "../../components/EventsModal.vue";
 import OperationColumn from "../../components/OperationColumn.vue";
 import { usePipeStore } from "@/stores/pipe";
-import { taskService } from "@/services/index";
+import { services } from "@/main";
+
 
 const router = useRouter();
 const taskStore = useTaskStore();
 const pipeStore = usePipeStore();
+const TaskService = services.Task
 const PIPES = computed(() => pipeStore.getPipes);
 const LOADING = ref(false);
 const taskId = router.currentRoute.value.params["id"];
@@ -33,7 +35,7 @@ const taskStatus = computed(() => {
 
 onBeforeMount(async () => {
   LOADING.value = true;
-  await taskService.fetchTasks({
+  await TaskService.fetchTasks({
     filter: { id: Number(taskId) },
     options: { onlyLimit: true, itemsPerPage: 1 },
     select: [],

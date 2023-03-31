@@ -1,3 +1,5 @@
+import type { User } from "./user";
+
 interface SuccessApiResponse<T> {
   message: string;
   result: ApiResult<T>;
@@ -10,6 +12,10 @@ type ResultWithPagination<T> = {
 interface FailureApiResponse {
   message: string;
   result?: unknown;
+}
+
+type UserResponse = {
+	auth: User
 }
 
 type ApiResult<T> = ResultWithPagination<T> | T[];
@@ -40,4 +46,4 @@ interface FilterPayload {
 	};
 }
 
-export type { ApiResponse, SuccessApiResponse, FailureApiResponse, FilterPayload };
+export type { ApiResponse, SuccessApiResponse, FailureApiResponse, FilterPayload, UserResponse };

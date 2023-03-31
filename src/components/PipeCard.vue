@@ -15,9 +15,8 @@ import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
-import { usePipeStore } from "@/stores/pipe";
 import type { Pipe } from "@/types/pipe";
-import { pipeService } from "@/services/index";
+import { services } from "@/main";
 
 const props = defineProps({
   pipe: {
@@ -35,6 +34,7 @@ const props = defineProps({
 const router = useRouter();
 const user = useUserStore().getUser;
 const pipe = ref(props.pipe);
+const PipeService = services.Pipe
 
 const operationStore = useOperationStore();
 const operations = computed(() => operationStore.getOperations);
@@ -75,21 +75,23 @@ const sendPipe = () => {
     u_id: user?.id,
     value: pipe?.value?.value,
   };
-  pipeService.sendPipe(data).then((res) => {
-    if (errVueHandler(res)) {
-      ElMessage({
-        message: "Операция выполнена успешно!",
-        type: "success",
-        center: true,
-        duration: 1500,
-        showClose: true,
-      });
-      if (!pipe?.value?.id) router.push("/pipes");
-      oldContent.value = JSON.stringify(pipe.value);
-    }
-    LOADING.value = false;
-    msg.close();
-  });
+  PipeService
+    .sendPipe(data)
+    .then((res) => {
+      if (errVueHandler(res)) {
+        ElMessage({
+          message: "Операция выполнена успешно!",
+          type: "success",
+          center: true,
+          duration: 1500,
+          showClose: true,
+        });
+        if (!pipe?.value?.id) router.push("/pipes");
+        oldContent.value = JSON.stringify(pipe.value);
+      }
+      LOADING.value = false;
+      msg.close();
+    });
 };
 
 //DRAG AND DROP

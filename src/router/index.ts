@@ -3,13 +3,9 @@ import {
   createWebHistory,
   type NavigationGuardNext,
 } from "vue-router";
-import { useUserStore } from "@/stores/user";
-import { envConfig } from "@/plugins/envConfig";
 
-interface rightsObj {
-  [key: string]: any;
-}
 
+console.log('ROUTER_____')
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -76,45 +72,9 @@ const router = createRouter({
     },
   ],
 });
-router.beforeEach((to, from, next) => {
-  const userStore = useUserStore();
-  userStore.showLoader();
-  if (to.query["auth"]) {
-    console.log("cookie exist");
-    document.cookie = `connect.sid=${
-      to.query["auth"]
-    };path=/;expires=${new Date(Date.now() + 86400000).toUTCString()}`;
-  }
-  if (to.matched.some((record) => record.meta["requiresAuth"])) {
-    if (userStore.is_auth) {
-      return chechRights(userStore, to.meta["rights"] as rightsObj, next);
-    }
-    return userStore.checkAuth().then((res) => {
-      if (res) {
-        return chechRights(userStore, to.meta["rights"] as rightsObj, next);
-      } else {
-        window.location.href = `${envConfig.CLIENT_COOKIE}/auth_service?redirect=http://${location.host}${to.fullPath}`;
-      }
-    });
-  } else {
-    userStore.hideLoader();
-    next();
-  }
-});
-function chechRights(
-  userStore: any,
-  rightsObj: rightsObj,
-  next: NavigationGuardNext
-) {
-  const rights = userStore.getRights;
-  let access = true;
-  for (const prop in rightsObj) {
-    if (!rights[prop] || rights[prop] < rightsObj[prop]) {
-      access = false;
-      break;
-    }
-  }
-  userStore.hideLoader();
-  return access ? next() : next({ path: "401" });
-}
+
+
+
+
+
 export default router;

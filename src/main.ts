@@ -4,7 +4,9 @@ import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import "./assets/base.css";
 import App from "./App.vue";
+console.log('before router')
 import router from "./router";
+console.log('after router')
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 import * as Sentry from "@sentry/vue";
 import { BrowserTracing } from "@sentry/tracing";
@@ -17,6 +19,8 @@ import "element-plus/theme-chalk/display.css";
 import "./assets/b-spacing.css";
 import "./assets/common.css";
 import RuLocale from "element-plus/es/locale/lang/ru";
+import initServices from "./services";
+
 
 const app = createApp(App);
 
@@ -47,16 +51,19 @@ const app = createApp(App);
 //   trackComponents: true,
 //   tracesSampleRate: 1.0,
 // });
-
+console.log('MAIN____1')
 app.directive("tooltip", VTooltip);
 app.use(ElementPlus, {
   locale: RuLocale,
 });
+console.log('MAIN____2')
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 app.use(createPinia());
-
+console.log('MAIN____3')
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 app.use(router);
+export const services = initServices()
+services.User.initMiddleware()
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component);
 }

@@ -8,11 +8,14 @@ import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
-import { taskService } from "@/services/index";
+import { services } from "@/main";
+
 
 const taskStore = useTaskStore();
 const interfaceStore = useInterfaceStore();
 const pipeStore = usePipeStore();
+
+const TaskService = services.Task
 
 //GETTERS
 const detailWindowIsOpen = computed(() => interfaceStore.getDetailWindowIsOpen);
@@ -60,7 +63,7 @@ const save = () => {
     center: true,
     duration: 1000,
   });
-  taskService
+  TaskService
     .upsertTask(task.value)
     .then(res => {
       if (errVueHandler(res)) {
@@ -111,7 +114,7 @@ const save = () => {
           >
             <el-button
               :icon="Notification"
-              @click.stop="taskService.openTaskInNewTab(task)"
+              @click.stop="TaskService.openTaskInNewTab(task)"
             ></el-button>
           </el-tooltip>
         </template>
@@ -124,7 +127,7 @@ const save = () => {
           <el-button
             class="close-btn"
             :icon="Close"
-            @click.stop="taskService.closeDetailWindow()"
+            @click.stop="TaskService.closeDetailWindow()"
           ></el-button>
         </el-tooltip>
       </div>

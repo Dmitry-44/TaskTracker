@@ -4,7 +4,8 @@ import { RouterView, useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import Menu from "@/components/MenuAside.vue";
 import { useOperationStore } from "@/stores/operation";
-import { pipeService, siteService, operationService } from "@/services/index";
+import { services } from "@/main";
+
 
 const isCollapse = ref(true);
 const route = useRoute();
@@ -21,9 +22,9 @@ onBeforeMount(async () => {
   delete query["auth"];
   router.replace({ query });
 
-  const operations = await operationService.fetchOperations();
-  const pipes = await pipeService.fetchPipes();
-  const sites = await siteService.fetchSites();
+  const operations = await services.Operation.fetchOperations();
+  const pipes = await services.Pipe.fetchPipes();
+  const sites = await services.Site.fetchSites();
   Promise.allSettled([operations, pipes, sites]).then(
     () => (loading.value = false)
   );

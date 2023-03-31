@@ -1,20 +1,19 @@
 import type { Operation } from '@/types/operation';
-import { isResultWithPagination } from "../types/api";
+import { isResultWithPagination, type FilterPayload } from "../types/api";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
-import type { FilterPayload } from "@/types";
 import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
 import type { IOperationRepo } from '@/types/operation';
-import { useOperationStore } from '@/stores/operation';
+import type PiniaOperationAdapter from '@/adapters/piniaOperationAdapter';
 
-
-const operationStore = useOperationStore()
 
 export default class OperationService {
 
 	operationRepo;
+	operationStore;
 
-	constructor(operationRepo: IOperationRepo) {
+	constructor(operationRepo: IOperationRepo, operationStore: PiniaOperationAdapter) {
 		this.operationRepo = operationRepo;
+		this.operationStore = operationStore
 	}
 
 	fetchOperations (payload?: FilterPayload) {
@@ -24,19 +23,19 @@ export default class OperationService {
 				if (isSuccessApiResponse(respdata)) {
 					if (payload?.filter!["id"]) {
 						if (isResultWithPagination(respdata.result)) {
-							operationStore.setSingleOperation(respdata.result.queryResult[0]);
+							this.operationStore.setSingleOperation(respdata.result.queryResult[0]);
 						} else {
 							const payload =
 							respdata.result.length > 0
 								? respdata.result[0]
 								: null;
-								operationStore.setSingleOperation(payload);
+								this.operationStore.setSingleOperation(payload);
 						}
 					} else {
 						if (isResultWithPagination(respdata.result)) {
-							operationStore.setOperations(respdata.result.queryResult);
+							this.operationStore.setOperations(respdata.result.queryResult);
 						} else {
-							operationStore.setOperations(respdata.result);
+							this.operationStore.setOperations(respdata.result);
 						}
 					}
 					return true;

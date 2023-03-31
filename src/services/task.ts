@@ -1,4 +1,3 @@
-import router from '@/router';
 import { useInterfaceStore } from './../stores/interface';
 import { isResultWithPagination } from "../types/api";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
@@ -6,18 +5,22 @@ import type { FilterPayload } from "@/types/api";
 import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
 import type { ITaskRepo, Task } from "@/types/task";
 import TaskRepo from "@/api/task";
-import { useTaskStore } from "@/stores/task";
+import router from '@/router';
+import type PiniaTaskAdapter from '@/adapters/piniaTaskAdapter';
+import type PiniaInterfaceAdapter from '@/adapters/piniaInterfaceAdapter';
 
 
-const taskStore = useTaskStore();
-const interfaceStore = useInterfaceStore();
 
 export default class TaskService {
 
 	taskRepo;
+	interfaceStore;
+	taskStore;
 
-	constructor(taskRepo: ITaskRepo) {
+	constructor(taskRepo: ITaskRepo, taskStore: PiniaTaskAdapter, interfaceStore: PiniaInterfaceAdapter) {
 		this.taskRepo = taskRepo;
+		this.taskStore = taskStore;
+		this.interfaceStore=interfaceStore;
 	}
 
 	fetchTasks (payload?: FilterPayload | Partial<FilterPayload>, signal?: AbortSignal) {
@@ -27,13 +30,13 @@ export default class TaskService {
 				if (isSuccessApiResponse(respdata)) {
 					if (payload?.filter!["id"]) {
 						if (isResultWithPagination(respdata.result)) {
-							taskStore.setSingleTask(respdata.result.queryResult[0]);
+							this.taskStore.setSingleTask(respdata.result.queryResult[0]);
 						} else {
 							const payload =
 							respdata.result.length > 0
 								? respdata.result[0]
 								: null;
-							taskStore.setSingleTask(payload);
+							this.taskStore.setSingleTask(payload);
 						}
 					} else {
 						const tasks = 
@@ -41,7 +44,7 @@ export default class TaskService {
 							? respdata.result.queryResult
 							: respdata.result
 
-						taskStore.setTasksList(tasks);
+						this.taskStore.setTasksList(tasks);
 					}
 					return true;
 				} else {
@@ -78,33 +81,33 @@ export default class TaskService {
 	}
 
 	setActiveTask(payload: Task|null){
-		const activeTask = taskStore.getActiveTask
+		const activeTask = this.taskStore.getActiveTask()
 		if (
 			activeTask?.id == payload?.id &&
-			!interfaceStore.getIsCreatingTaskProcess
+			!this.interfaceStore.getIsCreatingTaskProcess()
 		)
 			return;
 		payload  
-			? taskStore.setActiveTask(payload)
-			: taskStore.setActiveTask(Object.assign({},TaskRepo.emptyTask));
+			? this.taskStore.setActiveTask(payload)
+			: this.taskStore.setActiveTask(Object.assign({},TaskRepo.emptyTask));
 	}
 
 	clickTask(task: Task) {
-		taskStore.setActiveTask(task)
-		interfaceStore.toggleCreatingTaskProcess(false)
-		interfaceStore.toggleDetailsWindow(true)
+		this.taskStore.setActiveTask(task)
+		this.interfaceStore.toggleCreatingTaskProcess(false)
+		this.interfaceStore.toggleDetailsWindow(true)
 	}
 
 	createNewTask(){
-		interfaceStore.toggleCreatingTaskProcess(true)
-		taskStore.setActiveTask(TaskRepo.emptyTask)
-		interfaceStore.toggleDetailsWindow(true)
+		this.interfaceStore.toggleCreatingTaskProcess(true)
+		this.taskStore.setActiveTask(TaskRepo.emptyTask)
+		this.interfaceStore.toggleDetailsWindow(true)
 	}
 
 	closeDetailWindow(){
-		interfaceStore.toggleDetailsWindow(false),
+		this.interfaceStore.toggleDetailsWindow(false),
 		this.setActiveTask(TaskRepo.emptyTask),
-		interfaceStore.toggleCreatingTaskProcess(false)
+		this.interfaceStore.toggleCreatingTaskProcess(false)
 	}
 
 	openTaskInNewTab(task: Task){

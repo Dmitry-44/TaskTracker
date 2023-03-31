@@ -1,17 +1,18 @@
 <script lang="ts" setup>
+import { services } from "@/main";
 import { usePipeStore } from "@/stores/pipe";
+import type { FilterPayload } from "@/types/api";
 import type { Pipe } from "@/types/pipe";
-import type { FilterPayload } from "@/types/index";
 import { ref, computed, onBeforeMount, type Ref } from "vue";
 import { useRouter } from "vue-router";
 import PipeCard from "../../components/PipeCard.vue";
-import { pipeService } from "@/services/index";
 
 const router = useRouter();
 const paramId = router.currentRoute.value.params["id"];
 const pipeStore = usePipeStore();
 const pipe = computed<Pipe | null>(() => pipeStore.getSinglePipe);
 const LOADING = ref(false);
+const PipeService = services.Pipe
 
 
 onBeforeMount(async () => {
@@ -21,7 +22,7 @@ onBeforeMount(async () => {
 		options: { onlyLimit: true, itemsPerPage: 1 },
 	};
 	LOADING.value = false
-	pipeService
+	PipeService
 		.fetchPipes(payload)
 		.finally(()=>{LOADING.value = false})
 

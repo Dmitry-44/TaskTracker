@@ -1,22 +1,17 @@
 <script setup lang="ts">
 import type { Task } from "@/types/task";
-import { useInterfaceStore } from "@/stores/interface";
 import {
-  SuccessFilled,
-  More,
   EditPen,
-  CopyDocument,
-  Delete,
   Notification,
-  Link,
   View,
   Pointer,
 } from "@element-plus/icons-vue";
 import { ref, onMounted, computed } from "vue";
 import type { PropType } from "vue";
 import { useRouter } from "vue-router";
-import { taskService } from "@/services";
+
 import TaskRepo from "@/api/task";
+import { services } from "@/main";
 
 const props = defineProps({
   task: {
@@ -28,7 +23,7 @@ const props = defineProps({
 const emit = defineEmits(["titleChanged"]);
 const task = ref(props.task);
 const readonlyTask = computed(() => task.value.status === 4);
-
+const TaskService = services.Task
 const router = useRouter();
 
 // const copyTaskLink = () => {
@@ -40,7 +35,7 @@ const router = useRouter();
 // };
 </script>
 <template>
-  <el-option value="" @click="taskService.openTaskInNewTab(task)">
+  <el-option value="" @click="TaskService.openTaskInNewTab(task)">
     <el-icon><Notification /></el-icon>
     <span style="margin-left: 10px">Открыть в новой вкладке</span>
   </el-option>
@@ -52,7 +47,7 @@ const router = useRouter();
     <el-icon><EditPen /></el-icon>
     <span style="margin-left: 10px">Изменить название задачи</span>
   </el-option>
-  <el-option value="" @click="taskService.clickTask(task)">
+  <el-option value="" @click="TaskService.clickTask(task)">
     <el-icon><View /></el-icon>
     <span style="margin-left: 10px">Открыть сведения</span>
   </el-option>

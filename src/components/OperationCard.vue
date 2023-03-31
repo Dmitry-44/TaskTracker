@@ -6,7 +6,7 @@ import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
 import JsonEditor from "@/components/JsonEditor.vue";
-import { operationService } from "@/services";
+import { services } from "@/main";
 
 const props = defineProps({
   operation: {
@@ -25,6 +25,7 @@ const props = defineProps({
 //VARIABLES
 const router = useRouter();
 const paramsEditor = ref<HTMLInputElement | null>(null);
+const OperationService = services.Operation
 
 const operation = ref(props.operation);
 const params = ref(operation?.value?.params);
@@ -58,7 +59,7 @@ const sendOperation = () => {
     name: operation?.value?.name,
     params: operation?.value?.params,
   };
-  operationService.sendOperation(data)
+  OperationService.sendOperation(data)
     .then(res => {
       if (errVueHandler(res)) {
         ElMessage({
