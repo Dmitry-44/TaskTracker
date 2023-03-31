@@ -40,7 +40,8 @@ function initServices() {
     const searchFiltersService = new SearchFiltersService(new PiniaUserAdapter())
     const userService = new UserService(
         new UserRepo(), 
-        new PiniaUserAdapter()
+        new PiniaUserAdapter(),
+        new PiniaInterfaceAdapter()
     )
 
     return {

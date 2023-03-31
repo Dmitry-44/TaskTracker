@@ -6,16 +6,19 @@ import { envConfig } from '@/plugins/envConfig';
 import type { NavigationGuardNext } from 'vue-router';
 import { services } from "@/main";
 import type PiniaUserAdapter from "@/adapters/piniaUserAdapter";
+import type PiniaInterfaceAdapter from "@/adapters/piniaInterfaceAdapter";
 
 
 export default class UserService {
 
 	userRepo;
 	userStore;
+	interfaceStore;
 
-	constructor(userRepo: IUserRepo, userStore: PiniaUserAdapter) {
+	constructor(userRepo: IUserRepo, userStore: PiniaUserAdapter, interfaceStore: PiniaInterfaceAdapter) {
 		this.userRepo = userRepo;
-		this.userStore = userStore
+		this.userStore = userStore;
+		this.interfaceStore = interfaceStore;
 	}
 
 	checkAuth(): Promise<boolean> {
@@ -33,53 +36,52 @@ export default class UserService {
 			});
 	}
 
-	initMiddleware() {
+	logout(): Promise<boolean> {
+		return this.userRepo
+			.Logout()
+			.then(()=>true)
+	}
+
+	initAuthMiddleware() {
+		const COOKIE_LIFETIME = 24 * 60 * 60 * 1000; //ms
 		router.beforeEach((to, from, next) => {
-			console.log('beforeEach+_____')
-			const userStore = useUserStore();
-			userStore.showLoader();
+			this.interfaceStore.showGlobalLoader()
 			if (to.query["auth"]) {
-			  console.log("cookie exist");
-			  document.cookie = `connect.sid=${
-				to.query["auth"]
-			  };path=/;expires=${new Date(Date.now() + 86400000).toUTCString()}`;
+				console.log("cookie exist");
+				document.cookie = `connect.sid=${to.query["auth"]};path=/;expires=${new Date(Date.now() + COOKIE_LIFETIME).toUTCString()}`;
 			}
 			if (to.matched.some((record) => record.meta["requiresAuth"])) {
-			  if (userStore.is_auth) {
-				return chechRights(userStore, to.meta["rights"] as rightsObj, next);
-			  }
-			  return services.User.checkAuth().then(res => {
-				if (res) {
-				  return chechRights(userStore, to.meta["rights"] as rightsObj, next);
-				} else {
-				  window.location.href = `${envConfig.CLIENT_COOKIE}/auth_service?redirect=http://${location.host}${to.fullPath}`;
+				if (this.userStore.getUserIsAuth()) {
+					return this.chechRights(this.userStore, to.meta["rights"] as User['rights'], next);
 				}
-			  });
+				return services.User.checkAuth().then(res => {
+					if (res) {
+						return this.chechRights(this.userStore, to.meta["rights"] as User['rights'], next);
+					} else {
+						window.location.href = `${envConfig.CLIENT_COOKIE}/auth_service?redirect=http://${location.host}${to.fullPath}`;
+					}
+				});
 			} else {
-			  userStore.hideLoader();
-			  next();
+				this.interfaceStore.hideGlobalLoader()
+				next();
 			}
-		  });
-		
-		function chechRights(
-			userStore: any,
-			rightsObj: rightsObj,
-			next: NavigationGuardNext
-		) {
-			const rights = userStore.getRights;
-			let access = true;
-			for (const prop in rightsObj) {
-				if (!rights[prop] || rights[prop] < rightsObj[prop]) {
-					access = false;
-					break;
-				}
+		});
+	}
+
+	chechRights(
+		userStore: PiniaUserAdapter,
+		rightsObj: User['rights'],
+		next: NavigationGuardNext
+	) {
+		const rights = userStore.getRights();
+		let access = true;
+		for (const prop in rightsObj) {
+			if (!rights[prop] || rights[prop] < rightsObj[prop]) {
+				access = false;
+				break;
 			}
-			userStore.hideLoader();
-			return access ? next() : next({ path: "401" });
 		}
+		this.interfaceStore.hideGlobalLoader()
+		return access ? next() : next({ path: "401" });
 	}
 }
-
-interface rightsObj {
-	[key: string]: any;
-  }

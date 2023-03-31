@@ -1,11 +1,9 @@
 import {
   createRouter,
   createWebHistory,
-  type NavigationGuardNext,
 } from "vue-router";
 
-
-console.log('ROUTER_____')
+console.log('INIT ROUTER')
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -72,8 +70,6 @@ const router = createRouter({
     },
   ],
 });
-
-
 
 
 

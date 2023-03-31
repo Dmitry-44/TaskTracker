@@ -12,9 +12,9 @@ const route = useRoute();
 const router = useRouter();
 const UserStore = useUserStore();
 const userInfo = computed(() => UserStore.getUser);
-const logout = () => UserStore.logout();
-const operationsStore = useOperationStore();
-const loader = computed(() => UserStore.getLoader);
+const logout = () => services.User.logout();
+// const operationsStore = useOperationStore();
+// const loader = computed(() => UserStore.getLoader);
 const loading = ref(false);
 onBeforeMount(async () => {
   loading.value = true;

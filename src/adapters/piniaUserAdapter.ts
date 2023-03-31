@@ -11,6 +11,12 @@ export default class PiniaUserAdapter implements IUserStore{
 	constructor(){
 		this.userStore = useUserStore();
 	}
+	getUserIsAuth(){
+		return this.userStore.getIsAuth;
+	}
+	getRights(){
+		return this.userStore.getRights;
+	}
 	getUser(){
 		return this.userStore.getUser;
 	}
