@@ -2,7 +2,6 @@
 import { useTaskStore } from "@/stores/task";
 import type { Task } from "@/types/task";
 import type { FilterPayload } from "@/types/api";
-import { useInterfaceStore } from "@/stores/interface";
 import DetailsWindow from "../../components/DetailsWindow.vue";
 import { ref, computed, onBeforeUnmount, nextTick } from "vue";
 import Filters from "../../components/Filters.vue";
@@ -12,7 +11,6 @@ import { services } from "@/main";
 
 
 const taskStore = useTaskStore();
-const interfaceStore = useInterfaceStore();
 const $filters = ref<typeof Filters | null>(null);
 const abortController = new AbortController();
 const abortSignal = abortController.signal;
@@ -32,18 +30,11 @@ const tasksFinished = computed(() =>
   tasks.value.filter((task) => task.status === 4)
 );
 
-//ACTIONS
-const setActiveTask = TaskService.setActiveTask;
-const toggleDetailsWindow = interfaceStore.toggleDetailsWindow;
-const toggleCreatingTaskProcess = interfaceStore.toggleCreatingTaskProcess;
-
 
 //METHODS
 const clickOutsideCards = () => {
+  TaskService.clickOutsideTaskCard()
   $filters?.value?.["closeFilters"]();
-  toggleDetailsWindow(false);
-  TaskService.setActiveTask(null)
-  toggleCreatingTaskProcess(false);
 };
 const filterUpdate = async (payload: FilterPayload) => {
   LOADING.value = true;

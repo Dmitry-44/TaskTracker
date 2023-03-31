@@ -53,7 +53,7 @@ const taskPriority = computed(
 const taskStatus = computed(
   () => statusOptions.filter((v) => v.id === task.value.status)[0]
 );
-const oldContent = ref<Task | null>(null);
+// const oldContent = ref<Task | null>(null);
 
 const submitNewTitle = async () => {
   if(currentTitle===task.value.title.trim()){
@@ -74,7 +74,7 @@ const deleteTask = () => {
 
 onMounted(() => {
   if (props.emptyCard) changeTitle();
-  oldContent.value = { ...task.value };
+  // oldContent.value = { ...task.value };
 });
 
 //ACTIONS

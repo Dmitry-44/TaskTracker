@@ -1,4 +1,4 @@
-interface Event {
+export interface Event {
   id: number;
   task_id?: number;
   operation_id?: number;
@@ -12,5 +12,3 @@ interface Event {
   result?: string | null;
   params?: { [key: string]: any };
 }
-
-export type { Event };

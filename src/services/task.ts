@@ -98,6 +98,12 @@ export default class TaskService {
 		this.interfaceStore.toggleDetailsWindow(true)
 	}
 
+	clickOutsideTaskCard(){
+		this.interfaceStore.toggleDetailsWindow(false)
+		this.interfaceStore.toggleCreatingTaskProcess(false)
+		this.taskStore.setActiveTask(TaskRepo.emptyTask)
+	}
+
 	createNewTask(){
 		this.interfaceStore.toggleCreatingTaskProcess(true)
 		this.taskStore.setActiveTask(TaskRepo.emptyTask)
