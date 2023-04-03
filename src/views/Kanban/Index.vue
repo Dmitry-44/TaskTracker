@@ -83,8 +83,8 @@ onBeforeUnmount(() => abortController.abort());
 
 //DRAG AND DROP
 const transferTask = ref<Task | null>(null);
-const taskInProcessArea = ref<any | HTMLDivElement>(null);
-const tasksToTakeArea = ref<any | HTMLDivElement>(null);
+const taskInProcessArea = ref<HTMLDivElement|null>(null);
+const tasksToTakeArea = ref<HTMLDivElement|null>(null);
 const areaParams = new Map([
   [1, { areaRef: tasksToTakeArea, status: 2 }],
   [2, { areaRef: taskInProcessArea, status: 3 }],
@@ -104,12 +104,12 @@ const dragoverHandler = (ev: DragEvent, areaId: number): void => {
   if (!!transferTask.value && transferTask!.value?.status === area!.status)
     return;
   if (transferTask!.value?.status === 1 && area!.status === 2) return;
-  area?.areaRef.value.classList.add("dragOver");
+  area?.areaRef.value?.classList.add("dragOver");
 };
 const dragleaveHandler = (ev: DragEvent) => {
   stopAll(ev);
-  tasksToTakeArea.value.classList.remove("dragOver");
-  taskInProcessArea.value.classList.remove("dragOver");
+  tasksToTakeArea.value?.classList.remove("dragOver");
+  taskInProcessArea.value?.classList.remove("dragOver");
 };
 const dropHandler = async (ev: DragEvent, area: number) => {
   ev.dataTransfer!.dropEffect = "link";
@@ -127,8 +127,8 @@ const dropHandler = async (ev: DragEvent, area: number) => {
       );
     }
   }
-  tasksToTakeArea.value.classList.remove("dragOver");
-  taskInProcessArea.value.classList.remove("dragOver");
+  tasksToTakeArea.value?.classList.remove("dragOver");
+  taskInProcessArea.value?.classList.remove("dragOver");
 };
 </script>
 <template>

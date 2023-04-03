@@ -30,6 +30,7 @@ export default class TaskRepo implements ITaskRepo {
 		created_at: -1,
 		status: 1,
 		text: "",
+		event_entities: []
 	}
 
 

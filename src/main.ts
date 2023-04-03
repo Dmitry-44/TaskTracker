@@ -59,8 +59,10 @@ app.use(createPinia());
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 app.use(router);
+
 export const services = initServices()
 services.User.initAuthMiddleware()
+
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component);
 }

@@ -50,6 +50,9 @@ export default class SearchFiltersService {
 
 	setPersonalFilters(filters: FilterPayload): void {
 		try {
+			if(this.getLocalStorageKey().length===0){
+				return
+			}
 			const data = JSON.parse(JSON.stringify(filters));
 			delete data!.filter!["search1"];
 			delete data!.filter!["search2"];

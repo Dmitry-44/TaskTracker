@@ -46,7 +46,7 @@ onBeforeMount(async () => {
 const openEventsModal = () => {
   eventsModalOpened.value = true;
 };
-const addNewEvent = (value: Operation) => {};
+const addNewEvent = (value: Operation|null) => {};
 </script>
 <template>
   <div class="kanbar-wrapper">

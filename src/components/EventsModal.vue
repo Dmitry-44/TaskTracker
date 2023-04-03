@@ -15,7 +15,7 @@ const props = defineProps({
 });
 const emit = defineEmits<{
   (e: "close"): void;
-  (e: "update", value: Operation): void;
+  (e: "update", value: Operation|null): void;
 }>();
 
 const operationStore = useOperationStore();

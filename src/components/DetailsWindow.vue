@@ -25,8 +25,8 @@ const isCreatingTaskProcess = computed(
   () => interfaceStore.isCreatingTaskProcess
 );
 const PIPES = computed(() => pipeStore.getPipes);
-const PRIORITY_OPTIONS = taskStore.getPriorityOptions;
-const STATUS_OPTIONS = taskStore.getStatusOptions;
+const PRIORITY_OPTIONS = computed(()=>taskStore.getPriorityOptions);
+const STATUS_OPTIONS = computed(()=>taskStore.getStatusOptions);
 
 //VARIABLES
 const LOADING = ref(false);
@@ -135,7 +135,7 @@ const save = () => {
     <div v-if="task" class="body">
       <div class="title_block">
         <input
-          v-model="task.title"
+          v-model.trim="task.title"
           :disabled="isReadonlyTask"
           class="title-input"
           placeholder="Ввести название задачи"

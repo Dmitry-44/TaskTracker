@@ -1,5 +1,4 @@
-import type { FilterPayload } from ".";
-import type { ApiResponse } from "./api";
+import type { ApiResponse, FilterPayload } from "./api";
 
 type Operation = {
 	id: number;
