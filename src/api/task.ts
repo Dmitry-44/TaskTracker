@@ -1,6 +1,7 @@
 import { envConfig } from "@/plugins/envConfig";
 import type { FilterPayload } from "@/types/api";
 import type { ApiResponse } from "@/types/api";
+import type { Event } from "@/types/event";
 import type { ITaskRepo, Task } from "@/types/task";
 import { axiosClient } from "../plugins/axios";
 
@@ -49,9 +50,19 @@ export default class TaskRepo implements ITaskRepo {
 			.then(res => res.data)
 	}
 
-	TakeTask(id: number): Promise<ApiResponse<Task>> {
+	TakeTask(taskId: Task['id'], eventId: Event['id']): Promise<ApiResponse<Task>> {
 		return axiosClient
-        	.post(`${envConfig.API_URL}tasktracker/takeTaskSmi`, { id: id })
+        	.get(`${envConfig.API_URL}tasktracker/task/${taskId}/event/${eventId}/take`)
 			.then(res => res.data)
+			.catch(err => {
+				console.log('error in api', err)
+			})
+	}
+
+	UpdateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): Promise<ApiResponse<Task>> {
+		return axiosClient
+        	.post(`${envConfig.API_URL}tasktracker/task/${taskId}/event/${eventId}/status`, { status: status })
+			.then(res => res.data)
+		
 	}
 }

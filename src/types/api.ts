@@ -11,7 +11,7 @@ type ResultWithPagination<T> = {
 };
 interface FailureApiResponse {
   message: string;
-  result?: unknown;
+  error?: string;
 }
 
 type UserResponse = {

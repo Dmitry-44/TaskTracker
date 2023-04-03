@@ -59,39 +59,13 @@ watch(
 );
 
 //METHODS
-const takeTask = async (taskId: Task["id"]) => {
+const takeTask = async (task: Task) => {
   LOADING.value = true;
-  const msg = ElMessage({
-    message: "Хватаю задачу..",
-    type: "success",
-    center: true,
-    duration: 1000,
-  });
   TaskService
-    .takeTask(taskId)
-    .then(res => {
-      if (errVueHandler(res)) {
-        ElMessage({
-          message: "Операция выполнена успешно!",
-          type: "success",
-          center: true,
-          duration: 1500,
-          showClose: true,
-        })
-      } else {
-        ElMessage({
-          message: "Что-то пошло не так",
-          type: "error",
-          center: true,
-          duration: 1500,
-          showClose: true,
-        });
-      }
-    })
-    .finally(() => {
+    .takeTask(task)
+    .finally(()=>{
       LOADING.value = false;
-      msg.close();
-    });
+    })
 };
 
 const doSearch = () => {
@@ -152,7 +126,7 @@ const setDefaultSort = () => {
           :active="task.id === activeTask?.id ? true : false"
           @click.stop="TaskService.clickTask(task)"
           @dragstart="emit('taskDragStart', $event, task)"
-          @take="takeTask($event)"
+          @take="takeTask(task)"
         />
         <el-button
           v-if="addNewTask"

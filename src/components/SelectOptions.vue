@@ -5,6 +5,7 @@ import {
   Notification,
   View,
   Pointer,
+  Finished,
 } from "@element-plus/icons-vue";
 import { ref, onMounted, computed } from "vue";
 import type { PropType } from "vue";
@@ -39,9 +40,13 @@ const router = useRouter();
     <el-icon><Notification /></el-icon>
     <span style="margin-left: 10px">Открыть в новой вкладке</span>
   </el-option>
-  <el-option v-if="!readonlyTask" value="">
+  <el-option v-if="TaskService.canTakeTask(task)" value="">
     <el-icon><Pointer /></el-icon>
     <span style="margin-left: 10px">Взять задачу</span>
+  </el-option>
+  <el-option v-if="TaskService.canFinishTask(task)" value="">
+    <el-icon><Finished /></el-icon>
+    <span style="margin-left: 10px">Завершить задачу</span>
   </el-option>
   <el-option v-if="!readonlyTask" value="" @click="emit('titleChanged')">
     <el-icon><EditPen /></el-icon>

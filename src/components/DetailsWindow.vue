@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
 import { useInterfaceStore } from "@/stores/interface";
-import { Close, Pointer, Notification } from "@element-plus/icons-vue";
+import { Close, Pointer, Notification, Finished } from "@element-plus/icons-vue";
 import { computed, onMounted, watch } from "vue";
 import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
@@ -74,6 +74,7 @@ const save = () => {
           duration: 1500,
           showClose: true,
         });
+        oldContent.value=JSON.stringify(task.value)
       }
     })
     .finally(() => {
@@ -98,7 +99,7 @@ const save = () => {
         >
         <template v-if="!isCreatingTaskProcess">
           <el-tooltip
-            v-if="!isReadonlyTask"
+            v-if="TaskService.canTakeTask(task)"
             class="item"
             effect="dark"
             content="Взять задачу"
@@ -106,6 +107,15 @@ const save = () => {
           >
             <el-button :icon="Pointer"></el-button>
           </el-tooltip>
+          <!-- <el-tooltip
+            v-if="TaskService.canFinishTask(task)"
+            class="item"
+            effect="dark"
+            content="Завершить задачу"
+            placement="top-start"
+          >
+            <el-button :icon="Finished"></el-button>
+          </el-tooltip> -->
           <el-tooltip
             class="item"
             effect="dark"
@@ -227,6 +237,7 @@ const save = () => {
               <OperationCollapseItem
                 :operation="operation"
                 :event="task?.event_entities!.find(event=>event?.operation_id===operation?.id) || null"
+                :task-id="task.id"
               />
             </template>
           </el-collapse>

@@ -16,18 +16,20 @@ const abortController = new AbortController();
 const abortSignal = abortController.signal;
 const TaskService = services.Task
 
+const dialogFinishTaskIsOpen = ref(false)
+
 //GETTERS
 const tasks = computed(() => taskStore.getList);
 const LOADING = ref(false);
 
 const tasksToTake = computed(() =>
-  tasks.value.filter((task) => task.status! <= 2)
+  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1].status === 1)
 );
 const tasksInProcess = computed(() =>
-  tasks.value.filter((task) => task.status === 3)
+  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1].status === 2)
 );
 const tasksFinished = computed(() =>
-  tasks.value.filter((task) => task.status === 4)
+  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1].status === 3)
 );
 
 
@@ -41,6 +43,13 @@ const filterUpdate = async (payload: FilterPayload) => {
   await TaskService.fetchTasks(payload, abortSignal);
   LOADING.value = false;
 };
+function dialogCancelHandle(){
+  dialogFinishTaskIsOpen.value=false
+}
+function dialogOkHandle(){
+  TaskService.dragAndDropTask(transferTask.value!, 3)
+  dialogFinishTaskIsOpen.value=false
+}
 const updateTask = async (task: Task) => {
   LOADING.value = true;
   const msg = ElMessage({
@@ -85,9 +94,11 @@ onBeforeUnmount(() => abortController.abort());
 const transferTask = ref<Task | null>(null);
 const taskInProcessArea = ref<HTMLDivElement|null>(null);
 const tasksToTakeArea = ref<HTMLDivElement|null>(null);
+const finishedTasksArea = ref<HTMLDivElement|null>(null);
 const areaParams = new Map([
-  [1, { areaRef: tasksToTakeArea, status: 2 }],
-  [2, { areaRef: taskInProcessArea, status: 3 }],
+  [1, { areaRef: tasksToTakeArea, status: 1 }],
+  [2, { areaRef: taskInProcessArea, status: 2 }],
+  [3, { areaRef: finishedTasksArea, status: 3 }],
 ]);
 const stopAll = (e: DragEvent) => {
   e.preventDefault();
@@ -99,37 +110,29 @@ const dragstartHandler = (ev: DragEvent, task: Task) => {
 };
 const dragoverHandler = (ev: DragEvent, areaId: number): void => {
   stopAll(ev);
-  ev.dataTransfer!.effectAllowed = "link";
+  const taskLastevent = transferTask.value?.event_entities![transferTask.value?.event_entities!.length-1];
   const area = areaParams.get(areaId);
-  if (!!transferTask.value && transferTask!.value?.status === area!.status)
-    return;
-  if (transferTask!.value?.status === 1 && area!.status === 2) return;
+  if (taskLastevent && taskLastevent.status === area!.status)return;
   area?.areaRef.value?.classList.add("dragOver");
 };
 const dragleaveHandler = (ev: DragEvent) => {
   stopAll(ev);
-  tasksToTakeArea.value?.classList.remove("dragOver");
-  taskInProcessArea.value?.classList.remove("dragOver");
+  clearDragAndDrop()
 };
 const dropHandler = async (ev: DragEvent, area: number) => {
-  ev.dataTransfer!.dropEffect = "link";
-  const updatedTask = tasks.value.find(
-    (task) => task.id === transferTask?.value?.id
-  );
-  if (updatedTask) {
-    if (updatedTask.status != areaParams.get(area)?.status) {
-      updateTask({ ...updatedTask, status: areaParams.get(area)?.status }).then(
-        (res) => {
-          if (res) {
-            updatedTask.status = areaParams.get(area)?.status;
-          }
-        }
-      );
-    }
+  if(area===3){
+    dialogFinishTaskIsOpen.value=true
+    clearDragAndDrop()
+    return;
   }
+  TaskService.dragAndDropTask(transferTask.value!, area)
+    clearDragAndDrop()
+};
+const clearDragAndDrop = () => {
   tasksToTakeArea.value?.classList.remove("dragOver");
   taskInProcessArea.value?.classList.remove("dragOver");
-};
+  finishedTasksArea.value?.classList.remove("dragOver");
+}
 </script>
 <template>
   <div class="kanbar-wrapper">
@@ -173,14 +176,46 @@ const dropHandler = async (ev: DragEvent, area: number) => {
           @taskDragStart="dragstartHandler"
         />
       </div>
-      <KanbanColumn
-        :tasks="tasksFinished"
-        title="Архив"
-        :loading="LOADING"
+      <div
+        class="draggable-area"
+        @dragover="dragoverHandler($event, 3)"
+        @dragleave="dragleaveHandler($event)"
+        @drop="dropHandler($event, 3)"
         key="3"
-      />
+        ref="finishedTasksArea"
+      >
+        <KanbanColumn
+          :tasks="tasksFinished"
+          title="Завершенные"
+          :is-Draggable="true"
+          :loading="LOADING"
+          key="3"
+          @taskDragStart="dragstartHandler"
+        />
+      </div>
     </div>
   </div>
+  <el-dialog
+    v-model="dialogFinishTaskIsOpen"
+    width="30%"
+    @close="dialogCancelHandle"
+  >
+    <el-row justify="center">
+      Уверены что хотите завершить задачу?</el-row>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button
+        @click="dialogCancelHandle"
+        >Отмена
+      </el-button>
+        <el-button
+        type="primary"
+        @click="dialogOkHandle"
+        >
+        Ок</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <style lang="sass" scoped>

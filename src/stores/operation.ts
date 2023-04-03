@@ -9,6 +9,7 @@ type OperationsById = {
 type State = {
 	operations: Operation[];
 	singleOperation: Operation | null;
+	directionOptions: {[key:string]: any}[]
 };
 
 export const useOperationStore = defineStore({
@@ -16,6 +17,8 @@ export const useOperationStore = defineStore({
 	state: (): State => ({
 		operations: [],
 		singleOperation: null,
+		//TODO
+		directionOptions: [{"id":0,"name":"Без направления","disabled":false},{"id":21,"name":"Политика","disabled":false},{"id":22,"name":"Общество","disabled":false},{"id":23,"name":"Проишествия","disabled":false},{"id":24,"name":"Экономика","disabled":false},{"id":25,"name":"Развлечения","disabled":false},{"id":26,"name":"Армия и ОПК","disabled":false},{"id":27,"name":"Ночь","disabled":false},{"id":28,"name":"Дзен","disabled":false}]
 	}),
 	getters: {
 		getOperations: (state) => state.operations,
@@ -25,6 +28,7 @@ export const useOperationStore = defineStore({
 				acc[el?.id!] = el;
 				return acc;
 			}, {} as OperationsById),
+		getDirectionOptions: (state) => state.directionOptions
 	},
 	actions: {
 		setOperations(payload: Operation[]) {

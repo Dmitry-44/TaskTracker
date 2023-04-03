@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { SuccessFilled, More, EditPen, Pointer } from "@element-plus/icons-vue";
+import { SuccessFilled, More, EditPen, Pointer, Finished } from "@element-plus/icons-vue";
 import { ref, onMounted, computed, nextTick } from "vue";
 import type { PropType } from "vue";
 import SelectOptions from "./SelectOptions.vue";
 import { useTaskStore } from "@/stores/task";
+import { useUserStore } from "@/stores/user";
 import type { Task } from "@/types/task";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
@@ -30,6 +31,8 @@ const task = ref(props.task);
 const readonlyTask = computed(() => task.value.status === 4);
 const priorityOptions = taskStore.getPriorityOptions;
 const statusOptions = taskStore.getStatusOptions;
+const eventStatusOptions = taskStore.getEventStatusOptions;
+const user = useUserStore().getUser;
 
 const selectMore = ref<any | HTMLInputElement>(null);
 const TaskService = services.Task
@@ -51,7 +54,7 @@ const taskPriority = computed(
   () => priorityOptions.filter((v) => v.id === task.value.priority)[0]
 );
 const taskStatus = computed(
-  () => statusOptions.filter((v) => v.id === task.value.status)[0]
+  () => eventStatusOptions.find((v) => v.id === task.value.event_entities![task.value.event_entities!.length-1].status)
 );
 // const oldContent = ref<Task | null>(null);
 
@@ -137,7 +140,7 @@ const save = async() => {
             }}</el-tag>
           </el-tooltip>
         </div>
-        <div class="wrapper" v-if="task.status">
+        <div class="wrapper" v-if="taskStatus">
           <el-tooltip
             class="item"
             effect="dark"
@@ -151,7 +154,7 @@ const save = async() => {
       <div class="actions">
         <div class="buttons">
           <el-tooltip
-            v-if="!readonlyTask"
+            v-if="TaskService.canTakeTask(task)"
             class="item"
             effect="dark"
             content="Взять задачу"
@@ -159,6 +162,18 @@ const save = async() => {
           >
             <el-button
               :icon="Pointer"
+              @click.stop="$emit('take', task.id)"
+            ></el-button>
+          </el-tooltip>
+          <el-tooltip
+            v-if="TaskService.canFinishTask(task)"
+            class="item"
+            effect="dark"
+            content="Завершить задачу"
+            placement="top-start"
+          >
+            <el-button
+              :icon="Finished"
               @click.stop="$emit('take', task.id)"
             ></el-button>
           </el-tooltip>

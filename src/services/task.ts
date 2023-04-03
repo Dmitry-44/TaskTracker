@@ -1,3 +1,4 @@
+import { ElMessage } from 'element-plus';
 import { useInterfaceStore } from './../stores/interface';
 import { isResultWithPagination } from "../types/api";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
@@ -8,6 +9,8 @@ import TaskRepo from "@/api/task";
 import router from '@/router';
 import type PiniaTaskAdapter from '@/adapters/piniaTaskAdapter';
 import type PiniaInterfaceAdapter from '@/adapters/piniaInterfaceAdapter';
+import type { Event } from '@/types/event';
+import type { User } from '@/types/user';
 
 
 
@@ -67,9 +70,45 @@ export default class TaskService {
 			.catch(err => errRequestHandler(err));
 	}
 
-	takeTask(id: number) {
+	takeTask(task: Task) {
+		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		const msg = ElMessage({
+			message: "Хватаю задачу..",
+			type: "success",
+			center: true,
+			duration: 1000,
+		});
 		return this.taskRepo
-			.TakeTask(id)
+			.TakeTask(task.id, taskLastEvent.id )
+			.then((respdata) => {
+				if (isSuccessApiResponse(respdata)) {
+					ElMessage({
+						message: "Задача твоя!",
+						type: "success",
+						center: true,
+						duration: 2000,
+						showClose: true,
+					});
+					return true;
+				} else {
+					console.log('respdata', respdata)
+					errVueHandler(respdata.error!);
+					return respdata.message || -1;
+				}
+			})
+			.catch(err => {
+				console.log('sssssss')
+				console.log('err', err)
+				errRequestHandler(err)
+			})
+			.finally(()=>{
+				msg.close();
+			})
+	}
+
+	updateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']) {
+		return this.taskRepo
+			.UpdateEventStatus(taskId, eventId, status)
 			.then((respdata) => {
 				if (isSuccessApiResponse(respdata)) {
 					return true;
@@ -130,5 +169,54 @@ export default class TaskService {
 				.toLowerCase()
 				.indexOf(search.toLowerCase()) !== -1
 		);
+	}
+
+	dragAndDropTask(task: Task, newEventStatus: number) {
+		const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
+		if(eventToUpdate.status === newEventStatus) {
+			return;
+		} else {
+			const msg = ElMessage({
+				message: "Сохраняю задачу..",
+				type: "success",
+				center: true,
+				duration: 1000,
+			});
+			console.log('newEventStatus', newEventStatus)
+			this.updateEventStatus(task.id, eventToUpdate.id, newEventStatus)
+				.then(res => {
+					console.log('res', res)
+					if (res) {
+					ElMessage({
+						message: "Операция выполнена успешно!",
+						type: "success",
+						center: true,
+						duration: 1500,
+						showClose: true,
+					});
+					} else {
+					ElMessage({
+						message: "Ошибка при выполнении операции!",
+						type: "error",
+						center: true,
+						duration: 1500,
+						showClose: true,
+					});
+					}
+				})
+				.finally(() => {
+					msg.close();
+				});
+		  }
+	}
+
+	canTakeTask(task: Task): boolean {
+		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		if(!taskLastEvent){return false};
+		return taskLastEvent.status === 1
+	}
+	canFinishTask(task: Task): boolean {
+		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		return taskLastEvent.status === 2
 	}
 }

@@ -22,7 +22,8 @@ interface Task {
 interface ITaskRepo {
 	GetTasks(filterPayload?: Partial<FilterPayload>, signal?: AbortSignal): Promise<ApiResponse<Task>>
 	UpsertTask(payload: Partial<Task>): Promise<ApiResponse<Task>>
-	TakeTask(id: number): Promise<ApiResponse<Task>>
+	TakeTask(taskId: Task['id'], eventId: Event['id']): Promise<ApiResponse<Task>>
+	UpdateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): Promise<ApiResponse<Task>>
 }
 
 export type { Task, ITaskRepo };

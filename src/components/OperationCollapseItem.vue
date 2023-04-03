@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { services } from "@/main";
 import { useTaskStore } from "@/stores/task";
+import { useOperationStore } from "@/stores/operation";
 import type { Event } from "@/types/event";
 import type { Operation } from "@/types/operation";
+import { ElMessage } from "element-plus";
 import type { PropType } from "vue";
+import { computed } from "@vue/reactivity";
 
 const props = defineProps({
   operation: {
@@ -13,12 +17,55 @@ const props = defineProps({
     type: Object as PropType<Event | null>,
     default: () => null,
   },
+  taskId: {
+    type: Number,
+    required: true,
+  }
 });
 
 const taskStore = useTaskStore();
+const operatonStore = useOperationStore()
+const TaskService = services.Task
 const eventStatusOptions = taskStore.getEventStatusOptions;
+const DIRECTION_OPTIONS = operatonStore.getDirectionOptions
 const statusColor =
   eventStatusOptions.filter((ev) => props.event?.status === ev.id)[0]?.color || "";
+
+function takeButtonHandle() {
+  const msg = ElMessage({
+    message: "Сохраняю задачу..",
+    type: "success",
+    center: true,
+    duration: 1000,
+  });
+
+  TaskService.updateEventStatus(props.taskId, props.event!.id, 2)
+    .then(res => {
+      console.log('res', res)
+      if (res) {
+        ElMessage({
+          message: "Операция выполнена успешно!",
+          type: "success",
+          center: true,
+          duration: 1500,
+          showClose: true,
+        });
+      } else {
+        ElMessage({
+          message: "Ошибка при выполнении операции!",
+          type: "error",
+          center: true,
+          duration: 1500,
+          showClose: true,
+        });
+      }
+    })
+    .finally(() => {
+      msg.close();
+    });
+}
+
+
 </script>
 <template>
   <el-collapse-item>
@@ -60,6 +107,21 @@ const statusColor =
         <el-tag>{{ event.user_name }}</el-tag>
       </div>
     </div>
+    <div class="row" v-if="event?.status===1">
+      <el-button
+      @click="takeButtonHandle"
+      >
+        Взять
+      </el-button>
+    </div>
+    <template v-if="!event">
+      <div class="row">
+        <div class="left">Исполнитель</div>
+        <div class="right">
+          
+        </div>
+      </div>
+    </template>
   </el-collapse-item>
 </template>
 <style lang="sass">
