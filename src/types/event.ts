@@ -9,6 +9,7 @@ export interface Event {
   user_name?: string | null;
   status: number;
   selected_users: number[];
+  selected_divisions: number[];
   result?: string | null;
   params?: { [key: string]: any };
 }

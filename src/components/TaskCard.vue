@@ -154,7 +154,7 @@ const save = async() => {
       <div class="actions">
         <div class="buttons">
           <el-tooltip
-            v-if="TaskService.canTakeTask(task)"
+            v-if="TaskService.canTakeTask(task, user!)"
             class="item"
             effect="dark"
             content="Взять задачу"
@@ -166,7 +166,7 @@ const save = async() => {
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canFinishTask(task)"
+            v-if="TaskService.canFinishTask(task, user!)"
             class="item"
             effect="dark"
             content="Завершить задачу"

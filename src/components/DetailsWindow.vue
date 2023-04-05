@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
+import { useUserStore } from "@/stores/user";
 import { useInterfaceStore } from "@/stores/interface";
 import { Close, Pointer, Notification, Finished } from "@element-plus/icons-vue";
 import { computed, onMounted, watch } from "vue";
@@ -14,6 +15,7 @@ import { services } from "@/main";
 const taskStore = useTaskStore();
 const interfaceStore = useInterfaceStore();
 const pipeStore = usePipeStore();
+const user = useUserStore().getUser;
 
 const TaskService = services.Task
 
@@ -99,7 +101,7 @@ const save = () => {
         >
         <template v-if="!isCreatingTaskProcess">
           <el-tooltip
-            v-if="TaskService.canTakeTask(task)"
+            v-if="TaskService.canTakeTask(task, user!)"
             class="item"
             effect="dark"
             content="Взять задачу"
@@ -107,15 +109,15 @@ const save = () => {
           >
             <el-button :icon="Pointer"></el-button>
           </el-tooltip>
-          <!-- <el-tooltip
-            v-if="TaskService.canFinishTask(task)"
+          <el-tooltip
+            v-if="TaskService.canFinishTask(task, user!)"
             class="item"
             effect="dark"
             content="Завершить задачу"
             placement="top-start"
           >
             <el-button :icon="Finished"></el-button>
-          </el-tooltip> -->
+          </el-tooltip>
           <el-tooltip
             class="item"
             effect="dark"

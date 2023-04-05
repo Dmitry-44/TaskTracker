@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Task } from "@/types/task";
+import { useUserStore } from "@/stores/user";
 import {
   EditPen,
   Notification,
@@ -10,7 +11,6 @@ import {
 import { ref, onMounted, computed } from "vue";
 import type { PropType } from "vue";
 import { useRouter } from "vue-router";
-
 import TaskRepo from "@/api/task";
 import { services } from "@/main";
 
@@ -26,6 +26,7 @@ const task = ref(props.task);
 const readonlyTask = computed(() => task.value.status === 4);
 const TaskService = services.Task
 const router = useRouter();
+const user = useUserStore().getUser;
 
 // const copyTaskLink = () => {
 //   const routeData = router.resolve({ path: `/tasks/${task.value.id}` });
@@ -40,11 +41,11 @@ const router = useRouter();
     <el-icon><Notification /></el-icon>
     <span style="margin-left: 10px">Открыть в новой вкладке</span>
   </el-option>
-  <el-option v-if="TaskService.canTakeTask(task)" value="">
+  <el-option v-if="TaskService.canTakeTask(task, user!)" value="">
     <el-icon><Pointer /></el-icon>
     <span style="margin-left: 10px">Взять задачу</span>
   </el-option>
-  <el-option v-if="TaskService.canFinishTask(task)" value="">
+  <el-option v-if="TaskService.canFinishTask(task, user!)" value="">
     <el-icon><Finished /></el-icon>
     <span style="margin-left: 10px">Завершить задачу</span>
   </el-option>

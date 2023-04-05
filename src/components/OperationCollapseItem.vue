@@ -31,40 +31,6 @@ const DIRECTION_OPTIONS = operatonStore.getDirectionOptions
 const statusColor =
   eventStatusOptions.filter((ev) => props.event?.status === ev.id)[0]?.color || "";
 
-function takeButtonHandle() {
-  const msg = ElMessage({
-    message: "Сохраняю задачу..",
-    type: "success",
-    center: true,
-    duration: 1000,
-  });
-
-  TaskService.updateEventStatus(props.taskId, props.event!.id, 2)
-    .then(res => {
-      console.log('res', res)
-      if (res) {
-        ElMessage({
-          message: "Операция выполнена успешно!",
-          type: "success",
-          center: true,
-          duration: 1500,
-          showClose: true,
-        });
-      } else {
-        ElMessage({
-          message: "Ошибка при выполнении операции!",
-          type: "error",
-          center: true,
-          duration: 1500,
-          showClose: true,
-        });
-      }
-    })
-    .finally(() => {
-      msg.close();
-    });
-}
-
 
 </script>
 <template>
@@ -106,13 +72,6 @@ function takeButtonHandle() {
       <div class="right">
         <el-tag>{{ event.user_name }}</el-tag>
       </div>
-    </div>
-    <div class="row" v-if="event?.status===1">
-      <el-button
-      @click="takeButtonHandle"
-      >
-        Взять
-      </el-button>
     </div>
     <template v-if="!event">
       <div class="row">

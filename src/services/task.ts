@@ -210,13 +210,15 @@ export default class TaskService {
 		  }
 	}
 
-	canTakeTask(task: Task): boolean {
+	canTakeTask(task: Task, user: User): boolean {
 		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
 		if(!taskLastEvent){return false};
-		return taskLastEvent.status === 1
+		return ((taskLastEvent.selected_users.length===0 && taskLastEvent.selected_divisions.length===0) || taskLastEvent.selected_users.includes(user.id))
+				&& taskLastEvent.status === 1
 	}
-	canFinishTask(task: Task): boolean {
+	canFinishTask(task: Task, user: User): boolean {
 		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
-		return taskLastEvent.status === 2
+		if(!taskLastEvent){return false};
+		return taskLastEvent.u_id===user.id && taskLastEvent.status === 2
 	}
 }
