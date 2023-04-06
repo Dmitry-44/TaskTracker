@@ -5,9 +5,6 @@ import type { Task } from "@/types/task";
 import { toRef, type PropType, watch } from "vue";
 import { ref, computed } from "vue";
 import { Plus, Top, Bottom, CloseBold } from "@element-plus/icons-vue";
-import { useInterfaceStore } from "@/stores/interface";
-import { ElMessage } from "element-plus";
-import { errVueHandler } from "@/plugins/errorResponser";
 import KanbanColumnFilter from "./KanbanColumnSortPicker.vue";
 import { services } from "@/main";
 
@@ -59,21 +56,6 @@ watch(
 );
 
 //METHODS
-const takeTask = async (task: Task) => {
-  LOADING.value = true;
-  TaskService
-    .takeTask(task)
-    .finally(()=>{
-      LOADING.value = false;
-    })
-};
-
-const returnTask = (task: Task) => {
-  TaskService.returnTask(task)
-}
-const takeTaskToWork = (task: Task) => {
-  TaskService.takeTaskToWork(task)
-}
 
 const doSearch = () => {
   tasks.value = TaskService.searchTasks(props.tasks, searchValue.value)
@@ -134,10 +116,6 @@ const setDefaultSort = () => {
           :active="task.id === activeTask?.id ? true : false"
           @click.stop="TaskService.clickTask(task)"
           @dragstart="emit('taskDragStart', $event, task)"
-          @take="takeTask(task)"
-          @return="returnTask(task)"
-          @toWork="takeTaskToWork(task)"
-          @complete="TaskService.completeTask(task)"
         />
         <el-button
           v-if="addNewTask"

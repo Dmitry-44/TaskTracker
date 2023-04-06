@@ -1,8 +1,10 @@
 import { envConfig } from "@/plugins/envConfig";
+import { errRequestHandler } from "@/plugins/errorResponser";
 import type { FilterPayload } from "@/types/api";
 import type { ApiResponse } from "@/types/api";
 import type { Event } from "@/types/event";
 import type { ITaskRepo, Task } from "@/types/task";
+import { Axios, AxiosError } from "axios";
 import { axiosClient } from "../plugins/axios";
 
 export default class TaskRepo implements ITaskRepo {
@@ -49,12 +51,26 @@ export default class TaskRepo implements ITaskRepo {
 		return axiosClient
 			.post(`${envConfig.API_URL}tasktracker/taskUpsert`, payload)
 			.then(res => res.data)
+			.catch(err=> {
+				if(err instanceof AxiosError) {
+					throw err
+				} else {
+					return {message: errRequestHandler(err)}
+				}
+			})
 	}
 
 	TakeTask(taskId: Task['id'], eventId: Event['id']): Promise<ApiResponse<Task>> {
 		return axiosClient
         	.get(`${envConfig.API_URL}tasktracker/task/${taskId}/event/${eventId}/take`)
 			.then(res => res.data)
+			.catch(err=> {
+				if(err instanceof AxiosError) {
+					throw err
+				} else {
+					return {message: errRequestHandler(err)}
+				}
+			})
 	}
 
 	UpdateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): Promise<ApiResponse<Task>> {
@@ -62,8 +78,11 @@ export default class TaskRepo implements ITaskRepo {
         	.post(`${envConfig.API_URL}tasktracker/task/${taskId}/event/${eventId}/status`, { status: status })
 			.then(res => res.data)
 			.catch(err=> {
-				console.log('err in api', err);
-				throw err
+				if(err instanceof AxiosError) {
+					throw err
+				} else {
+					return {message: errRequestHandler(err)}
+				}
 			})
 		
 	}
@@ -72,6 +91,13 @@ export default class TaskRepo implements ITaskRepo {
 		return axiosClient
         	.post(`${envConfig.API_URL}tasktracker/task/${taskId}/event/${eventId}/complete`)
 			.then(res => res.data)
+			.catch(err=> {
+				if(err instanceof AxiosError) {
+					throw err
+				} else {
+					return {message: errRequestHandler(err)}
+				}
+			})
 		
 	}
 }

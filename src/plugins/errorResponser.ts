@@ -1,6 +1,7 @@
 import { ElMessage } from "element-plus";
 import router from "@/router";
 export const errVueHandler = (res: number | boolean | string, errText = "") => {
+  console.log('errVueHandler res', res)
   if (res === true) {
     return true;
   }

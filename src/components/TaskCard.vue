@@ -6,8 +6,6 @@ import SelectOptions from "./SelectOptions.vue";
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
 import type { Task } from "@/types/task";
-import { ElMessage } from "element-plus";
-import { errVueHandler } from "@/plugins/errorResponser";
 import { services } from "@/main";
 
 const props = defineProps({
@@ -37,94 +35,21 @@ const user = useUserStore().getUser;
 const selectMore = ref<any | HTMLInputElement>(null);
 const TaskService = services.Task
 
-const taskTitleEditing = ref(false);
-const titleInput = ref<any | HTMLInputElement>(null);
-let currentTitle = ''
-const changeTitle = () => {
-  taskTitleEditing.value = true;
-  currentTitle=task.value.title
-  nextTick(() => {
-    titleInput.value.focus();
-    titleInput.value.select();
-  });
-};
-const LOADING = ref(false);
-
 const taskPriority = computed(
   () => priorityOptions.filter((v) => v.id === task.value.priority)[0]
 );
 const taskStatus = computed(
-  () => eventStatusOptions.find((v) => v.id === task.value.event_entities![task.value.event_entities!.length-1].status)
+  () => eventStatusOptions.find((v) => v.id === task.value.event_entities![task.value.event_entities!.length - 1].status)
 );
-// const oldContent = ref<Task | null>(null);
 
-const submitNewTitle = async () => {
-  if(currentTitle===task.value.title.trim()){
-    return
-  }
-  await save()
-  taskTitleEditing.value = false;
-};
-
-const titleInputBlurHandle = () => {
-  task.value.title=currentTitle
-  taskTitleEditing.value = false;
-}
-
-const deleteTask = () => {
-  console.log("delete task");
-};
-
-onMounted(() => {
-  if (props.emptyCard) changeTitle();
-  // oldContent.value = { ...task.value };
-});
-
-//ACTIONS
-const save = async() => {
-  LOADING.value = true;
-  const msg = ElMessage({
-    message: "Сохраняю задачу..",
-    type: "success",
-    center: true,
-    duration: 1000,
-  });
-  TaskService
-    .upsertTask(task.value)
-    .then((res) => {
-      if (errVueHandler(res)) {
-        ElMessage({
-          message: "Операция выполнена успешно!",
-          type: "success",
-          center: true,
-          duration: 1500,
-          showClose: true,
-        });
-      }
-    })
-    .finally(() => {
-      LOADING.value = false;
-      msg.close();
-    });
-};
 </script>
+
 <template>
   <div :class="['card', active ? 'active' : '', readonlyTask ? 'done' : '']">
     <div class="content">
       <div class="title-indicator">
         <span class="title">
-          <form v-if="taskTitleEditing">
-            <input
-              v-model="task.title"
-              class="title-input"
-              type="text"
-              placeholder="Напишите название задачи"
-              ref="titleInput"
-              @keydown.enter="submitNewTitle"
-              @blur="titleInputBlurHandle()"
-            />
-          </form>
-          <span v-else>{{ task.title }}</span>
+          {{ task.title }}
         </span>
       </div>
       <div class="tags">
@@ -162,11 +87,11 @@ const save = async() => {
           >
             <el-button
               :icon="Pointer"
-              @click.stop="$emit('take', task.id)"
+              @click.stop="TaskService.takeTask(task, user!)"
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canTakeTaskToWork(task, user!)"
+            v-if="TaskService.canTakeTaskToProgress(task, user!)"
             class="item"
             effect="dark"
             content="В работу"
@@ -174,11 +99,11 @@ const save = async() => {
           >
             <el-button
               :icon="ArrowRightBold"
-              @click.stop="$emit('toWork', task)"
+              @click.stop="TaskService.takeTaskToProgress(task,user!)"
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canReturnTask(task, user!)"
+            v-if="TaskService.canReturnTaskToBacklog(task, user!)"
             class="item"
             effect="dark"
             content="Вернуть к исполнению"
@@ -186,7 +111,7 @@ const save = async() => {
           >
             <el-button
               :icon="ArrowLeftBold"
-              @click.stop="$emit('return', task)"
+              @click.stop="TaskService.returnTaskToBacklog(task,user!)"
             ></el-button>
           </el-tooltip>
           <el-tooltip
@@ -198,13 +123,13 @@ const save = async() => {
           >
             <el-button
               :icon="Finished"
-              @click.stop="$emit('complete', task)"
+              @click.stop="TaskService.finishTask(task,user!)"
             ></el-button>
           </el-tooltip>
         </div>
       </div>
     </div>
-    <div v-if="!taskTitleEditing" class="menu">
+    <div class="menu">
       <el-button
         type="info"
         plain
@@ -212,7 +137,7 @@ const save = async() => {
         @click.stop="selectMore.toggleMenu()"
       ></el-button>
       <el-select class="select-more" ref="selectMore">
-        <SelectOptions :task="task" @titleChanged="changeTitle()" />
+        <SelectOptions :task="task" />
       </el-select>
     </div>
   </div>
@@ -284,17 +209,6 @@ const save = async() => {
     display: flex
     flex-direction: column
     justify-content: space-between
-.title-input
-    width: calc(100% - 25px)
-    border: none
-    font-size: inherit
-    padding: 0
-    line-height: inherit
-    background-color: inherit
-    font-family: inherit
-    &:active,&:focus-visible
-        border: none
-        outline: none
 
 .card .tags
     margin: 0 16px

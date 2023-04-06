@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
+import { useUserStore } from "@/stores/user";
 import type { Task } from "@/types/task";
 import type { FilterPayload } from "@/types/api";
 import DetailsWindow from "../../components/DetailsWindow.vue";
 import { ref, computed, onBeforeUnmount, nextTick } from "vue";
 import Filters from "../../components/Filters.vue";
 import KanbanColumn from "@/components/KanbanColumn.vue";
-import { ElMessage } from "element-plus";
 import { services } from "@/main";
 
 
@@ -15,7 +15,7 @@ const $filters = ref<typeof Filters | null>(null);
 const abortController = new AbortController();
 const abortSignal = abortController.signal;
 const TaskService = services.Task
-
+const user = useUserStore().getUser;
 const dialogFinishTaskIsOpen = ref(false)
 
 //GETTERS
@@ -47,45 +47,45 @@ function dialogCancelHandle(){
   dialogFinishTaskIsOpen.value=false
 }
 function dialogOkHandle(){
-  TaskService.dragAndDropTask(transferTask.value!, 3)
+  TaskService.dragAndDropTask(transferTask.value!, 3, user!)
   dialogFinishTaskIsOpen.value=false
 }
-const updateTask = async (task: Task) => {
-  LOADING.value = true;
-  const msg = ElMessage({
-    message: "Сохраняю задачу..",
-    type: "success",
-    center: true,
-    duration: 1000,
-  });
-  return TaskService
-    .upsertTask(task)
-    .then(res => {
-      if (res) {
-        ElMessage({
-          message: "Операция выполнена успешно!",
-          type: "success",
-          center: true,
-          duration: 1500,
-          showClose: true,
-        });
-        return true;
-      } else {
-        ElMessage({
-          message: "Ошибка при выполнении операции!",
-          type: "error",
-          center: true,
-          duration: 1500,
-          showClose: true,
-        });
-        return false;
-      }
-    })
-    .finally(() => {
-      LOADING.value = false;
-      msg.close();
-    });
-};
+// const updateTask = async (task: Task) => {
+//   LOADING.value = true;
+//   const msg = ElMessage({
+//     message: "Сохраняю задачу..",
+//     type: "success",
+//     center: true,
+//     duration: 1000,
+//   });
+//   return TaskService
+//     .upsertTask(task)
+//     .then(res => {
+//       if (res) {
+//         ElMessage({
+//           message: "Операция выполнена успешно!",
+//           type: "success",
+//           center: true,
+//           duration: 1500,
+//           showClose: true,
+//         });
+//         return true;
+//       } else {
+//         ElMessage({
+//           message: "Ошибка при выполнении операции!",
+//           type: "error",
+//           center: true,
+//           duration: 1500,
+//           showClose: true,
+//         });
+//         return false;
+//       }
+//     })
+//     .finally(() => {
+//       LOADING.value = false;
+//       msg.close();
+//     });
+// };
 
 //HOOKS
 onBeforeUnmount(() => abortController.abort());
@@ -125,8 +125,8 @@ const dropHandler = async (ev: DragEvent, area: number) => {
     clearDragAndDrop()
     return;
   }
-  TaskService.dragAndDropTask(transferTask.value!, area)
-    clearDragAndDrop()
+  TaskService.dragAndDropTask(transferTask.value!, area, user!)
+  clearDragAndDrop()
 };
 const clearDragAndDrop = () => {
   tasksToTakeArea.value?.classList.remove("dragOver");
@@ -187,10 +187,8 @@ const clearDragAndDrop = () => {
         <KanbanColumn
           :tasks="tasksFinished"
           title="Завершенные"
-          :is-Draggable="true"
           :loading="LOADING"
           key="3"
-          @taskDragStart="dragstartHandler"
         />
       </div>
     </div>

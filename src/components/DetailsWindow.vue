@@ -7,8 +7,6 @@ import { computed, onMounted, watch } from "vue";
 import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
-import { ElMessage } from "element-plus";
-import { errVueHandler } from "@/plugins/errorResponser";
 import { services } from "@/main";
 
 
@@ -49,8 +47,8 @@ onMounted(()=>{
 watch(
   () => task.value,
   (newVal, oldVal) => {
-    if(newVal.id!=oldVal.id){
-      oldContent.value=JSON.stringify(task.value)
+    if(newVal != oldVal){
+      oldContent.value=JSON.stringify(newVal)
     }
   }
 );
@@ -59,29 +57,15 @@ watch(
 const save = () => {
   if(!task.value)return
   LOADING.value = true;
-  const msg = ElMessage({
-    message: "Сохраняю задачу..",
-    type: "success",
-    center: true,
-    duration: 1000,
-  });
   TaskService
     .upsertTask(task.value)
     .then(res => {
-      if (errVueHandler(res)) {
-        ElMessage({
-          message: "Операция выполнена успешно!",
-          type: "success",
-          center: true,
-          duration: 1500,
-          showClose: true,
-        });
+      if (res) {
         oldContent.value=JSON.stringify(task.value)
       }
     })
     .finally(() => {
       LOADING.value = false;
-      msg.close();
     });
 };
 
@@ -99,6 +83,13 @@ const save = () => {
           @click="save()"
           >Сохранить</el-button
         >
+        <el-button
+          :loading="LOADING"
+          v-show="!(task.id>0)"
+          type="info"
+          @click="TaskService.clearTask()"
+          >Очистить</el-button
+        >
         <template v-if="!isCreatingTaskProcess">
           <el-tooltip
             v-if="TaskService.canTakeTask(task, user!)"
@@ -109,11 +100,11 @@ const save = () => {
           >
             <el-button 
             :icon="Pointer"
-            @click.stop="TaskService.takeTask(task)"
+            @click.stop="TaskService.takeTask(task, user!)"
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canTakeTaskToWork(task, user!)"
+            v-if="TaskService.canTakeTaskToProgress(task, user!)"
             class="item"
             effect="dark"
             content="В работу"
@@ -121,11 +112,11 @@ const save = () => {
           >
             <el-button
               :icon="ArrowRightBold"
-              @click.stop="TaskService.takeTaskToWork(task)"
+              @click.stop="TaskService.takeTaskToProgress(task, user!)"
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canReturnTask(task, user!)"
+            v-if="TaskService.canReturnTaskToBacklog(task, user!)"
             class="item"
             effect="dark"
             content="Вернуть к исполнению"
@@ -133,7 +124,7 @@ const save = () => {
           >
             <el-button
               :icon="ArrowLeftBold"
-              @click.stop="TaskService.returnTask(task)"
+              @click.stop="TaskService.returnTaskToBacklog(task, user!)"
             ></el-button>
           </el-tooltip>
           <el-tooltip

@@ -21,7 +21,7 @@ const props = defineProps({
     require: true,
   },
 });
-const emit = defineEmits(["titleChanged"]);
+
 const task = ref(props.task);
 const readonlyTask = computed(() => task.value.status === 4);
 const TaskService = services.Task
@@ -41,18 +41,14 @@ const user = useUserStore().getUser;
     <el-icon><Notification /></el-icon>
     <span style="margin-left: 10px">Открыть в новой вкладке</span>
   </el-option>
-  <el-option v-if="TaskService.canTakeTask(task, user!)" value="">
+  <!-- <el-option v-if="TaskService.canTakeTask(task, user!)" value="">
     <el-icon><Pointer /></el-icon>
     <span style="margin-left: 10px">Взять задачу</span>
-  </el-option>
-  <el-option v-if="TaskService.canFinishTask(task, user!)" value="">
+  </el-option> -->
+  <!-- <el-option v-if="TaskService.canFinishTask(task, user!)" value="">
     <el-icon><Finished /></el-icon>
     <span style="margin-left: 10px">Завершить задачу</span>
-  </el-option>
-  <el-option v-if="!readonlyTask" value="" @click="emit('titleChanged')">
-    <el-icon><EditPen /></el-icon>
-    <span style="margin-left: 10px">Изменить название задачи</span>
-  </el-option>
+  </el-option> -->
   <el-option value="" @click="TaskService.clickTask(task)">
     <el-icon><View /></el-icon>
     <span style="margin-left: 10px">Открыть сведения</span>
