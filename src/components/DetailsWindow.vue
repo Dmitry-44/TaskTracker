@@ -134,7 +134,11 @@ const save = () => {
             content="Завершить задачу"
             placement="top-start"
           >
-            <el-button :icon="Finished"></el-button>
+            <el-button 
+              :icon="Finished"
+              @click.stop="TaskService.finishTask(task, user!)"
+            >
+            </el-button>
           </el-tooltip>
           <el-tooltip
             class="item"
@@ -286,6 +290,11 @@ const save = () => {
         width: min(700px, 60%)
         transform: translateX(0px)
         visibility: visible
+
+@media screen and (max-width: 768px)
+  .details.active
+    width: 100%
+    
 .details .header
     height: 50px
     padding: 0px 12px

@@ -167,8 +167,8 @@ const taskStatus = computed(
         border-color: #406ac4
     & .title-indicator
         line-height: 22px
-        max-height: 110px
-        margin: 12px 16px 12px 16px
+        max-height: 120px
+        margin: 12px 55px 12px 16px
         min-height: 20px
         overflow-x: hidden
         overflow-y: auto
@@ -196,6 +196,7 @@ const taskStatus = computed(
     right: 0
     top: 0
     display: initial
+    display: none
 
 .select-more
     appearance: none

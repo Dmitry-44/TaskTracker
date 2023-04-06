@@ -3,7 +3,7 @@ import type { ApiResponse, FilterPayload } from "./api";
 type Operation = {
 	id: number;
 	name: string;
-	params: { [key: string]: any };
+	params: Record<string, unknown>
 }
 
 interface IOperationRepo {

@@ -28,7 +28,7 @@ const executors = ref(1)
 
 onBeforeMount(()=> {
     // if(!(task.value.id > 0)){
-        task.value.pipe_data[operationId.value]={}
+        task.value.pipe_data[operationId.value]= {}
         task.value.pipe_data[operationId.value]['selected_users']=[]
         task.value.pipe_data[operationId.value]['selected_divisions']=[]
     // } else {

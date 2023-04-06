@@ -4,14 +4,14 @@ import type { ApiResponse, UserResponse } from "./api";
 interface User {
 	id: number;
 	fio: string;
-	rights: { [key: string]: any };
+	rights: Record<string, any>
 }
 
 type UserSimple = {
 	id: number;
 	fullname: string;
-	permissions: { [key: string]: any}
-	sites: {[key: string]: any}[]
+	permissions: Record<string, any>
+	sites: Record<string, any>[]
 	ttrace_division_id: number;
 }
 

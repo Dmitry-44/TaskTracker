@@ -6,18 +6,17 @@ interface Task {
 	id: number;
 	title: string;
 	text: string;
-	created_at: number;
-	priority?: number;
-	status?: number;
-	pipe_id?: number;
+	pipe_id: number;
+	priority: number;
+	status: number;
 	event_id?: number;
-	division_id?: number;
+	division_id: number;
 	created_by?: number;
+	pipe_data: Record<string, any>
 	events?: number[];
 	event_entities?: Event[];
 	child_tasks?: Task[];
 	smi_direction?: number;
-	pipe_data: {[key:string]: any}
 }
 
 interface ITaskRepo {

@@ -9,7 +9,7 @@ type OperationsById = {
 type State = {
 	operations: Operation[];
 	singleOperation: Operation | null;
-	directionOptions: {[key:string]: any}[]
+	directionOptions: Record<string, any>[]
 };
 
 export const useOperationStore = defineStore({

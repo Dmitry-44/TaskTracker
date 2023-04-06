@@ -6,8 +6,8 @@ interface SuccessApiResponse<T> {
 }
 
 type ResultWithPagination<T> = {
-  pagination: { [key: string]: any };
-  queryResult: T[];
+  pagination: Record<string,any>
+  queryResult: T[]
 };
 interface FailureApiResponse {
   message: string;
@@ -30,7 +30,7 @@ export const isResultWithPagination = <T>(res: ApiResult<T>): res is ResultWithP
 
 interface FilterPayload {
 	select: string[];
-	filter: { [key: string]: any };
+	filter: Record<string, any>;
 	options: {
 		onlyLimit?: boolean;
 		page?: number;
