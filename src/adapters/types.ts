@@ -2,7 +2,7 @@ import type{ Operation } from '@/types/operation';
 import type { Pipe } from '@/types/pipe';
 import type { Site } from '@/types/site';
 import type { Task } from '@/types/task';
-import type { User } from '@/types/user';
+import type { User, UserSimple } from '@/types/user';
 
 
 interface IUserStore {
@@ -11,6 +11,7 @@ interface IUserStore {
     getUser(): User|null
     setIsAuth(payload: boolean): void
     setUser(payload: User|null): void
+    setUsers(payload: UserSimple[]): void
 }
 interface ITaskStore {
     getActiveTask(): Task

@@ -1,12 +1,15 @@
+import { isResultWithPagination } from './../types/api';
 
 import { useUserStore } from "@/stores/user";
-import type { IUserRepo, User } from "@/types/user";
+import type { IUserRepo, User, UserSimple } from "@/types/user";
 import router from '@/router';
 import { envConfig } from '@/plugins/envConfig';
 import type { NavigationGuardNext } from 'vue-router';
 import { services } from "@/main";
 import type PiniaUserAdapter from "@/adapters/piniaUserAdapter";
 import type PiniaInterfaceAdapter from "@/adapters/piniaInterfaceAdapter";
+import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
+import { errRequestHandler } from "@/plugins/errorResponser";
 
 
 export default class UserService {
@@ -40,6 +43,20 @@ export default class UserService {
 		return this.userRepo
 			.Logout()
 			.then(()=>true)
+	}
+
+	getAllUsers(): Promise<ApiResponse<User>> {
+		return this.userRepo
+			.GetUsersList()
+			.then((respdata) => {
+				if (isSuccessApiResponse(respdata)) {
+					this.userStore.setUsers(respdata.result as UserSimple[])
+					return true
+				} else {
+					return respdata.message || -1;
+				}
+			})
+			.catch(err => errRequestHandler(err));
 	}
 
 	initAuthMiddleware() {

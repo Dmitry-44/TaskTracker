@@ -65,5 +65,9 @@ export const useTaskStore = defineStore({
 		setSingleTask(payload: Task | null): void {
 			this.singleTask = payload;
 		},
+		updateTask(payload: Task): void {
+			const index = this.tasks.findIndex(task => task.id === payload.id)
+			this.tasks[index]=payload
+		}
 	},
 });

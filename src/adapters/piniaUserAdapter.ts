@@ -1,5 +1,5 @@
 import { useUserStore } from '@/stores/user';
-import type { User } from "@/types/user";
+import type { User, UserSimple } from "@/types/user";
 import type { IUserStore } from './types';
 
 
@@ -26,4 +26,7 @@ export default class PiniaUserAdapter implements IUserStore{
     setUser(payload: User | null): void {
         return this.userStore.setUser(payload);
     }
+	setUsers(payload: UserSimple[]): void {
+		return this.userStore.setUsers(payload);
+	}
 }

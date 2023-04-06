@@ -68,12 +68,20 @@ const takeTask = async (task: Task) => {
     })
 };
 
+const returnTask = (task: Task) => {
+  TaskService.returnTask(task)
+}
+const takeTaskToWork = (task: Task) => {
+  TaskService.takeTaskToWork(task)
+}
+
 const doSearch = () => {
   tasks.value = TaskService.searchTasks(props.tasks, searchValue.value)
 };
 const setDefaultSort = () => {
   tasks.value = JSON.parse(JSON.stringify(props.tasks));
 };
+
 </script>
 
 <template>
@@ -127,6 +135,9 @@ const setDefaultSort = () => {
           @click.stop="TaskService.clickTask(task)"
           @dragstart="emit('taskDragStart', $event, task)"
           @take="takeTask(task)"
+          @return="returnTask(task)"
+          @toWork="takeTaskToWork(task)"
+          @complete="TaskService.completeTask(task)"
         />
         <el-button
           v-if="addNewTask"

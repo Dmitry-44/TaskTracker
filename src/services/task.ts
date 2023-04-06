@@ -11,6 +11,8 @@ import type PiniaTaskAdapter from '@/adapters/piniaTaskAdapter';
 import type PiniaInterfaceAdapter from '@/adapters/piniaInterfaceAdapter';
 import type { Event } from '@/types/event';
 import type { User } from '@/types/user';
+import { lastEventId } from '@sentry/vue';
+import { AxiosError } from 'axios';
 
 
 
@@ -97,8 +99,6 @@ export default class TaskService {
 				}
 			})
 			.catch(err => {
-				console.log('sssssss')
-				console.log('err', err)
 				errRequestHandler(err)
 			})
 			.finally(()=>{
@@ -109,6 +109,26 @@ export default class TaskService {
 	updateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']) {
 		return this.taskRepo
 			.UpdateEventStatus(taskId, eventId, status)
+			.then((respdata) => {
+				console.log('respdata', respdata)
+				if (isSuccessApiResponse(respdata)) {
+					return true;
+				} else {
+					return respdata.message || -1;
+				}
+			})
+			.catch(err => {
+				console.log('updateEventStatus catch err', err)
+				if(err instanceof AxiosError) {
+					return err.response?.data
+				}
+				errRequestHandler(err)
+			});
+	}
+
+	completeEvent(taskId: Task['id'], eventId: Event['id']) {
+		return this.taskRepo
+			.CompleteEvent(taskId, eventId)
 			.then((respdata) => {
 				if (isSuccessApiResponse(respdata)) {
 					return true;
@@ -182,38 +202,81 @@ export default class TaskService {
 				center: true,
 				duration: 1000,
 			});
-			console.log('newEventStatus', newEventStatus)
-			this.updateEventStatus(task.id, eventToUpdate.id, newEventStatus)
+			if(newEventStatus===3){
+				this.completeEvent(task.id, eventToUpdate.id)
+					.then(res => {
+						if (res) {
+							eventToUpdate.status=newEventStatus
+							this.taskStore.updateTask(task)
+							ElMessage({
+								message: "Операция выполнена успешно!",
+								type: "success",
+								center: true,
+								duration: 1500,
+								showClose: true,
+							});
+						} else {
+							ElMessage({
+								message: "Ошибка при выполнении операции!",
+								type: "error",
+								center: true,
+								duration: 1500,
+								showClose: true,
+							});
+						}
+					})
+					.finally(() => {
+						msg.close();
+					});
+			} else {
+				this.updateEventStatus(task.id, eventToUpdate.id, newEventStatus)
 				.then(res => {
 					console.log('res', res)
 					if (res) {
-					ElMessage({
-						message: "Операция выполнена успешно!",
-						type: "success",
-						center: true,
-						duration: 1500,
-						showClose: true,
-					});
+						eventToUpdate.status=newEventStatus
+						this.taskStore.updateTask(task)
+						ElMessage({
+							message: "Операция выполнена успешно!",
+							type: "success",
+							center: true,
+							duration: 1500,
+							showClose: true,
+						});
 					} else {
-					ElMessage({
-						message: "Ошибка при выполнении операции!",
-						type: "error",
-						center: true,
-						duration: 1500,
-						showClose: true,
-					});
+						ElMessage({
+							message: "Ошибка при выполнении операции!",
+							type: "error",
+							center: true,
+							duration: 1500,
+							showClose: true,
+						});
 					}
+				})
+				.catch(error=>{
+					// console.log('error', error)
 				})
 				.finally(() => {
 					msg.close();
 				});
+			}
 		  }
+	}
+
+	returnTask(task: Task) {
+		this.dragAndDropTask(task, 1)
+	}
+	takeTaskToWork(task: Task) {
+		this.dragAndDropTask(task, 2)
+	}
+	completeTask(task: Task) {
+		this.dragAndDropTask(task, 3)
 	}
 
 	canTakeTask(task: Task, user: User): boolean {
 		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
 		if(!taskLastEvent){return false};
 		return ((taskLastEvent.selected_users.length===0 && taskLastEvent.selected_divisions.length===0) || taskLastEvent.selected_users.includes(user.id))
+				&& !taskLastEvent.u_id
 				&& taskLastEvent.status === 1
 	}
 	canFinishTask(task: Task, user: User): boolean {
@@ -221,4 +284,18 @@ export default class TaskService {
 		if(!taskLastEvent){return false};
 		return taskLastEvent.u_id===user.id && taskLastEvent.status === 2
 	}
+	canReturnTask(task: Task, user: User): boolean {
+		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		if(!taskLastEvent){return false};
+		return ((taskLastEvent.selected_users.length===0 && taskLastEvent.selected_divisions.length===0) || taskLastEvent.selected_users.includes(user.id))
+				&& taskLastEvent.u_id === user.id
+				&& taskLastEvent.status === 2
+	}
+	canTakeTaskToWork(task: Task, user: User): boolean {
+		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		if(!taskLastEvent){return false};
+		return taskLastEvent.u_id===user.id
+			&& taskLastEvent.status === 1
+	}
+
 }

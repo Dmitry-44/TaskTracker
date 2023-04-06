@@ -31,7 +31,8 @@ export default class TaskRepo implements ITaskRepo {
 		created_at: -1,
 		status: 1,
 		text: "",
-		event_entities: []
+		event_entities: [],
+		pipe_data: {}
 	}
 
 
@@ -54,14 +55,22 @@ export default class TaskRepo implements ITaskRepo {
 		return axiosClient
         	.get(`${envConfig.API_URL}tasktracker/task/${taskId}/event/${eventId}/take`)
 			.then(res => res.data)
-			.catch(err => {
-				console.log('error in api', err)
-			})
 	}
 
 	UpdateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): Promise<ApiResponse<Task>> {
 		return axiosClient
         	.post(`${envConfig.API_URL}tasktracker/task/${taskId}/event/${eventId}/status`, { status: status })
+			.then(res => res.data)
+			.catch(err=> {
+				console.log('err in api', err);
+				throw err
+			})
+		
+	}
+
+	CompleteEvent(taskId: Task['id'], eventId: Event['id']): Promise<ApiResponse<Task>> {
+		return axiosClient
+        	.post(`${envConfig.API_URL}tasktracker/task/${taskId}/event/${eventId}/complete`)
 			.then(res => res.data)
 		
 	}

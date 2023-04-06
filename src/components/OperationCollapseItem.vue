@@ -7,15 +7,16 @@ import type { Operation } from "@/types/operation";
 import { ElMessage } from "element-plus";
 import type { PropType } from "vue";
 import { computed } from "@vue/reactivity";
+import SelectExecutor from "./SelectExecutor.vue";
 
 const props = defineProps({
   operation: {
     type: Object as PropType<Operation>,
-    default: () => null,
+    default: () => {},
   },
   event: {
     type: Object as PropType<Event | null>,
-    default: () => null,
+    default: () => {},
   },
   taskId: {
     type: Number,
@@ -73,14 +74,15 @@ const statusColor =
         <el-tag>{{ event.user_name }}</el-tag>
       </div>
     </div>
-    <template v-if="!event">
-      <div class="row">
-        <div class="left">Исполнитель</div>
-        <div class="right">
-          
-        </div>
-      </div>
-    </template>
+    <div v-if="!event">
+      <!-- <div class="row"> -->
+        <div>Исполнители</div>
+        <!-- <div class="left">Исполнитель</div>
+        <div class="right"> -->
+          <!-- <SelectExecutor :operation="operation"/> -->
+        <!-- </div> -->
+      <!-- </div> -->
+    </div>
   </el-collapse-item>
 </template>
 <style lang="sass">

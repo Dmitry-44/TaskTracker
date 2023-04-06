@@ -2,7 +2,7 @@
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
 import { useInterfaceStore } from "@/stores/interface";
-import { Close, Pointer, Notification, Finished } from "@element-plus/icons-vue";
+import { Close, Pointer, Notification, Finished, ArrowRightBold, ArrowLeftBold } from "@element-plus/icons-vue";
 import { computed, onMounted, watch } from "vue";
 import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
@@ -94,7 +94,7 @@ const save = () => {
       <div class="actions">
         <el-button
           :loading="LOADING"
-          :disabled="!wasChanged"
+          :disabled="!wasChanged||!task.pipe_id"
           type="success"
           @click="save()"
           >Сохранить</el-button
@@ -107,7 +107,34 @@ const save = () => {
             content="Взять задачу"
             placement="top-start"
           >
-            <el-button :icon="Pointer"></el-button>
+            <el-button 
+            :icon="Pointer"
+            @click.stop="TaskService.takeTask(task)"
+            ></el-button>
+          </el-tooltip>
+          <el-tooltip
+            v-if="TaskService.canTakeTaskToWork(task, user!)"
+            class="item"
+            effect="dark"
+            content="В работу"
+            placement="top-start"
+          >
+            <el-button
+              :icon="ArrowRightBold"
+              @click.stop="TaskService.takeTaskToWork(task)"
+            ></el-button>
+          </el-tooltip>
+          <el-tooltip
+            v-if="TaskService.canReturnTask(task, user!)"
+            class="item"
+            effect="dark"
+            content="Вернуть к исполнению"
+            placement="top-start"
+          >
+            <el-button
+              :icon="ArrowLeftBold"
+              @click.stop="TaskService.returnTask(task)"
+            ></el-button>
           </el-tooltip>
           <el-tooltip
             v-if="TaskService.canFinishTask(task, user!)"

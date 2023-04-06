@@ -24,4 +24,7 @@ export default class PiniaTaskAdapter implements ITaskStore {
 	setSingleTask(payload: Task | null): void {
 		return this.taskStore.setSingleTask(payload);
 	}
+	updateTask(payload: Task): void {
+		return this.taskStore.updateTask(payload);
+	}
 }

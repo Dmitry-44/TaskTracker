@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SuccessFilled, More, EditPen, Pointer, Finished } from "@element-plus/icons-vue";
+import { SuccessFilled, More, EditPen, Pointer, Finished, ArrowLeftBold, ArrowRightBold} from "@element-plus/icons-vue";
 import { ref, onMounted, computed, nextTick } from "vue";
 import type { PropType } from "vue";
 import SelectOptions from "./SelectOptions.vue";
@@ -166,6 +166,30 @@ const save = async() => {
             ></el-button>
           </el-tooltip>
           <el-tooltip
+            v-if="TaskService.canTakeTaskToWork(task, user!)"
+            class="item"
+            effect="dark"
+            content="В работу"
+            placement="top-start"
+          >
+            <el-button
+              :icon="ArrowRightBold"
+              @click.stop="$emit('toWork', task)"
+            ></el-button>
+          </el-tooltip>
+          <el-tooltip
+            v-if="TaskService.canReturnTask(task, user!)"
+            class="item"
+            effect="dark"
+            content="Вернуть к исполнению"
+            placement="top-start"
+          >
+            <el-button
+              :icon="ArrowLeftBold"
+              @click.stop="$emit('return', task)"
+            ></el-button>
+          </el-tooltip>
+          <el-tooltip
             v-if="TaskService.canFinishTask(task, user!)"
             class="item"
             effect="dark"
@@ -174,7 +198,7 @@ const save = async() => {
           >
             <el-button
               :icon="Finished"
-              @click.stop="$emit('take', task.id)"
+              @click.stop="$emit('complete', task)"
             ></el-button>
           </el-tooltip>
         </div>

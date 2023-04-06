@@ -17,6 +17,7 @@ interface Task {
 	event_entities?: Event[];
 	child_tasks?: Task[];
 	smi_direction?: number;
+	pipe_data: {[key:string]: any}
 }
 
 interface ITaskRepo {
@@ -24,6 +25,7 @@ interface ITaskRepo {
 	UpsertTask(payload: Partial<Task>): Promise<ApiResponse<Task>>
 	TakeTask(taskId: Task['id'], eventId: Event['id']): Promise<ApiResponse<Task>>
 	UpdateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): Promise<ApiResponse<Task>>
+	CompleteEvent(taskId: Task['id'], eventId: Event['id']): Promise<ApiResponse<Task>>
 }
 
 export type { Task, ITaskRepo };
