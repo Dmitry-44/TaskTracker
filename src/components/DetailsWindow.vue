@@ -209,9 +209,10 @@ const save = () => {
         <div class="row">
           <div class="left">Приоритет</div>
           <div class="right">
+            {{ TaskService.canChangeTaskPriority(task, user!) }}
             <el-select
               v-model="task.priority"
-              :disabled="isReadonlyTask||TaskService.canChangeTaskPriority(task, user!)"
+              :disabled="isReadonlyTask||!TaskService.canChangeTaskPriority(task, user!)"
               clearable
               placeholder="Приоритет"
             >

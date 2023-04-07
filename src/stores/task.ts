@@ -1,6 +1,7 @@
 import  TaskRepo  from '@/api/task';
 import { defineStore } from "pinia";
 import type { Task } from "@/types/task";
+import type { Event } from '@/types/event';
 
 
 interface TaskOption {
@@ -65,9 +66,42 @@ export const useTaskStore = defineStore({
 		setSingleTask(payload: Task | null): void {
 			this.singleTask = payload;
 		},
-		updateTask(payload: Task): void {
+		updateTask(payload: Partial<Task>): void {
 			const index = this.tasks.findIndex(task => task.id === payload.id)
-			this.tasks[index]=payload
+			if(!index)return;
+			this.tasks[index]=Object.assign(this.tasks[index], payload)
+		},
+		addNewTask(payload: Task): void {
+			this.tasks = [payload, ...this.tasks]
+		},
+		updateTaskStatus(taskId: Task['id'], status: Task['status']):void {
+			const index = this.tasks.findIndex(task => task.id === taskId)
+			if(!index)return;
+			this.tasks[index].status=status
+		},
+		pushNewEventToTask(event: Event): void {
+			let task = this.getTaskByEventId(event.id);
+			if(!task)return;
+			task.events?.push(event.id)
+			task.event_entities?.push(event)
+			this.updateTask(task)
+		},
+		getTaskByEventId(eventId: Event['id']): Task|null {
+			return this.tasks.find(task=>task.events?.includes(eventId)) || null
+		},
+		eventUpdate(taskId: Task['id'], event: Partial<Event>): void {
+			let task = this.tasks.find(task=>task.id===taskId)
+			if(!task)return;
+			let eventToUpdate = task?.event_entities?.find(ev=>ev.id===event.id)
+			if(!eventToUpdate)return;
+			eventToUpdate = Object.assign(eventToUpdate,event)
+		},
+		updateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): void {
+			let task = this.tasks.find(task=>task.id===taskId)
+			if(!task)return;
+			let eventToUpdate = task?.event_entities?.find(ev=>ev.id===eventId)
+			if(!eventToUpdate)return;
+			eventToUpdate.status=status
 		}
 	},
 });

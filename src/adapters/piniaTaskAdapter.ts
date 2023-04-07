@@ -2,6 +2,7 @@
 import type { Task } from '@/types/task';
 import { useTaskStore } from '@/stores/task';
 import type { ITaskStore } from './types';
+import type { Event } from '@/types/event';
 
 
 export default class PiniaTaskAdapter implements ITaskStore {
@@ -24,7 +25,22 @@ export default class PiniaTaskAdapter implements ITaskStore {
 	setSingleTask(payload: Task | null): void {
 		return this.taskStore.setSingleTask(payload);
 	}
-	updateTask(payload: Task): void {
+	updateTask(payload: Partial<Task>): void {
 		return this.taskStore.updateTask(payload);
+	}
+	addNewTask(payload: Task): void {
+		return this.taskStore.addNewTask(payload)
+	}
+	updateTaskStatus(payload: Task['id'], status: Task['status']):void {
+		return this.taskStore.updateTaskStatus(payload, status)
+	}
+	pushNewEventToTask(event: Event): void {
+		return this.taskStore.pushNewEventToTask(event)
+	}
+	updateEvent(taskId: number, event: Partial<Event>): void {
+		return this.taskStore.eventUpdate(taskId, event)
+	}
+	updateEventStatus(taskId: number, eventId: number, status: number): void {
+		return this.taskStore.updateEventStatus(taskId, eventId, status)
 	}
 }

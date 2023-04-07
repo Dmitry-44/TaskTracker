@@ -3,8 +3,8 @@ window.envConfig = (() => {
   envstring = envstring.split(";");
   const result = {
     AUTH_URL: "http://auth.dev.lan",
-    API_URL: "http://eclipse.dev.lan:3002/",
-    WS_URL: "http://vlad.dev.lan:9001/",
+    API_URL: "http://eclipse.dev.lan:3003/",
+    WS_URL: "http://eclipse.dev.lan:9000/",
   };
   for (let i = 0; i < envstring.length; i++) {
     if (envstring[i].indexOf("=") + 1) {

@@ -1,3 +1,4 @@
+import type { Event } from '@/types/event';
 import type{ Operation } from '@/types/operation';
 import type { Pipe } from '@/types/pipe';
 import type { Site } from '@/types/site';
@@ -18,6 +19,12 @@ interface ITaskStore {
     setActiveTask(payload: Task): void
     setTasksList(payload: Task[]): void
     setSingleTask(payload: Task|null): void
+    addNewTask(payload: Task):void
+    updateTask(payload: Partial<Task>): void
+    updateTaskStatus(taskId: Task['id'], status: Task['status']):void
+    pushNewEventToTask(event: Event): void
+    updateEvent(taskId: Task['id'], event: Partial<Event>):void
+    updateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): void
 }
 interface IInterfaceStore {
     getGlobalLoading(): boolean

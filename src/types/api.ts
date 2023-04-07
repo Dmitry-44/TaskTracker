@@ -46,4 +46,13 @@ interface FilterPayload {
 	};
 }
 
+export const enum WSEvents {
+	TASK_CREATE = 'task:create',
+	TASK_UPDATE = 'task:update',
+	TASK_STATUS_UPDATE = 'task:status_update',
+	EVENT_CREATE = 'event:create',
+	EVENT_UPDATE = 'event:update',
+	EVENT_STATUS_UPDATE = 'event:status_update',
+}
+
 export type { ApiResponse, SuccessApiResponse, FailureApiResponse, FilterPayload, UserResponse };

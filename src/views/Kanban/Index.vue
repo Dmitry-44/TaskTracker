@@ -23,13 +23,13 @@ const tasks = computed(() => taskStore.getList);
 const LOADING = ref(false);
 
 const tasksToTake = computed(() =>
-  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1].status === 1)
+  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1]?.status === 1)
 );
 const tasksInProcess = computed(() =>
-  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1].status === 2)
+  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1]?.status === 2)
 );
 const tasksFinished = computed(() =>
-  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1].status === 3)
+  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1]?.status === 3)
 );
 
 

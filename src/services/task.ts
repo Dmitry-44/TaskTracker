@@ -154,7 +154,7 @@ export default class TaskService {
 			})
 	}
 
-	updateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']) {
+	updateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): Promise<boolean> {
 		const msg = ElMessage({
 			message: "Обновляю статус задачи..",
 			type: "success",
@@ -196,7 +196,7 @@ export default class TaskService {
 			})
 	}
 
-	completeEvent(taskId: Task['id'], eventId: Event['id']) {
+	completeEvent(taskId: Task['id'], eventId: Event['id']): Promise<boolean> {
 		const msg = ElMessage({
 			message: "Обновляю статус задачи..",
 			type: "success",
@@ -286,7 +286,7 @@ export default class TaskService {
 		);
 	}
 
-	async dragAndDropTask(task: Task, newEventStatus: number, user: User) {
+	async dragAndDropTask(task: Task, newEventStatus: number, user: User): Promise<boolean> {
 		if(newEventStatus<1 || newEventStatus>3){
 			return false
 		}
@@ -323,7 +323,7 @@ export default class TaskService {
 		}
 	}
 
-	async returnTaskToBacklog(task: Task, user: User) {
+	async returnTaskToBacklog(task: Task, user: User): Promise<boolean> {
 		if(!this.canReturnTaskToBacklog(task, user)){
 			ElMessage({
 				message: "Вы не можете вернуть данную задачу к исполнению",
@@ -335,16 +335,10 @@ export default class TaskService {
 			return false
 		} else {
 			const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
-			const res = await this.updateEventStatus(task.id, eventToUpdate.id, this.#EVENT_BACKLOG_STATUS)
-			if(res){
-				eventToUpdate.status=this.#EVENT_BACKLOG_STATUS
-				this.taskStore.updateTask(task)
-				this.taskStore.setActiveTask(task)
-			}
-			return res
+			return this.updateEventStatus(task.id, eventToUpdate.id, this.#EVENT_BACKLOG_STATUS)
 		}
 	}
-	async takeTaskToProgress(task: Task, user: User) {
+	async takeTaskToProgress(task: Task, user: User): Promise<boolean> {
 		if(!this.canTakeTaskToProgress(task, user)){
 			ElMessage({
 				message: "Вы не можете взять данную задачу в работу",
@@ -356,13 +350,7 @@ export default class TaskService {
 			return false
 		} else {
 			const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
-			const res = await this.updateEventStatus(task.id, eventToUpdate.id, this.#EVENT_INPROGRESS_STATUS)
-			if(res){
-				eventToUpdate.status=this.#EVENT_INPROGRESS_STATUS
-				this.taskStore.updateTask(task)
-				this.taskStore.setActiveTask(task)
-			}
-			return res
+			return this.updateEventStatus(task.id, eventToUpdate.id, this.#EVENT_INPROGRESS_STATUS)
 		}
 	}
 	async finishTask(task: Task, user: User) {
@@ -412,9 +400,10 @@ export default class TaskService {
 		if(!taskLastEvent){return false};
 		return taskLastEvent.u_id===user.id && taskLastEvent.status === 2
 	}
+	//TO DO!
 	canChangeTaskPriority(task: Task, user: User): boolean {
-		return task.created_by === user.id
-				&& task.status != this.#EVENT_FINISHED_STATUS
+		return task.created_by === user?.id
+				&& (task.status != 4 || !task.status)
 	}
 
 	clearTask(){

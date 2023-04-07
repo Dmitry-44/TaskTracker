@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SuccessFilled, More, EditPen, Pointer, Finished, ArrowLeftBold, ArrowRightBold} from "@element-plus/icons-vue";
-import { ref, onMounted, computed, nextTick } from "vue";
+import { ref, onMounted, computed, nextTick, watch, onUpdated, onBeforeMount } from "vue";
 import type { PropType } from "vue";
 import SelectOptions from "./SelectOptions.vue";
 import { useTaskStore } from "@/stores/task";
@@ -31,6 +31,7 @@ const priorityOptions = taskStore.getPriorityOptions;
 const statusOptions = taskStore.getStatusOptions;
 const eventStatusOptions = taskStore.getEventStatusOptions;
 const user = useUserStore().getUser;
+const activeTask = computed(()=>taskStore.getActiveTask)
 
 const selectMore = ref<any | HTMLInputElement>(null);
 const TaskService = services.Task
@@ -42,10 +43,32 @@ const taskStatus = computed(
   () => eventStatusOptions.find((v) => v.id === task.value.event_entities![task.value.event_entities!.length - 1].status)
 );
 
+const taskCardElement = ref<any | HTMLInputElement>(null);
+
+watch(
+  () => task.value,
+  (newVal) => {
+    if(activeTask.value.id===newVal.id){
+      return;
+    }
+    taskCardElement.value?.classList.add('card-update-anim')
+    // setTimeout(()=>{
+    //   taskCardElement.value?.classList.remove('card-update-anim')
+    // },1000)
+  },
+  {
+    deep: true,
+  }
+);
+
+onMounted(()=>{
+  taskCardElement.value?.classList.add('card-update-anim')
+})
+
 </script>
 
 <template>
-  <div :class="['card', active ? 'active' : '', readonlyTask ? 'done' : '']">
+  <div :class="['card', active ? 'active' : '', readonlyTask ? 'done' : '']" ref='taskCardElement'>
     <div class="content">
       <div class="title-indicator">
         <span class="title">
@@ -190,6 +213,39 @@ const taskStatus = computed(
             cursor: pointer
             &:hover
                 opacity: .7
+.card.card-update-anim
+  animation: card-pulse 2s ease-in-out
+
+@keyframes card-pulse 
+  0% 
+    transform: scale(1)
+    box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.4)
+    // transform: translateX(0)
+
+  25% 
+    box-shadow: 0 0 0 5px rgba(0, 255, 0, 0.2)
+    // transform: translateX(-3px)
+
+
+  50%
+    box-shadow: 0 0 0 5px rgba(0, 255, 0, 0)
+    transform: scale(1.01)
+    // transform: translateX(0)
+
+  51%
+    // box-shadow: 0 0 0 10px rgba(0, 255, 0, 0.4)
+
+  75%
+    // box-shadow: 0 0 0 10px rgba(0, 255, 0, 0.2)
+    // transform: translateX(3px)
+
+  
+  100% 
+    // box-shadow: 0 0 0 10px rgba(0, 255, 0, 0)
+    transform: scale(1)
+    // transform: translateX(0)
+
+    
 .card .menu
     margin: 8px
     position: absolute
