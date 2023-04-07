@@ -30,8 +30,7 @@ export default class TaskRepo implements ITaskRepo {
 	{
 		id: -1,
 		title: "",
-		created_at: -1,
-		status: 1,
+		division_id: 0,
 		text: "",
 		event_entities: [],
 		pipe_data: {}

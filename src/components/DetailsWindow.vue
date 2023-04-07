@@ -25,8 +25,7 @@ const isCreatingTaskProcess = computed(
   () => interfaceStore.isCreatingTaskProcess
 );
 const PIPES = computed(() => pipeStore.getPipes);
-const PRIORITY_OPTIONS = computed(()=>taskStore.getPriorityOptions);
-const STATUS_OPTIONS = computed(()=>taskStore.getStatusOptions);
+const PRIORITY_OPTIONS = computed(()=>taskStore.getPriorityOptions);;
 
 //VARIABLES
 const LOADING = ref(false);
@@ -38,6 +37,10 @@ const wasChanged = computed(() => {
 const detailWindowTitleInput = ref<HTMLInputElement|null>(null);
 const taskPipe = computed(
   () => PIPES.value.find((pipe) => pipe?.id === task.value?.pipe_id) || null
+);
+const eventStatusOptions = taskStore.getEventStatusOptions;
+const taskStatus = computed(
+  () => eventStatusOptions.find((v) => v.id === task.value.event_entities![task.value.event_entities!.length - 1]?.status)
 );
 
 onMounted(()=>{
@@ -177,6 +180,12 @@ const save = () => {
         />
       </div>
       <div class="content">
+        <div class="row" v-if="taskStatus">
+          <div class="left">Статус</div>
+          <div class="right">
+            <el-tag :color="taskStatus.color">{{ taskStatus.value }}</el-tag>
+          </div>
+        </div>
         <div class="row">
           <div class="left">Пайплайн</div>
           <div class="right">
@@ -202,33 +211,12 @@ const save = () => {
           <div class="right">
             <el-select
               v-model="task.priority"
-              :disabled="isReadonlyTask"
+              :disabled="isReadonlyTask||TaskService.canChangeTaskPriority(task, user!)"
               clearable
               placeholder="Приоритет"
             >
               <el-option
                 v-for="item in PRIORITY_OPTIONS"
-                :key="item.value"
-                :label="item.value"
-                :value="item.id"
-              >
-                <el-tag :color="item.color">{{ item.value }}</el-tag>
-              </el-option>
-            </el-select>
-          </div>
-        </div>
-        <div class="row" v-if="!isCreatingTaskProcess">
-          <div class="left">Статус</div>
-          <div class="right">
-            <el-select
-              v-model="task.status"
-              :disabled="isReadonlyTask"
-              clearable
-              placeholder="Статус"
-              style="box-shadow: none"
-            >
-              <el-option
-                v-for="item in STATUS_OPTIONS"
                 :key="item.value"
                 :label="item.value"
                 :value="item.id"

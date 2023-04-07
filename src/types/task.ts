@@ -6,9 +6,9 @@ interface Task {
 	id: number;
 	title: string;
 	text: string;
-	pipe_id: number;
-	priority: number;
-	status: number;
+	pipe_id?: number;
+	priority?: number;
+	status?: number;
 	event_id?: number;
 	division_id: number;
 	created_by?: number;

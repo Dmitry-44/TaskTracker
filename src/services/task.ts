@@ -412,6 +412,10 @@ export default class TaskService {
 		if(!taskLastEvent){return false};
 		return taskLastEvent.u_id===user.id && taskLastEvent.status === 2
 	}
+	canChangeTaskPriority(task: Task, user: User): boolean {
+		return task.created_by === user.id
+				&& task.status != this.#EVENT_FINISHED_STATUS
+	}
 
 	clearTask(){
 		this.taskStore.setActiveTask(Object.assign({},TaskRepo.emptyTask));
