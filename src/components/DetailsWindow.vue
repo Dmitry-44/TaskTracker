@@ -7,15 +7,14 @@ import { computed, onMounted, watch } from "vue";
 import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
-import { useOperationStore } from "@/stores/operation";
 import { services } from "@/main";
 
 
 const taskStore = useTaskStore();
 const interfaceStore = useInterfaceStore();
 const pipeStore = usePipeStore();
-const operationStore = useOperationStore();
-const user = useUserStore().getUser;
+const userStore = useUserStore();
+const user = userStore.getUser;
 
 
 const TaskService = services.Task
@@ -28,7 +27,7 @@ const isCreatingTaskProcess = computed(
 );
 const PIPES = computed(() => pipeStore.getPipes);
 const PRIORITY_OPTIONS = computed(()=>taskStore.getPriorityOptions);
-const DIVISIONS_OPTIONS = computed(()=>operationStore.getDirectionOptions)
+const DIVISIONS_OPTIONS = computed(()=>userStore.getDivisions)
 
 //VARIABLES
 const LOADING = ref(false);

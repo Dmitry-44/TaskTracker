@@ -1,8 +1,9 @@
 import { axiosClient } from "@/plugins/axios";
 import { envConfig } from "@/plugins/envConfig";
+import { errRequestHandler } from "@/plugins/errorResponser";
 import type { ApiResponse, UserResponse } from "@/types/api";
-import type { IUserRepo, User, UserSimple } from "@/types/user";
-import type { AxiosResponse } from "axios";
+import type { Division, IUserRepo, User, UserSimple } from "@/types/user";
+import { AxiosError, type AxiosResponse } from "axios";
 
 
 export default class UserRepo implements IUserRepo {
@@ -19,5 +20,17 @@ export default class UserRepo implements IUserRepo {
         return axiosClient
             .get(`${envConfig.API_URL}tasktracker/users`)
             .then(resp=>resp.data)
+    }
+    GetDivisions(): Promise<ApiResponse<Division>> {
+        return axiosClient
+        .get(`${envConfig.API_URL}tasktracker/divisions`)
+        .then(resp=>resp.data)
+        .catch(err=> {
+            if(err instanceof AxiosError) {
+                throw err
+            } else {
+                return {message: errRequestHandler(err)}
+            }
+        })
     }
 }

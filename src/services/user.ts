@@ -1,4 +1,4 @@
-import { emptyUser } from './../types/user';
+import { emptyUser, type Division } from './../types/user';
 import type { IUserRepo, User, UserSimple } from "@/types/user";
 import router from '@/router';
 import { envConfig } from '@/plugins/envConfig';
@@ -55,6 +55,20 @@ export default class UserService {
 				}
 			})
 			.catch(err => errRequestHandler(err));
+	}
+
+	getDivisions(): Promise<boolean> {
+		return this.userRepo
+			.GetDivisions()
+			.then(respdata => {
+				if (isSuccessApiResponse(respdata)) {
+					this.userStore.setDivisions(respdata.result as Division[])
+					return true;
+				} else {
+					return respdata.message || -1;
+				}
+			})
+			.catch(err => errRequestHandler(err))
 	}
 
 	initAuthMiddleware() {

@@ -26,7 +26,8 @@ onBeforeMount(async () => {
   const pipes = await services.Pipe.fetchPipes();
   const sites = await services.Site.fetchSites();
   const users = await services.User.getAllUsers();
-  Promise.allSettled([operations, pipes, sites, users]).then(
+  const divisions = await services.User.getDivisions()
+  Promise.allSettled([operations, pipes, sites, users, divisions]).then(
     () => (loading.value = false)
   );
 });
