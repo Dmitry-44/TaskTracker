@@ -9,9 +9,9 @@ import type { User, UserSimple } from '@/types/user';
 interface IUserStore {
     getUserIsAuth(): boolean
     getRights(): User['rights']|Object
-    getUser(): User|null
+    getUser(): User
     setIsAuth(payload: boolean): void
-    setUser(payload: User|null): void
+    setUser(payload: User): void
     setUsers(payload: UserSimple[]): void
 }
 interface ITaskStore {

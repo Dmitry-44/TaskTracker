@@ -103,7 +103,7 @@ onMounted(()=>{
       <div class="actions">
         <div class="buttons">
           <el-tooltip
-            v-if="TaskService.canTakeTask(task, user!)"
+            v-if="TaskService.canTakeTask(task, user)"
             class="item"
             effect="dark"
             content="Взять задачу"
@@ -111,11 +111,11 @@ onMounted(()=>{
           >
             <el-button
               :icon="Pointer"
-              @click.stop="TaskService.takeTask(task, user!)"
+              @click.stop="TaskService.takeTask(task, user)"
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canTakeTaskToProgress(task, user!)"
+            v-if="TaskService.canTakeTaskToProgress(task, user)"
             class="item"
             effect="dark"
             content="В работу"
@@ -123,11 +123,11 @@ onMounted(()=>{
           >
             <el-button
               :icon="ArrowRightBold"
-              @click.stop="TaskService.takeTaskToProgress(task,user!)"
+              @click.stop="TaskService.takeTaskToProgress(task,user)"
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canReturnTaskToBacklog(task, user!)"
+            v-if="TaskService.canReturnTaskToBacklog(task, user)"
             class="item"
             effect="dark"
             content="Вернуть к исполнению"
@@ -135,11 +135,11 @@ onMounted(()=>{
           >
             <el-button
               :icon="ArrowLeftBold"
-              @click.stop="TaskService.returnTaskToBacklog(task,user!)"
+              @click.stop="TaskService.returnTaskToBacklog(task,user)"
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canFinishTask(task, user!)"
+            v-if="TaskService.canFinishTask(task, user)"
             class="item"
             effect="dark"
             content="Завершить задачу"
@@ -147,7 +147,7 @@ onMounted(()=>{
           >
             <el-button
               :icon="Finished"
-              @click.stop="TaskService.finishTask(task,user!)"
+              @click.stop="TaskService.finishTask(task,user)"
             ></el-button>
           </el-tooltip>
         </div>

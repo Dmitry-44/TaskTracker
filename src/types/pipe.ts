@@ -3,7 +3,7 @@ import type { FilterPayload } from "@/types/api";
 import type { ApiResponse } from "./api";
 
 interface Pipe {
-	id: number;
+	id: UniqueId;
 	name: string;
 	operation_entities: Operation[];
 	value: number[];

@@ -1,6 +1,4 @@
-import { isResultWithPagination } from './../types/api';
-
-import { useUserStore } from "@/stores/user";
+import { emptyUser } from './../types/user';
 import type { IUserRepo, User, UserSimple } from "@/types/user";
 import router from '@/router';
 import { envConfig } from '@/plugins/envConfig';
@@ -34,7 +32,7 @@ export default class UserService {
 			})
 			.catch(() => {
 				this.userStore.setIsAuth(false)
-				this.userStore.setUser(null)
+				this.userStore.setUser(emptyUser)
 				return false;
 			});
 	}

@@ -17,6 +17,7 @@ const pipeStore = usePipeStore();
 const operationStore = useOperationStore();
 const user = useUserStore().getUser;
 
+
 const TaskService = services.Task
 
 //GETTERS
@@ -97,7 +98,7 @@ const save = () => {
         >
         <template v-if="!isCreatingTaskProcess">
           <el-tooltip
-            v-if="TaskService.canTakeTask(task, user!)"
+            v-if="TaskService.canTakeTask(task, user)"
             class="item"
             effect="dark"
             content="Взять задачу"
@@ -105,11 +106,11 @@ const save = () => {
           >
             <el-button 
             :icon="Pointer"
-            @click.stop="TaskService.takeTask(task, user!)"
+            @click.stop="TaskService.takeTask(task, user)"
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canTakeTaskToProgress(task, user!)"
+            v-if="TaskService.canTakeTaskToProgress(task, user)"
             class="item"
             effect="dark"
             content="В работу"
@@ -117,11 +118,11 @@ const save = () => {
           >
             <el-button
               :icon="ArrowRightBold"
-              @click.stop="TaskService.takeTaskToProgress(task, user!)"
+              @click.stop="TaskService.takeTaskToProgress(task, user)"
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canReturnTaskToBacklog(task, user!)"
+            v-if="TaskService.canReturnTaskToBacklog(task, user)"
             class="item"
             effect="dark"
             content="Вернуть к исполнению"
@@ -129,11 +130,11 @@ const save = () => {
           >
             <el-button
               :icon="ArrowLeftBold"
-              @click.stop="TaskService.returnTaskToBacklog(task, user!)"
+              @click.stop="TaskService.returnTaskToBacklog(task, user)"
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canFinishTask(task, user!)"
+            v-if="TaskService.canFinishTask(task, user)"
             class="item"
             effect="dark"
             content="Завершить задачу"
@@ -141,7 +142,7 @@ const save = () => {
           >
             <el-button 
               :icon="Finished"
-              @click.stop="TaskService.finishTask(task, user!)"
+              @click.stop="TaskService.finishTask(task, user)"
             >
             </el-button>
           </el-tooltip>
@@ -175,7 +176,7 @@ const save = () => {
       <div class="title_block">
         <input
           v-model.trim="task.title"
-          :disabled="!TaskService.canChangeTaskTitle(task, user!)"
+          :disabled="!TaskService.canChangeTaskTitle(task, user)"
           class="title-input"
           placeholder="Ввести название задачи"
           ref="detailWindowTitleInput"
@@ -193,7 +194,7 @@ const save = () => {
           <div class="right">
             <el-select
               v-model="task.priority"
-              :disabled="!TaskService.canChangeTaskPriority(task, user!)"
+              :disabled="!TaskService.canChangeTaskPriority(task, user)"
               clearable
               placeholder="Приоритет"
             >
@@ -228,12 +229,12 @@ const save = () => {
           </div>
         </div>
         <div class="row"
-          v-if="TaskService.canSetTaskPipeline(task, user!)"
+          v-if="TaskService.canSetTaskPipeline(task, user)"
         >
           <div class="left">Пайплайн</div>
           <div class="right">
             <el-select
-              v-if="TaskService.canChangeTaskPipeline(task, user!)"
+              v-if="TaskService.canChangeTaskPipeline(task, user)"
               v-model="task.pipe_id"
               clearable
               placeholder="Пайплайн"
@@ -254,7 +255,7 @@ const save = () => {
           <div class="right text">
             <el-input
               v-model="task.text"
-              :disabled="!TaskService.canChangeTaskText(task, user!)"
+              :disabled="!TaskService.canChangeTaskText(task, user)"
               clearable
               :autosize="{ minRows: 2, maxRows: 4 }"
               type="textarea"

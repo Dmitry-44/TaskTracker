@@ -23,7 +23,7 @@ export default class PiniaUserAdapter implements IUserStore{
 	setIsAuth(payload: boolean): void{
 		return this.userStore.setIsAuth(payload);
 	}
-    setUser(payload: User | null): void {
+    setUser(payload: User): void {
         return this.userStore.setUser(payload);
     }
 	setUsers(payload: UserSimple[]): void {

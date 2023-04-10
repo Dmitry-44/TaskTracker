@@ -1,7 +1,7 @@
 import type { ApiResponse } from "./api";
 
 export type Site = {
-	id: number;
+	id: UniqueId;
 	url: string;
 };
 

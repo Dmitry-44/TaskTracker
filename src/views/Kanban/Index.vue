@@ -47,7 +47,7 @@ function dialogCancelHandle(){
   dialogFinishTaskIsOpen.value=false
 }
 function dialogOkHandle(){
-  TaskService.dragAndDropTask(transferTask.value!, 3, user!)
+  TaskService.dragAndDropTask(transferTask.value!, 3, user)
   dialogFinishTaskIsOpen.value=false
 }
 // const updateTask = async (task: Task) => {
@@ -125,7 +125,7 @@ const dropHandler = async (ev: DragEvent, area: number) => {
     clearDragAndDrop()
     return;
   }
-  TaskService.dragAndDropTask(transferTask.value!, area, user!)
+  TaskService.dragAndDropTask(transferTask.value!, area, user)
   clearDragAndDrop()
 };
 const clearDragAndDrop = () => {

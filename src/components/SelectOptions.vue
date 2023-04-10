@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Task } from "@/types/task";
+import { emptyTask, type Task } from "@/types/task";
 import { useUserStore } from "@/stores/user";
 import {
   EditPen,
@@ -17,7 +17,7 @@ import { services } from "@/main";
 const props = defineProps({
   task: {
     type: Object as PropType<Task>,
-    default: () => TaskRepo.emptyTask,
+    default: () => emptyTask,
     require: true,
   },
 });
@@ -41,11 +41,11 @@ const user = useUserStore().getUser;
     <el-icon><Notification /></el-icon>
     <span style="margin-left: 10px">Открыть в новой вкладке</span>
   </el-option>
-  <!-- <el-option v-if="TaskService.canTakeTask(task, user!)" value="">
+  <!-- <el-option v-if="TaskService.canTakeTask(task, user)" value="">
     <el-icon><Pointer /></el-icon>
     <span style="margin-left: 10px">Взять задачу</span>
   </el-option> -->
-  <!-- <el-option v-if="TaskService.canFinishTask(task, user!)" value="">
+  <!-- <el-option v-if="TaskService.canFinishTask(task, user)" value="">
     <el-icon><Finished /></el-icon>
     <span style="margin-left: 10px">Завершить задачу</span>
   </el-option> -->

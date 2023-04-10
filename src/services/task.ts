@@ -1,3 +1,4 @@
+import { emptyTask } from './../types/task';
 import { ElMessage } from 'element-plus';
 import { useInterfaceStore } from './../stores/interface';
 import { isFailureApiResponse, isResultWithPagination } from "../types/api";
@@ -239,7 +240,7 @@ export default class TaskService {
 			return;
 		payload  
 			? this.taskStore.setActiveTask(payload)
-			: this.taskStore.setActiveTask(Object.assign({},TaskRepo.emptyTask));
+			: this.taskStore.setActiveTask(Object.assign({},emptyTask));
 	}
 
 	clickTask(task: Task) {
@@ -251,18 +252,18 @@ export default class TaskService {
 	clickOutsideTaskCard(){
 		this.interfaceStore.toggleDetailsWindow(false)
 		this.interfaceStore.toggleCreatingTaskProcess(false)
-		this.taskStore.setActiveTask(Object.assign({},TaskRepo.emptyTask))
+		this.taskStore.setActiveTask(Object.assign({},emptyTask))
 	}
 
 	createNewTask(){
 		this.interfaceStore.toggleCreatingTaskProcess(true)
-		this.taskStore.setActiveTask(Object.assign({},TaskRepo.emptyTask))
+		this.taskStore.setActiveTask(Object.assign({},emptyTask))
 		this.interfaceStore.toggleDetailsWindow(true)
 	}
 
 	closeDetailWindow(){
 		this.interfaceStore.toggleDetailsWindow(false),
-		this.setActiveTask(Object.assign({},TaskRepo.emptyTask)),
+		this.setActiveTask(Object.assign({},emptyTask)),
 		this.interfaceStore.toggleCreatingTaskProcess(false)
 	}
 
@@ -413,7 +414,7 @@ export default class TaskService {
 	}
 
 	clearTask(){
-		this.taskStore.setActiveTask(Object.assign({},TaskRepo.emptyTask));
+		this.taskStore.setActiveTask(Object.assign({},emptyTask));
 	}
 
 }

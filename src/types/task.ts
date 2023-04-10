@@ -3,20 +3,29 @@ import type { FilterPayload } from "@/types/api";
 import type { ApiResponse } from "./api";
 
 interface Task {
-	id: number;
+	id: UniqueId;
 	title: string;
 	text: string;
-	pipe_id?: number;
+	pipe_id?: UniqueId;
 	priority?: number;
 	status?: number;
-	event_id?: number;
-	division_id: number;
-	created_by?: number;
+	event_id?: UniqueId;
+	division_id: UniqueId;
+	created_by?: UniqueId;
 	pipe_data: Record<string, any>
 	events?: number[];
 	event_entities?: Event[];
 	child_tasks?: Task[];
 	smi_direction?: number;
+}
+
+export const emptyTask: Readonly<Task> = {
+	id: -1,
+	title: "",
+	division_id: 0,
+	text: "",
+	event_entities: [],
+	pipe_data: {}
 }
 
 interface ITaskRepo {

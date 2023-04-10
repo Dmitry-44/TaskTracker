@@ -1,7 +1,7 @@
 import type { ApiResponse, FilterPayload } from "./api";
 
 type Operation = {
-	id: number;
+	id: UniqueId;
 	name: string;
 	params: Record<string, unknown>
 }

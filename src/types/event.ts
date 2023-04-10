@@ -1,15 +1,15 @@
 export interface Event {
-  id: number;
-  task_id?: number;
+  id: UniqueId;
+  task_id?: UniqueId;
   operation_id?: number;
-  created: number;
-  modified: number | null;
-  finished?: number | null;
-  u_id?: number | null;
-  user_name?: string | null;
+  created: DateTimeStamp;
+  modified: DateTimeStamp;
+  finished?: DateTimeStamp;
+  u_id?: UniqueId;
+  user_name?: string;
   status: number;
   selected_users: number[];
   selected_divisions: number[];
-  result: string | null;
+  result: string;
   params?: Record<string, unknown>
 }

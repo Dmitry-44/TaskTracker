@@ -1,3 +1,4 @@
+import { emptyTask } from './../types/task';
 import  TaskRepo  from '@/api/task';
 import { defineStore } from "pinia";
 import type { Task } from "@/types/task";
@@ -45,7 +46,7 @@ export const useTaskStore = defineStore({
 			{ id: 2, value: "В работе", color: "#f8df72" },
 			{ id: 3, value: "Готово", color: "#67C23A" },
 		],
-		activeTask: Object.assign({}, TaskRepo.emptyTask),
+		activeTask: Object.assign({}, emptyTask),
 		tasks: [],
 		singleTask: null,
 		taskByEventIdHash: new Map()

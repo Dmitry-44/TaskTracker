@@ -26,17 +26,6 @@ export default class TaskRepo implements ITaskRepo {
 		},
 	}
 
-	static emptyTask: Task = 
-	{
-		id: -1,
-		title: "",
-		division_id: 0,
-		text: "",
-		event_entities: [],
-		pipe_data: {}
-	}
-
-
 	GetTasks(filterPayload?: Partial<FilterPayload>, signal?: AbortSignal | undefined): Promise<ApiResponse<Task>> {
 		return axiosClient
 			.post(
