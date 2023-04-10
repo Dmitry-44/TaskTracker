@@ -20,7 +20,6 @@ const TaskService = services.Task
 //GETTERS
 const detailWindowIsOpen = computed(() => interfaceStore.getDetailWindowIsOpen);
 const task = computed(() => taskStore.getActiveTask);
-const isReadonlyTask = computed(() => task.value?.status === 4);
 const isCreatingTaskProcess = computed(
   () => interfaceStore.isCreatingTaskProcess
 );
@@ -173,7 +172,7 @@ const save = () => {
       <div class="title_block">
         <input
           v-model.trim="task.title"
-          :disabled="isReadonlyTask"
+          :disabled="!TaskService.canChangeTaskTitle(task, user!)"
           class="title-input"
           placeholder="Ввести название задачи"
           ref="detailWindowTitleInput"
@@ -187,32 +186,11 @@ const save = () => {
           </div>
         </div>
         <div class="row">
-          <div class="left">Пайплайн</div>
-          <div class="right">
-            <el-select
-              v-model="task.pipe_id"
-              :disabled="isReadonlyTask || task?.status!>2"
-              clearable
-              placeholder="Пайплайн"
-            >
-              <el-option
-                v-for="item in PIPES"
-                :key="item?.id"
-                :label="item?.name"
-                :value="item?.id"
-              >
-              </el-option>
-            </el-select>
-            <!-- <div v-else>{{PIPES.find(pipe=>pipe?.id===task.pipe_id)?.name}}</div> -->
-          </div>
-        </div>
-        <div class="row">
           <div class="left">Приоритет</div>
           <div class="right">
-            {{ TaskService.canChangeTaskPriority(task, user!) }}
             <el-select
               v-model="task.priority"
-              :disabled="isReadonlyTask||!TaskService.canChangeTaskPriority(task, user!)"
+              :disabled="!TaskService.canChangeTaskPriority(task, user!)"
               clearable
               placeholder="Приоритет"
             >
@@ -228,11 +206,31 @@ const save = () => {
           </div>
         </div>
         <div class="row">
+          <div class="left">Пайплайн</div>
+          <div class="right">
+            <el-select
+              v-if="TaskService.canChangeTaskPipeline(task, user!)"
+              v-model="task.pipe_id"
+              clearable
+              placeholder="Пайплайн"
+            >
+              <el-option
+                v-for="item in PIPES"
+                :key="item?.id"
+                :label="item?.name"
+                :value="item?.id"
+              >
+              </el-option>
+            </el-select>
+            <el-tag size="large" v-else>{{taskPipe?.name.toUpperCase()}}</el-tag>
+          </div>
+        </div>
+        <div class="row">
           <div class="left">Текст</div>
           <div class="right text">
             <el-input
               v-model="task.text"
-              :disabled="isReadonlyTask"
+              :disabled="!TaskService.canChangeTaskText(task, user!)"
               clearable
               :autosize="{ minRows: 2, maxRows: 4 }"
               type="textarea"
@@ -324,6 +322,8 @@ const save = () => {
     margin-left: -12px
     &:hover
         border-color: #cfcbcb
+    &:disabled:hover
+      border-color: #fff
 
 .header .title
     text-transform: uppercase

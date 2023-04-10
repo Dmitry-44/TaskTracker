@@ -400,10 +400,21 @@ export default class TaskService {
 		if(!taskLastEvent){return false};
 		return taskLastEvent.u_id===user.id && taskLastEvent.status === 2
 	}
-	//TO DO!
 	canChangeTaskPriority(task: Task, user: User): boolean {
+		if(!(task.id>0))return true;
 		return task.created_by === user?.id
 				&& (task.status != 4 || !task.status)
+	}
+	canChangeTaskPipeline(task: Task, user: User): boolean {
+		return !(task.id>0)
+	}
+	canChangeTaskTitle(task: Task, user: User): boolean {
+		if(!(task.id>0))return true;
+		return task.created_by === user?.id
+				&& task.status! < 4 
+	}
+	canChangeTaskText(task: Task, user: User): boolean {
+		return task.status! < 4 || !task.status
 	}
 
 	clearTask(){
