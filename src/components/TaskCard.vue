@@ -48,6 +48,7 @@ const taskCardElement = ref<any | HTMLInputElement>(null);
 watch(
   () => task.value,
   (newVal) => {
+    console.log('newVal', newVal)
     if(activeTask.value.id===newVal.id){
       return;
     }
@@ -214,7 +215,9 @@ onMounted(()=>{
             &:hover
                 opacity: .7
 .card.card-update-anim
-  animation: card-pulse 2s ease-in-out
+  animation: card-pulse 1s ease-in-out
+  animation-iteration-count: 3
+
 
 @keyframes card-pulse 
   0% 

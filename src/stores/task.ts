@@ -21,6 +21,7 @@ interface State {
 	statusOptions: TaskOption[];
 	eventStatusOptions: EventStatusOption[];
 	activeTask: Task;
+	taskByEventIdHash: Map<number, Task>
 }
 
 
@@ -47,6 +48,7 @@ export const useTaskStore = defineStore({
 		activeTask: Object.assign({}, TaskRepo.emptyTask),
 		tasks: [],
 		singleTask: null,
+		taskByEventIdHash: new Map()
 	}),
 	getters: {
 		getList: (state): Task[] => state.tasks,
@@ -75,12 +77,14 @@ export const useTaskStore = defineStore({
 			this.tasks = [payload, ...this.tasks]
 		},
 		updateTaskStatus(taskId: Task['id'], status: Task['status']):void {
-			const index = this.tasks.findIndex(task => task.id === taskId)
-			if(!index)return;
-			this.tasks[index].status=status
+			let task = this.tasks.find(task=>task.id===taskId)
+			console.log('task_to_update___', task?.status)
+			if(!task)return;
+			task.status=status
+			console.log('task_to_update___', task.status)
 		},
 		pushNewEventToTask(event: Event): void {
-			let task = this.getTaskByEventId(event.id);
+			let task = this.tasks.find(task=>task.id===event.task_id)
 			if(!task)return;
 			task.events?.push(event.id)
 			task.event_entities?.push(event)
@@ -90,18 +94,35 @@ export const useTaskStore = defineStore({
 			return this.tasks.find(task=>task.events?.includes(eventId)) || null
 		},
 		eventUpdate(taskId: Task['id'], event: Partial<Event>): void {
-			let task = this.tasks.find(task=>task.id===taskId)
-			if(!task)return;
+			let task;
+			task = this.taskByEventIdHash.get(event.id!) as Task
+			if(!task){
+				task = this.tasks.find(task=>task.id===taskId)
+				if(!task)return;
+				this.taskByEventIdHash.set(event.id!,task)
+			}
 			let eventToUpdate = task?.event_entities?.find(ev=>ev.id===event.id)
 			if(!eventToUpdate)return;
 			eventToUpdate = Object.assign(eventToUpdate,event)
 		},
 		updateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): void {
+			console.log('store update event status')
 			let task = this.tasks.find(task=>task.id===taskId)
 			if(!task)return;
 			let eventToUpdate = task?.event_entities?.find(ev=>ev.id===eventId)
 			if(!eventToUpdate)return;
 			eventToUpdate.status=status
+		},
+		getTaskFromHashByEvent(taskId: Task['id'], eventId: Event['id']): Task|undefined {
+			let task = this.taskByEventIdHash.get(eventId)
+			if(!task){
+				task = this.tasks.find(task=>task.id===taskId)
+				if(!task)return task;
+				this.taskByEventIdHash.set(eventId,task)
+				return task
+			} else {
+				return task
+			}
 		}
 	},
 });

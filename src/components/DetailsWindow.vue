@@ -7,12 +7,14 @@ import { computed, onMounted, watch } from "vue";
 import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
+import { useOperationStore } from "@/stores/operation";
 import { services } from "@/main";
 
 
 const taskStore = useTaskStore();
 const interfaceStore = useInterfaceStore();
 const pipeStore = usePipeStore();
+const operationStore = useOperationStore();
 const user = useUserStore().getUser;
 
 const TaskService = services.Task
@@ -24,7 +26,8 @@ const isCreatingTaskProcess = computed(
   () => interfaceStore.isCreatingTaskProcess
 );
 const PIPES = computed(() => pipeStore.getPipes);
-const PRIORITY_OPTIONS = computed(()=>taskStore.getPriorityOptions);;
+const PRIORITY_OPTIONS = computed(()=>taskStore.getPriorityOptions);
+const DIVISIONS_OPTIONS = computed(()=>operationStore.getDirectionOptions)
 
 //VARIABLES
 const LOADING = ref(false);
@@ -206,6 +209,27 @@ const save = () => {
           </div>
         </div>
         <div class="row">
+          <div class="left">Подразделение</div>
+          <div class="right">
+            <el-select
+              v-model="task.division_id"
+              clearable
+              placeholder="Назначить подразделение"
+            >
+              <el-option
+                v-for="item in DIVISIONS_OPTIONS"
+                :key="item?.['id']"
+                :label="item?.['name']"
+                :value="item?.['id']"
+              >
+              </el-option>
+            </el-select>
+            <!-- <el-tag size="large" v-else>{{taskPipe?.name.toUpperCase()}}</el-tag> -->
+          </div>
+        </div>
+        <div class="row"
+          v-if="TaskService.canSetTaskPipeline(task, user!)"
+        >
           <div class="left">Пайплайн</div>
           <div class="right">
             <el-select

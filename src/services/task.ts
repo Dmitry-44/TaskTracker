@@ -130,10 +130,10 @@ export default class TaskService {
 						duration: 2000,
 						showClose: true,
 					});
-					taskLastEvent.status=this.#EVENT_BACKLOG_STATUS
-					taskLastEvent.u_id=user.id
-					this.taskStore.updateTask(task)
-					this.taskStore.setActiveTask(task)
+					// taskLastEvent.status=this.#EVENT_BACKLOG_STATUS
+					// taskLastEvent.u_id=user.id
+					// this.taskStore.updateTask(task)
+					// this.taskStore.setActiveTask(task)
 					return true;
 				} else {
 					return errVueHandler(respdata.error!);
@@ -164,9 +164,7 @@ export default class TaskService {
 		return this.taskRepo
 			.UpdateEventStatus(taskId, eventId, status)
 			.then(respdata => {
-				console.log('respdata', respdata)
 				if (isSuccessApiResponse(respdata)) {
-					console.log('success')
 					ElMessage({
 						message: "Статус задачи успешно обновлен!",
 						type: "success",
@@ -176,8 +174,6 @@ export default class TaskService {
 					});
 					return true;
 				} else {
-					console.log('failure')
-					console.log('respdata.message', respdata.message)
 					return errVueHandler(respdata.message || -1)
 				}
 			})
@@ -365,13 +361,7 @@ export default class TaskService {
 			return false
 		} else {
 			const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
-			const res = await this.completeEvent(task.id, eventToUpdate.id)
-			if(res){
-				eventToUpdate.status=this.#EVENT_INPROGRESS_STATUS
-				this.taskStore.updateTask(task)
-				this.taskStore.setActiveTask(task)
-			}
-			return res
+			return this.completeEvent(task.id, eventToUpdate.id)
 		}
 	}
 
@@ -407,6 +397,11 @@ export default class TaskService {
 	}
 	canChangeTaskPipeline(task: Task, user: User): boolean {
 		return !(task.id>0)
+	}
+	canSetTaskPipeline(task: Task, user: User): boolean {
+		// if(!task.division_id)return false;
+		// if(task.division_id===21)return false
+		return true
 	}
 	canChangeTaskTitle(task: Task, user: User): boolean {
 		if(!(task.id>0))return true;
