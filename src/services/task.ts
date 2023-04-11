@@ -1,19 +1,15 @@
-import { emptyTask } from './../types/task';
+import { TaskStatus, emptyTask } from './../types/task';
 import { ElMessage } from 'element-plus';
-import { useInterfaceStore } from './../stores/interface';
 import { isFailureApiResponse, isResultWithPagination } from "../types/api";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
 import type { FilterPayload } from "@/types/api";
 import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
 import type { ITaskRepo, Task } from "@/types/task";
-import TaskRepo from "@/api/task";
 import router from '@/router';
 import type PiniaTaskAdapter from '@/adapters/piniaTaskAdapter';
 import type PiniaInterfaceAdapter from '@/adapters/piniaInterfaceAdapter';
-import type { Event } from '@/types/event';
+import { EventStatus, type Event } from '@/types/event';
 import type { User } from '@/types/user';
-import { lastEventId } from '@sentry/vue';
-import { AxiosError } from 'axios';
 
 
 
@@ -22,10 +18,6 @@ export default class TaskService {
 	taskRepo;
 	interfaceStore;
 	taskStore;
-
-	#EVENT_BACKLOG_STATUS=1
-	#EVENT_INPROGRESS_STATUS=2
-	#EVENT_FINISHED_STATUS=3
 
 	constructor(taskRepo: ITaskRepo, taskStore: PiniaTaskAdapter, interfaceStore: PiniaInterfaceAdapter) {
 		this.taskRepo = taskRepo;
@@ -58,13 +50,13 @@ export default class TaskService {
 					}
 					return true;
 				} else {
-					return respdata.message || -1;
+					return errVueHandler(respdata.message || -1)
 				}
 			})
 			.catch(err => errRequestHandler(err))
 	}
 
-	upsertTask(payload: Partial<Task>) {
+	upsertTask(payload: Partial<Task>): Promise<boolean> {
 		const msg = ElMessage({
 			message: "Сохраняю задачу..",
 			type: "success",
@@ -102,7 +94,7 @@ export default class TaskService {
 			})
 	}
 
-	async takeTask(task: Task, user: User) {
+	async takeTask(task: Task, user: User): Promise<boolean> {
 		if(!this.canTakeTask(task, user)){
 			ElMessage({
 				message: "Ты не можешь взять эту задачу",
@@ -272,7 +264,7 @@ export default class TaskService {
   		window.open(routeData.href, "_blank");
 	}
 
-	searchTasks(tasksList: Task[], search: string) {
+	searchTasks(tasksList: Task[], search: string): Task[] {
 		let tasks = JSON.parse(JSON.stringify(tasksList)) as Task[];
 		return tasks.filter(
 			(task) =>
@@ -284,21 +276,21 @@ export default class TaskService {
 	}
 
 	async dragAndDropTask(task: Task, newEventStatus: number, user: User): Promise<boolean> {
-		if(newEventStatus<1 || newEventStatus>3){
+		if(newEventStatus<EventStatus.CREATED || newEventStatus>EventStatus.COMPLETED){
 			return false
 		}
 		const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
 		if(eventToUpdate.status === newEventStatus) {
 			return false;
 		}
-		if(eventToUpdate.status===3){
+		if(eventToUpdate.status===EventStatus.COMPLETED){
 			return false;
 		}
 		switch (newEventStatus) {
-			case 1:
+			case EventStatus.CREATED:
 				return this.returnTaskToBacklog(task, user)
 				break;
-			case 2:
+			case EventStatus.IN_PROGRESS:
 				//если задача еще не взята, берем задачу на себя и уже после берем в работу
 				if(eventToUpdate.u_id!=user.id){
 					const didITakeTask = await this.takeTask(task, user)
@@ -312,7 +304,7 @@ export default class TaskService {
 					return this.takeTaskToProgress(task, user)
 				}
 				break;
-			case 3:
+			case EventStatus.COMPLETED:
 				return this.finishTask(task, user)
 				break;
 			default:
@@ -332,7 +324,7 @@ export default class TaskService {
 			return false
 		} else {
 			const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
-			return this.updateEventStatus(task.id, eventToUpdate.id, this.#EVENT_BACKLOG_STATUS)
+			return this.updateEventStatus(task.id, eventToUpdate.id, EventStatus.CREATED)
 		}
 	}
 	async takeTaskToProgress(task: Task, user: User): Promise<boolean> {
@@ -347,10 +339,10 @@ export default class TaskService {
 			return false
 		} else {
 			const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
-			return this.updateEventStatus(task.id, eventToUpdate.id, this.#EVENT_INPROGRESS_STATUS)
+			return this.updateEventStatus(task.id, eventToUpdate.id, EventStatus.IN_PROGRESS)
 		}
 	}
-	async finishTask(task: Task, user: User) {
+	async finishTask(task: Task, user: User): Promise<boolean> {
 		if(!this.canFinishTask(task, user)){
 			ElMessage({
 				message: "Вы не можете завершить данную задачу",
@@ -371,30 +363,30 @@ export default class TaskService {
 		if(!taskLastEvent){return false};
 		return ((taskLastEvent.selected_users.length===0 && taskLastEvent.selected_divisions.length===0) || taskLastEvent.selected_users.includes(user.id))
 				&& !taskLastEvent.u_id
-				&& taskLastEvent.status === 1
+				&& taskLastEvent.status === EventStatus.CREATED
 	}
 	canTakeTaskToProgress(task: Task, user: User): boolean {
 		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
 		if(!taskLastEvent){return false};
 		return taskLastEvent.u_id===user.id
-			&& taskLastEvent.status === 1
+			&& taskLastEvent.status === EventStatus.CREATED
 	}
 	canReturnTaskToBacklog(task: Task, user: User): boolean {
 		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
 		if(!taskLastEvent){return false};
 		return ((taskLastEvent.selected_users.length===0 && taskLastEvent.selected_divisions.length===0) || taskLastEvent.selected_users.includes(user.id))
 				&& taskLastEvent.u_id === user.id
-				&& taskLastEvent.status === 2
+				&& taskLastEvent.status === EventStatus.IN_PROGRESS
 	}
 	canFinishTask(task: Task, user: User): boolean {
 		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
 		if(!taskLastEvent){return false};
-		return taskLastEvent.u_id===user.id && taskLastEvent.status === 2
+		return taskLastEvent.u_id===user.id && taskLastEvent.status === EventStatus.IN_PROGRESS
 	}
 	canChangeTaskPriority(task: Task, user: User): boolean {
 		if(!(task.id>0))return true;
 		return task.created_by === user?.id
-				&& (task.status != 4 || !task.status)
+				&& (task.status != TaskStatus.COMPLETED || !task.status)
 	}
 	canChangeTaskPipeline(task: Task, user: User): boolean {
 		return !(task.id>0)
@@ -407,10 +399,10 @@ export default class TaskService {
 	canChangeTaskTitle(task: Task, user: User): boolean {
 		if(!(task.id>0))return true;
 		return task.created_by === user?.id
-				&& task.status! < 4 
+				&& task.status! < TaskStatus.COMPLETED 
 	}
 	canChangeTaskText(task: Task, user: User): boolean {
-		return task.status! < 4 || !task.status
+		return task.status! < TaskStatus.COMPLETED || !task.status
 	}
 
 	clearTask(){

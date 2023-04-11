@@ -1,18 +1,18 @@
 import type { AxiosResponse } from "axios";
 import type { ApiResponse, UserResponse } from "./api";
 
-interface User {
+type User = {
 	id: UniqueId;
 	fio: string;
 	rights: Record<string, any>
 }
 
-type UserSimple = {
+type Person = {
 	id: UniqueId;
 	fullname: string;
 	permissions: Record<string, any>
 	sites: Record<string, any>[]
-	ttrace_division_id: number;
+	ttrace_division_id: UniqueId;
 }
 
 type Division = {
@@ -22,11 +22,12 @@ type Division = {
 }
 
 export const emptyUser: Readonly<User> = Object.freeze({id:-1,fio:'', rights:{}});
+
 interface IUserRepo {
 	CheckLogin(): Promise<UserResponse>
 	Logout(): Promise<AxiosResponse>
-	GetUsersList(): Promise<ApiResponse<UserSimple>>
+	GetUsersList(): Promise<ApiResponse<Person>>
 	GetDivisions(): Promise<ApiResponse<Division>>
 }
 
-export type { User, IUserRepo, UserSimple, Division };
+export type { User, IUserRepo, Person, Division };

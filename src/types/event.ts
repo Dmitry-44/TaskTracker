@@ -1,15 +1,21 @@
 export interface Event {
   id: UniqueId;
   task_id?: UniqueId;
-  operation_id?: number;
+  operation_id?: UniqueId;
   created: DateTimeStamp;
   modified: DateTimeStamp;
   finished?: DateTimeStamp;
   u_id?: UniqueId;
   user_name?: string;
-  status: number;
-  selected_users: number[];
-  selected_divisions: number[];
-  result: string;
-  params?: Record<string, unknown>
+  status: EventStatus;
+  selected_users: UniqueId[];
+  selected_divisions: UniqueId[];
+  result: Record<string, unknown>;
+  params?: Record<string, unknown>;
+}
+
+export enum EventStatus {
+  CREATED = 1,
+  IN_PROGRESS = 2,
+  COMPLETED = 3,
 }

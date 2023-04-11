@@ -7,13 +7,13 @@ interface Task {
 	title: string;
 	text: string;
 	pipe_id?: UniqueId;
-	priority?: number;
-	status?: number;
+	priority?: TaskPriority;
+	status?: TaskStatus;
 	event_id?: UniqueId;
 	division_id: UniqueId;
 	created_by?: UniqueId;
 	pipe_data: Record<string, any>
-	events?: number[];
+	events?: UniqueId[];
 	event_entities?: Event[];
 	child_tasks?: Task[];
 	smi_direction?: number;
@@ -26,6 +26,20 @@ export const emptyTask: Readonly<Task> = {
 	text: "",
 	event_entities: [],
 	pipe_data: {}
+}
+
+export enum TaskStatus {
+	CREATED = 1,
+	READY_TO_PROGRESS = 2,
+	IN_PROGRESS = 3,
+	COMPLETED = 4,
+}
+
+export enum TaskPriority {
+	EXTRA = 1,
+	URGENT = 2,
+	BASIC = 3,
+	LOW = 4,
 }
 
 interface ITaskRepo {

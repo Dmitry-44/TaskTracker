@@ -1,11 +1,11 @@
 import { emptyUser, type Division } from './../types/user';
 import { defineStore } from "pinia";
-import type { User, UserSimple } from "@/types/user";
+import type { User, Person } from "@/types/user";
 
 interface State {
 	is_auth: boolean
 	user: User
-	allUsers: UserSimple[]
+	allUsers: Person[]
 	divisions: Division[]
 }
 
@@ -31,7 +31,7 @@ export const useUserStore = defineStore({
 		setIsAuth(payload: boolean) {
 			this.is_auth = payload
 		},
-		setUsers(payload: UserSimple[]) {
+		setUsers(payload: Person[]) {
 			this.allUsers=payload
 		},
 		setDivisions(payload: Division[]){

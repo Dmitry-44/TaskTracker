@@ -1,6 +1,5 @@
 import { isResultWithPagination } from "./../types/api";
-import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
-import { usePipeStore } from "@/stores/pipe";
+import { errRequestHandler } from "@/plugins/errorResponser";
 import type { FilterPayload } from "@/types/api";
 import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
 import type { IPipeRepo, Pipe } from "@/types/pipe";

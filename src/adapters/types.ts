@@ -3,7 +3,7 @@ import type{ Operation } from '@/types/operation';
 import type { Pipe } from '@/types/pipe';
 import type { Site } from '@/types/site';
 import type { Task } from '@/types/task';
-import type { Division, User, UserSimple } from '@/types/user';
+import type { Division, User, Person } from '@/types/user';
 
 
 interface IUserStore {
@@ -12,7 +12,7 @@ interface IUserStore {
     getUser(): User
     setIsAuth(payload: boolean): void
     setUser(payload: User): void
-    setUsers(payload: UserSimple[]): void
+    setUsers(payload: Person[]): void
     setDivisions(payload: Division[]):void
 }
 interface ITaskStore {

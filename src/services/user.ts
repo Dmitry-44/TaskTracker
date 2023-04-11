@@ -1,5 +1,5 @@
 import { emptyUser, type Division } from './../types/user';
-import type { IUserRepo, User, UserSimple } from "@/types/user";
+import type { IUserRepo, User, Person } from "@/types/user";
 import router from '@/router';
 import { envConfig } from '@/plugins/envConfig';
 import type { NavigationGuardNext } from 'vue-router';
@@ -48,7 +48,7 @@ export default class UserService {
 			.GetUsersList()
 			.then((respdata) => {
 				if (isSuccessApiResponse(respdata)) {
-					this.userStore.setUsers(respdata.result as UserSimple[])
+					this.userStore.setUsers(respdata.result as Person[])
 					return true
 				} else {
 					return respdata.message || -1;
