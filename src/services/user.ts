@@ -1,3 +1,4 @@
+import { isResultWithPagination } from './../types/api';
 import { emptyUser, type Division } from './../types/user';
 import type { IUserRepo, User, Person } from "@/types/user";
 import router from '@/router';
@@ -7,7 +8,7 @@ import { services } from "@/main";
 import type PiniaUserAdapter from "@/adapters/piniaUserAdapter";
 import type PiniaInterfaceAdapter from "@/adapters/piniaInterfaceAdapter";
 import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
-import { errRequestHandler } from "@/plugins/errorResponser";
+import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
 
 
 export default class UserService {
@@ -66,6 +67,25 @@ export default class UserService {
 					return true;
 				} else {
 					return respdata.message || -1;
+				}
+			})
+			.catch(err => errRequestHandler(err))
+	}
+
+	getPersonsByDivision(divisionId: Division['id']): Promise<boolean> {
+		return this.userRepo
+			.GetPersonsByDivision(divisionId)
+			.then(respdata => {
+				if (isSuccessApiResponse(respdata)) {
+						const persons = 
+							isResultWithPagination(respdata.result)
+							? respdata.result.queryResult
+							: respdata.result
+
+						this.userStore.setPersons(divisionId, persons);
+					return true;
+				} else {
+					return errVueHandler(respdata.message || -1)
 				}
 			})
 			.catch(err => errRequestHandler(err))

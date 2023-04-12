@@ -23,7 +23,8 @@ function initServices() {
     const taskService = new TaskService(
         new TaskRepo(),
         new PiniaTaskAdapter(),
-        new PiniaInterfaceAdapter()
+        new PiniaInterfaceAdapter(),
+        new PiniaUserAdapter()
     );
     const pipeService = new PipeService(
         new PipeRepo(),

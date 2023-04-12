@@ -6,7 +6,13 @@ interface State {
 	is_auth: boolean
 	user: User
 	allUsers: Person[]
-	divisions: Division[]
+	divisionsList: Division[]
+	persons: Person[]
+	divisionsData: Record<UniqueId, DivisionData>
+}
+
+export type DivisionData = Division & {
+	persons: Person[]
 }
 
 export const useUserStore = defineStore({
@@ -15,14 +21,17 @@ export const useUserStore = defineStore({
 		user: emptyUser,
 		is_auth: false,
 		allUsers: [],
-		divisions: [],
+		divisionsList: [],
+		persons: [],
+		divisionsData: {}
 	}),
 	getters: {
 		getRights: (state) => state?.user?.rights || {},
 		getUser: (state) => state.user,
 		getIsAuth: (state) => state.is_auth,
 		getAllUsers: (state) => state.allUsers,
-		getDivisions: (state) => state.divisions
+		getDivisions: (state) => state.divisionsList,
+		getDivisionsData: (state) => state.divisionsData,
 	},
 	actions: {
 		setUser(payload: User) {
@@ -35,7 +44,15 @@ export const useUserStore = defineStore({
 			this.allUsers=payload
 		},
 		setDivisions(payload: Division[]){
-			this.divisions=payload
+			this.divisionsList=payload
+		},
+		setPersons(payload: Person[]):void {
+			this.persons=payload
+		},
+		setDivisionData(divisionId: Division['id'], persons: Person[]): void {
+			const division = this.divisionsList.find(div=>div.id===divisionId)
+			if(!division)return;
+			this.divisionsData[divisionId]=Object.assign(division, { persons: persons })
 		}
 	},
 });

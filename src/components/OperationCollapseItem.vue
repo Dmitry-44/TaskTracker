@@ -1,12 +1,7 @@
 <script setup lang="ts">
-import { services } from "@/main";
-import { useTaskStore } from "@/stores/task";
-import { useOperationStore } from "@/stores/operation";
-import type { Event } from "@/types/event";
+import { eventStatusOptions, type Event } from "@/types/event";
 import type { Operation } from "@/types/operation";
-import { ElMessage } from "element-plus";
 import type { PropType } from "vue";
-import { computed } from "@vue/reactivity";
 import SelectExecutor from "./SelectExecutor.vue";
 
 const props = defineProps({
@@ -24,13 +19,7 @@ const props = defineProps({
   }
 });
 
-const taskStore = useTaskStore();
-const operatonStore = useOperationStore()
-const TaskService = services.Task
-const eventStatusOptions = taskStore.getEventStatusOptions;
-const DIRECTION_OPTIONS = operatonStore.getDirectionOptions
-const statusColor =
-  eventStatusOptions.filter((ev) => props.event?.status === ev.id)[0]?.color || "";
+const eventStatus = eventStatusOptions.find((ev) => props.event?.status === ev['id']);
 
 
 </script>
@@ -38,7 +27,7 @@ const statusColor =
   <el-collapse-item>
     <template #title>
       <div class="collapse-item-header">
-        <el-icon :color="statusColor">
+        <el-icon :color="eventStatus?.['color']">
           <SuccessFilled />
         </el-icon>
         <span class="ml-1">{{ operation?.name }}</span>
@@ -47,13 +36,14 @@ const statusColor =
     <div class="row" v-if="event?.status">
       <div class="left">Статус</div>
       <div class="right">
-        <template v-if="event?.status === 3">
+        <!-- <template v-if="event?.status === 3">
           <el-tag type="success">Готово</el-tag>
         </template>
         <el-tag v-else-if="event?.status === 2" color="#f8df72"
           >В работе</el-tag
         >
-        <el-tag v-else color="">Создан</el-tag>
+        <el-tag v-else color="">Создан</el-tag> -->
+        <el-tag :color="eventStatus?.['color']">{{ eventStatus?.['value'] }}</el-tag>
       </div>
     </div>
     <div class="row" v-if="event?.created">
@@ -75,13 +65,13 @@ const statusColor =
       </div>
     </div>
     <div v-if="!event">
-      <!-- <div class="row"> -->
+      <div class="row">
         <div>Исполнители</div>
-        <!-- <div class="left">Исполнитель</div>
-        <div class="right"> -->
-          <!-- <SelectExecutor :operation="operation"/> -->
-        <!-- </div> -->
-      <!-- </div> -->
+        <div class="left">Исполнитель</div>
+        <div class="right">
+          <SelectExecutor :operation="operation"/>
+        </div>
+      </div>
     </div>
   </el-collapse-item>
 </template>

@@ -14,6 +14,8 @@ interface IUserStore {
     setUser(payload: User): void
     setUsers(payload: Person[]): void
     setDivisions(payload: Division[]):void
+    setPersons(divisionId: Division['id'], payload: Person[]): void
+    getDivisionList(): Division[]
 }
 interface ITaskStore {
     getActiveTask(): Task

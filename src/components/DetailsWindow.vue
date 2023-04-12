@@ -8,6 +8,7 @@ import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
 import { services } from "@/main";
+import { taskStatusOptions, taskPriorityOptions } from "@/types/task"
 
 
 const taskStore = useTaskStore();
@@ -15,8 +16,6 @@ const interfaceStore = useInterfaceStore();
 const pipeStore = usePipeStore();
 const userStore = useUserStore();
 const user = userStore.getUser;
-
-
 const TaskService = services.Task
 
 //GETTERS
@@ -26,7 +25,6 @@ const isCreatingTaskProcess = computed(
   () => interfaceStore.isCreatingTaskProcess
 );
 const PIPES = computed(() => pipeStore.getPipes);
-const PRIORITY_OPTIONS = computed(()=>taskStore.getPriorityOptions);
 const DIVISIONS_OPTIONS = computed(()=>userStore.getDivisions)
 
 //VARIABLES
@@ -40,9 +38,11 @@ const detailWindowTitleInput = ref<HTMLInputElement|null>(null);
 const taskPipe = computed(
   () => PIPES.value.find((pipe) => pipe?.id === task.value?.pipe_id) || null
 );
-const eventStatusOptions = taskStore.getEventStatusOptions;
+const taskDivision = computed(
+  () => DIVISIONS_OPTIONS.value.find((division) => division?.id === task.value?.division_id)
+);
 const taskStatus = computed(
-  () => eventStatusOptions.find((v) => v.id === task.value.event_entities![task.value.event_entities!.length - 1]?.status)
+  () => taskStatusOptions.find((v) => v['id'] === task.value.status)
 );
 
 onMounted(()=>{
@@ -185,7 +185,7 @@ const save = () => {
         <div class="row" v-if="taskStatus">
           <div class="left">Статус</div>
           <div class="right">
-            <el-tag :color="taskStatus.color">{{ taskStatus.value }}</el-tag>
+            <el-tag size="large" :color="taskStatus['color']">{{ taskStatus['value'] }}</el-tag>
           </div>
         </div>
         <div class="row">
@@ -198,12 +198,12 @@ const save = () => {
               placeholder="Приоритет"
             >
               <el-option
-                v-for="item in PRIORITY_OPTIONS"
-                :key="item.value"
-                :label="item.value"
-                :value="item.id"
+                v-for="item in taskPriorityOptions"
+                :key="item['value']"
+                :label="item['value']"
+                :value="item['id']"
               >
-                <el-tag :color="item.color">{{ item.value }}</el-tag>
+                <el-tag :color="item['color']">{{ item['value'] }}</el-tag>
               </el-option>
             </el-select>
           </div>
@@ -212,6 +212,7 @@ const save = () => {
           <div class="left">Подразделение</div>
           <div class="right">
             <el-select
+              v-if="TaskService.canChangeTaskDivision(task, user)"
               v-model="task.division_id"
               clearable
               placeholder="Назначить подразделение"
@@ -224,12 +225,10 @@ const save = () => {
               >
               </el-option>
             </el-select>
-            <!-- <el-tag size="large" v-else>{{taskPipe?.name.toUpperCase()}}</el-tag> -->
+            <el-tag v-else size="large">{{taskDivision?.name.toUpperCase()}}</el-tag>
           </div>
         </div>
-        <div class="row"
-          v-if="TaskService.canSetTaskPipeline(task, user)"
-        >
+        <div class="row" v-if="TaskService.canSetTaskPipeline(task, user)">
           <div class="left">Пайплайн</div>
           <div class="right">
             <el-select

@@ -5,6 +5,7 @@ import type { FilterPayload } from "@/types/api";
 import { Close } from "@element-plus/icons-vue";
 import { ref, computed, watch, nextTick, onMounted, onBeforeMount, type Ref } from "vue";
 import { services } from "@/main";
+import { taskPriorityOptions } from "@/types/task";
 
 
 const emit = defineEmits<{
@@ -13,8 +14,6 @@ const emit = defineEmits<{
 
 //CONSTANTS
 const sitesStore = useSitesStore();
-const taskStore = useTaskStore();
-const PRIORITY_OPTIONS = computed(() => taskStore.getPriorityOptions);
 const SITES_OPTIONS = computed(() => sitesStore.getList);
 const FilterService = services.Filters
 // const operationsById = computed(() => operationStore.getOperationsById);
@@ -163,12 +162,12 @@ defineExpose({
             style="width: 240px"
           >
             <el-option
-              v-for="item in PRIORITY_OPTIONS"
-              :key="item.value"
-              :label="item.value"
-              :value="item.id"
+              v-for="priority in taskPriorityOptions"
+              :key="priority['value']"
+              :label="priority['value']"
+              :value="priority['id']"
             >
-              <span>{{ item.value }}</span>
+              <span>{{ priority['value'] }}</span>
             </el-option>
           </el-select>
 
@@ -191,7 +190,7 @@ defineExpose({
                     </el-select> -->
 
           <!-- Select only for smi center???? -->
-          <el-select
+          <!-- <el-select
             v-model="filterPayload.filter['site_ids']"
             multiple
             collapse-tags
@@ -207,7 +206,7 @@ defineExpose({
             >
               <span>{{ item.url }}</span>
             </el-option>
-          </el-select>
+          </el-select> -->
           <div class="my-2">
             <el-button type="success" class="ml-3" @click="applyFilters()"
               >Применить</el-button

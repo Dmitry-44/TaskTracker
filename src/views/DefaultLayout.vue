@@ -3,7 +3,6 @@ import { ref, computed, onBeforeMount } from "vue";
 import { RouterView, useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import Menu from "@/components/MenuAside.vue";
-import { useOperationStore } from "@/stores/operation";
 import { services } from "@/main";
 
 
@@ -25,9 +24,18 @@ onBeforeMount(async () => {
   const operations = await services.Operation.fetchOperations();
   const pipes = await services.Pipe.fetchPipes();
   const sites = await services.Site.fetchSites();
-  const users = await services.User.getAllUsers();
   const divisions = await services.User.getDivisions()
-  Promise.allSettled([operations, pipes, sites, users, divisions]).then(
+                          .then(async res=>{
+                            if(res){
+                              const divisions = UserStore.getDivisions
+                              divisions.forEach(async division=>{
+                                await services.User.getPersonsByDivision(division.id)
+                              })
+                            }
+                            return true
+                          })
+
+  Promise.allSettled([operations, pipes, sites, divisions]).then(
     () => (loading.value = false)
   );
 });

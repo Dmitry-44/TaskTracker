@@ -1,4 +1,5 @@
 import { envConfig } from "@/plugins/envConfig";
+import { errRequestHandler } from "@/plugins/errorResponser";
 import type { FilterPayload } from "@/types/api";
 import type { ApiResponse } from "@/types/api";
 import type { IOperationRepo, Operation } from "@/types/operation";
@@ -11,6 +12,9 @@ export default class OperationRepo implements IOperationRepo {
 		return axiosClient
       		.post(`${envConfig.API_URL}tasktracker/operations`,payload)
 			.then(res => res.data)
+			.catch(err=> {
+				return { message: errRequestHandler(err)}
+			})
 	}
 
 	SendOperation(payload: Partial<Operation>): Promise<ApiResponse<Operation>> {
@@ -19,6 +23,9 @@ export default class OperationRepo implements IOperationRepo {
 			: `${envConfig.API_URL}tasktracker/operation`;
 		return axiosClient
 			.put(api, payload)
-			.then(res => res.data);
+			.then(res => res.data)
+			.catch(err=> {
+				return { message: errRequestHandler(err)}
+			})
 	}
 }

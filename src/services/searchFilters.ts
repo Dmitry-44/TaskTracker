@@ -1,5 +1,4 @@
 import type PiniaUserAdapter from '@/adapters/piniaUserAdapter';
-import { useUserStore } from '@/stores/user';
 import type { FilterPayload } from '@/types/api';
 
 
@@ -17,18 +16,18 @@ export default class SearchFiltersService {
 	filtersBase: FilterPayload =
 		{
 		  filter: {
-			pipe_id: null,
+			// pipe_id: null,
 			priority: [],
 			dts: null,
 			dtf: null,
-			smi_direction: [],
-			site_ids: [],
+			// smi_direction: [],
+			// site_ids: [],
 			search1: '',
 			search2: '',
 		  },
 		  options: {
 			onlyLimit: true,
-			itemsPerPage: 100,
+			itemsPerPage: 1000,
 		  },
 		  select: [],
 		};
@@ -87,8 +86,8 @@ export default class SearchFiltersService {
 		filters.filter['search1'] = null;
 		filters.filter['search2'] = null;
 		filters.filter['priority'] = [];
-		filters.filter['smi_direction'] = [];
-		filters.filter['site_ids'] = [];
+		// filters.filter['smi_direction'] = [];
+		// filters.filter['site_ids'] = [];
 	}
 
 	applyFilters(filters: FilterPayload) {
@@ -99,6 +98,14 @@ export default class SearchFiltersService {
 				filters.filter['search1'].trim()
 			}
 		}
+		if(typeof filters.filter['search2'] === 'string'){
+			if (filters.filter['search2'] === '') {
+				filters.filter['search2'] = null;
+			} else {
+				filters.filter['search2'].trim()
+			}
+		}
+		
 		this.setPersonalFilters(filters);
 	}
 }

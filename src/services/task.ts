@@ -1,3 +1,4 @@
+import type PiniaUserAdapter from '@/adapters/piniaUserAdapter';
 import { TaskStatus, emptyTask } from './../types/task';
 import { ElMessage } from 'element-plus';
 import { isFailureApiResponse, isResultWithPagination } from "../types/api";
@@ -18,11 +19,13 @@ export default class TaskService {
 	taskRepo;
 	interfaceStore;
 	taskStore;
+	userStore;
 
-	constructor(taskRepo: ITaskRepo, taskStore: PiniaTaskAdapter, interfaceStore: PiniaInterfaceAdapter) {
+	constructor(taskRepo: ITaskRepo, taskStore: PiniaTaskAdapter, interfaceStore: PiniaInterfaceAdapter, userStore: PiniaUserAdapter) {
 		this.taskRepo = taskRepo;
 		this.taskStore = taskStore;
 		this.interfaceStore=interfaceStore;
+		this.userStore = userStore;
 	}
 
 	fetchTasks (payload?: FilterPayload | Partial<FilterPayload>, signal?: AbortSignal) {
@@ -32,7 +35,7 @@ export default class TaskService {
 				if (isSuccessApiResponse(respdata)) {
 					if (payload?.filter!["id"]) {
 						if (isResultWithPagination(respdata.result)) {
-							this.taskStore.setSingleTask(respdata.result.queryResult[0]);
+							this.taskStore.setSingleTask(respdata.result.data[0]);
 						} else {
 							const payload =
 							respdata.result.length > 0
@@ -43,7 +46,7 @@ export default class TaskService {
 					} else {
 						const tasks = 
 							isResultWithPagination(respdata.result)
-							? respdata.result.queryResult
+							? respdata.result.data
 							: respdata.result
 
 						this.taskStore.setTasksList(tasks);
@@ -392,9 +395,12 @@ export default class TaskService {
 		return !(task.id>0)
 	}
 	canSetTaskPipeline(task: Task, user: User): boolean {
+		if(task.id>0)return true;
 		// if(!task.division_id)return false;
-		// if(task.division_id===21)return false
-		return true
+		const division = this.userStore.getDivisionList().find(division=>division.id===task.division_id)
+		if(!division)return false;
+		const isUserMemberOfCurrentDivision = division.ttrace_ids.includes(user.selected_group)
+		return isUserMemberOfCurrentDivision
 	}
 	canChangeTaskTitle(task: Task, user: User): boolean {
 		if(!(task.id>0))return true;
@@ -403,6 +409,9 @@ export default class TaskService {
 	}
 	canChangeTaskText(task: Task, user: User): boolean {
 		return task.status! < TaskStatus.COMPLETED || !task.status
+	}
+	canChangeTaskDivision(task: Task, user: User): boolean {
+		return task.id < 0
 	}
 
 	clearTask(){

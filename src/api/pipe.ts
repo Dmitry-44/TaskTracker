@@ -1,4 +1,5 @@
 import { envConfig } from "@/plugins/envConfig";
+import { errRequestHandler } from "@/plugins/errorResponser";
 import type { FilterPayload } from "@/types/api";
 import type { ApiResponse } from "@/types/api";
 import type { IPipeRepo, Pipe } from "@/types/pipe";
@@ -10,6 +11,9 @@ export default class PipeRepo implements IPipeRepo {
 		return axiosClient
 				.post(`${envConfig.API_URL}tasktracker/pipe`, payload)
 				.then(res => res.data)
+				.catch(err=> {
+					return { message: errRequestHandler(err)}
+				})
 	}
 
 	SendPipe(payload: Partial<Pipe>): Promise<ApiResponse<Pipe>> {
@@ -18,6 +22,9 @@ export default class PipeRepo implements IPipeRepo {
 			: `${envConfig.API_URL}tasktracker/pipe`;
 		return axiosClient
 				.put(api, payload)
-				.then(res => res.data);
+				.then(res => res.data)
+				.catch(err=> {
+					return { message: errRequestHandler(err)}
+				})
 	}
 }

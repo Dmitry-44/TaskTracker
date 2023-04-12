@@ -32,4 +32,11 @@ export default class PiniaUserAdapter implements IUserStore{
 	setDivisions(payload: Division[]): void {
 		return this.userStore.setDivisions(payload);
 	}
+	setPersons(divisionId: Division['id'], payload: Person[]): void {
+		this.userStore.setPersons(payload);
+		this.userStore.setDivisionData(divisionId, payload)
+	}
+	getDivisionList(): Division[] {
+		return this.userStore.getDivisions
+	}
 }

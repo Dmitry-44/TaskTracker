@@ -7,7 +7,7 @@ interface SuccessApiResponse<T> {
 
 type ResultWithPagination<T> = {
   pagination: Record<string,any>
-  queryResult: T[]
+  data: T[]
 };
 interface FailureApiResponse {
   message: string;

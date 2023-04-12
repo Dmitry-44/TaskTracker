@@ -5,7 +5,7 @@ import type { PropType } from "vue";
 import SelectOptions from "./SelectOptions.vue";
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
-import type { Task } from "@/types/task";
+import { taskPriorityOptions, taskStatusOptions, type Task } from "@/types/task";
 import { services } from "@/main";
 
 const props = defineProps({
@@ -27,23 +27,20 @@ const props = defineProps({
 const taskStore = useTaskStore();
 const task = ref(props.task);
 const readonlyTask = computed(() => task.value.status === 4);
-const priorityOptions = taskStore.getPriorityOptions;
-const statusOptions = taskStore.getStatusOptions;
-const eventStatusOptions = taskStore.getEventStatusOptions;
 const user = useUserStore().getUser;
 const activeTask = computed(()=>taskStore.getActiveTask)
-
-const selectMore = ref<any | HTMLInputElement>(null);
 const TaskService = services.Task
 
+const selectMore = ref<any | HTMLInputElement>(null);
+const taskCardElement = ref<any | HTMLInputElement>(null);
+
 const taskPriority = computed(
-  () => priorityOptions.filter((v) => v.id === task.value.priority)[0]
+  () => taskPriorityOptions.filter((v) => v.id === task.value.priority)[0]
 );
 const taskStatus = computed(
-  () => eventStatusOptions.find((v) => v.id === task.value.event_entities![task.value.event_entities!.length - 1].status)
+  () => taskStatusOptions.find((v) => v.id === task.value.status)
 );
 
-const taskCardElement = ref<any | HTMLInputElement>(null);
 
 watch(
   () => task.value,
