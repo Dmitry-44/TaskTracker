@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { services } from "@/main";
 import { usePipeStore } from "@/stores/pipe";
-import type { FilterPayload } from "@/types/api";
-import type { Pipe } from "@/types/pipe";
+import type { FilterPayload } from "@/api";
+import type { Pipe } from "@/entities/pipe";
 import { ref, computed, onBeforeMount, type Ref } from "vue";
 import { useRouter } from "vue-router";
 import PipeCard from "../../components/PipeCard.vue";

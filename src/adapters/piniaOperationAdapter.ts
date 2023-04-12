@@ -1,4 +1,4 @@
-import type { Operation } from '@/types/operation';
+import type { Operation } from '@/entities/operation';
 import { useOperationStore } from '@/stores/operation';
 import type { IOperationStore } from './types';
 

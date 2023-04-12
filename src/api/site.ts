@@ -1,7 +1,7 @@
-import type { ISiteRepo, Site } from '@/types/site';
+import type { ISiteRepo, Site } from '@/entities/site';
 import { envConfig } from "@/plugins/envConfig";
 import { axiosClient } from "../plugins/axios";
-import type { ApiResponse } from '@/types/api';
+import type { ApiResponse } from '@/api';
 import { errRequestHandler } from '@/plugins/errorResponser';
 
 export default class SiteRepo implements ISiteRepo {

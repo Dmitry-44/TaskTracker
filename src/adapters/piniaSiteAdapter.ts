@@ -1,5 +1,5 @@
 import { useSitesStore } from '@/stores/sites';
-import type { Site } from '@/types/site';
+import type { Site } from '@/entities/site';
 import type { ISiteStore } from './types';
 
 

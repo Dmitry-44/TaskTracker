@@ -1,9 +1,8 @@
 import { envConfig } from "@/plugins/envConfig";
 import { errRequestHandler } from "@/plugins/errorResponser";
-import type { FilterPayload } from "@/types/api";
-import type { ApiResponse } from "@/types/api";
-import type { Event } from "@/types/event";
-import type { ITaskRepo, Task } from "@/types/task";
+import type { FilterPayload, ApiResponse } from "@/api";
+import type { Event } from "@/entities/event";
+import type { ITaskRepo, Task } from "@/entities/task";
 import { axiosClient } from "../plugins/axios";
 
 export default class TaskRepo implements ITaskRepo {
@@ -20,6 +19,7 @@ export default class TaskRepo implements ITaskRepo {
 			'event_id',
 			'division_id',
 			'created_by',
+			'created_at',
 			'pipe_data',
 			'events',
 			'event_entities',

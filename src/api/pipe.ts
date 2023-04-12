@@ -1,8 +1,7 @@
 import { envConfig } from "@/plugins/envConfig";
 import { errRequestHandler } from "@/plugins/errorResponser";
-import type { FilterPayload } from "@/types/api";
-import type { ApiResponse } from "@/types/api";
-import type { IPipeRepo, Pipe } from "@/types/pipe";
+import type { FilterPayload, ApiResponse } from "@//api";
+import type { IPipeRepo, Pipe } from "@/entities/pipe";
 import { axiosClient } from "../plugins/axios";
 
 export default class PipeRepo implements IPipeRepo {

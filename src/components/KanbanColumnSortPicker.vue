@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Task } from "@/types/task";
+import type { Task } from "@/entities/task";
 import { CloseBold } from "@element-plus/icons-vue";
 import { ref } from "vue";
 import { sortOptions } from "@/services/sortService"

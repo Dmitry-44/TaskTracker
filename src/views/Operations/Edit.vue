@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { services } from "@/main";
 import { useOperationStore } from "@/stores/operation";
-import type { FilterPayload } from "@/types/api";
-import type { Operation } from "@/types/operation";
+import type { FilterPayload } from "@/api";
+import type { Operation } from "@/entities/operation";
 import { computed, onBeforeMount, ref } from "vue";
 import { useRouter } from "vue-router";
 import OperationCard from "../../components/OperationCard.vue";

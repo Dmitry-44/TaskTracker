@@ -1,8 +1,8 @@
 
-import type { Task } from '@/types/task';
+import type { Task } from '@/entities/task';
 import { useTaskStore } from '@/stores/task';
 import type { ITaskStore } from './types';
-import type { Event } from '@/types/event';
+import type { Event } from '@/entities/event';
 
 
 export default class PiniaTaskAdapter implements ITaskStore {

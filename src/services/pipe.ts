@@ -1,8 +1,6 @@
-import { isResultWithPagination } from "./../types/api";
 import { errRequestHandler } from "@/plugins/errorResponser";
-import type { FilterPayload } from "@/types/api";
-import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
-import type { IPipeRepo, Pipe } from "@/types/pipe";
+import { isSuccessApiResponse, isResultWithPagination, type FilterPayload } from "@/api";
+import type { IPipeRepo, Pipe } from "@/entities/pipe";
 import type PiniaPipeAdapter from "@/adapters/piniaPipeAdapter";
 
 
@@ -22,7 +20,7 @@ export default class PipeService {
 				if (isSuccessApiResponse(respdata)) {
 					if (payload?.filter!["id"]) {
 						if (isResultWithPagination(respdata.result)) {
-							this.pipeStore.setSinglePipe(respdata.result.queryResult[0])
+							this.pipeStore.setSinglePipe(respdata.result.data[0])
 						} else {
 							const payload =
 								respdata.result.length > 0
@@ -32,7 +30,7 @@ export default class PipeService {
 						}
 					} else {
 						if (isResultWithPagination(respdata.result)) {
-							this.pipeStore.setPipes(respdata.result.queryResult);
+							this.pipeStore.setPipes(respdata.result.data);
 						} else {
 							this.pipeStore.setPipes(respdata.result);
 						}

@@ -1,6 +1,5 @@
-import type { Operation } from "@/types/operation";
-import type { FilterPayload } from "@/types/api";
-import type { ApiResponse } from "./api";
+import type { Operation } from "@/entities/operation";
+import type { ApiResponse, FilterPayload } from "@/api";
 
 interface Pipe {
 	id: UniqueId;

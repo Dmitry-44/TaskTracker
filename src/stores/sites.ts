@@ -1,4 +1,4 @@
-import type { Site } from "@/types/site";
+import type { Site } from "@/entities/site";
 import { defineStore } from "pinia";
 
 interface State {

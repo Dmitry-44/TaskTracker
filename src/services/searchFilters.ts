@@ -1,5 +1,5 @@
 import type PiniaUserAdapter from '@/adapters/piniaUserAdapter';
-import type { FilterPayload } from '@/types/api';
+import type { FilterPayload } from '@/api';
 
 
 export default class SearchFiltersService {

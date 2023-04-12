@@ -5,7 +5,7 @@ import type { PropType } from "vue";
 import SelectOptions from "./SelectOptions.vue";
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
-import { taskPriorityOptions, taskStatusOptions, type Task } from "@/types/task";
+import { taskPriorityOptions, taskStatusOptions, type Task } from "@/entities/task";
 import { services } from "@/main";
 
 const props = defineProps({

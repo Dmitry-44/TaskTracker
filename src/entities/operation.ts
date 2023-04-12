@@ -1,4 +1,4 @@
-import type { ApiResponse, FilterPayload } from "./api";
+import type { ApiResponse, FilterPayload } from "@/api";
 
 type Operation = {
 	id: UniqueId;

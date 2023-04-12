@@ -1,8 +1,7 @@
-import type { Operation } from '@/types/operation';
-import { isResultWithPagination, type FilterPayload } from "../types/api";
+import type { Operation } from '@/entities/operation';
+import { isResultWithPagination, isSuccessApiResponse, type FilterPayload } from "@/api";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
-import { isSuccessApiResponse, type ApiResponse } from "@/types/api";
-import type { IOperationRepo } from '@/types/operation';
+import type { IOperationRepo } from '@/entities/operation';
 import type PiniaOperationAdapter from '@/adapters/piniaOperationAdapter';
 
 
@@ -23,7 +22,7 @@ export default class OperationService {
 				if (isSuccessApiResponse(respdata)) {
 					if (payload?.filter!["id"]) {
 						if (isResultWithPagination(respdata.result)) {
-							this.operationStore.setSingleOperation(respdata.result.queryResult[0]);
+							this.operationStore.setSingleOperation(respdata.result.data[0]);
 						} else {
 							const payload =
 							respdata.result.length > 0
@@ -33,7 +32,7 @@ export default class OperationService {
 						}
 					} else {
 						if (isResultWithPagination(respdata.result)) {
-							this.operationStore.setOperations(respdata.result.queryResult);
+							this.operationStore.setOperations(respdata.result.data);
 						} else {
 							this.operationStore.setOperations(respdata.result);
 						}

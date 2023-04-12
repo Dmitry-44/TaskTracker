@@ -1,4 +1,4 @@
-import type { Task } from '@/types/task';
+import type { Task } from '@/entities/task';
 
 
 const topPriority = <U extends Task>(a: U, b: U) => a.priority! - b.priority!;

@@ -1,7 +1,7 @@
-import { emptyTask } from './../types/task';
+import { emptyTask } from '../entities/task';
 import { defineStore } from "pinia";
-import type { Task } from "@/types/task";
-import type { Event } from '@/types/event';
+import type { Task } from "@/entities/task";
+import type { Event } from '@/entities/event';
 
 interface State {
 	tasks: Task[];

@@ -3,7 +3,7 @@ import { useOperationStore } from '@/stores/operation';
 import { useUserStore } from '@/stores/user';
 import { useTaskStore } from '@/stores/task';
 import { computed, onBeforeMount, onMounted, ref, toRef, type PropType } from 'vue';
-import type { Operation } from '@/types/operation';
+import type { Operation } from '@/entities/operation';
 
 const props = defineProps({
     users: {

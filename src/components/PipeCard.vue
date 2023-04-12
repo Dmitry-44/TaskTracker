@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useOperationStore } from "@/stores/operation";
-import type { Operation } from "@/types/operation";
+import type { Operation } from "@/entities/operation";
 import {
   computed,
   type PropType,
@@ -15,7 +15,7 @@ import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
-import type { Pipe } from "@/types/pipe";
+import type { Pipe } from "@/entities/pipe";
 import { services } from "@/main";
 
 const props = defineProps({

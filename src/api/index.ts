@@ -1,4 +1,4 @@
-import type { User } from "./user";
+import type { User } from "@/entities/user";
 
 interface SuccessApiResponse<T> {
   message: string;

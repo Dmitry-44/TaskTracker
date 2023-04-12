@@ -1,6 +1,6 @@
-import { emptyUser, type Division } from './../types/user';
+import { emptyUser, type Division } from '../entities/user';
 import { defineStore } from "pinia";
-import type { User, Person } from "@/types/user";
+import type { User, Person } from "@/entities/user";
 
 interface State {
 	is_auth: boolean

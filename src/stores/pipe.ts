@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { Pipe } from "@/types/pipe";
+import type { Pipe } from "@/entities/pipe";
 
 type State = {
 	pipes: Pipe[];

@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { useTaskStore } from "@/stores/task";
 import { useSitesStore } from "@/stores/sites";
-import type { FilterPayload } from "@/types/api";
+import type { FilterPayload } from "@/api";
 import { Close } from "@element-plus/icons-vue";
 import { ref, computed, watch, nextTick, onMounted, onBeforeMount, type Ref } from "vue";
 import { services } from "@/main";
-import { taskPriorityOptions } from "@/types/task";
+import { taskPriorityOptions } from "@/entities/task";
 
 
 const emit = defineEmits<{

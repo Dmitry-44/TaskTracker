@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
-import type { Task } from "@/types/task";
-import type { FilterPayload } from "@/types/api";
+import type { Task } from "@/entities/task";
+import type { FilterPayload } from "@/api";
 import DetailsWindow from "../../components/DetailsWindow.vue";
 import { ref, computed, onBeforeUnmount, nextTick } from "vue";
 import Filters from "../../components/Filters.vue";
@@ -50,42 +50,6 @@ function dialogOkHandle(){
   TaskService.dragAndDropTask(transferTask.value!, 3, user)
   dialogFinishTaskIsOpen.value=false
 }
-// const updateTask = async (task: Task) => {
-//   LOADING.value = true;
-//   const msg = ElMessage({
-//     message: "Сохраняю задачу..",
-//     type: "success",
-//     center: true,
-//     duration: 1000,
-//   });
-//   return TaskService
-//     .upsertTask(task)
-//     .then(res => {
-//       if (res) {
-//         ElMessage({
-//           message: "Операция выполнена успешно!",
-//           type: "success",
-//           center: true,
-//           duration: 1500,
-//           showClose: true,
-//         });
-//         return true;
-//       } else {
-//         ElMessage({
-//           message: "Ошибка при выполнении операции!",
-//           type: "error",
-//           center: true,
-//           duration: 1500,
-//           showClose: true,
-//         });
-//         return false;
-//       }
-//     })
-//     .finally(() => {
-//       LOADING.value = false;
-//       msg.close();
-//     });
-// };
 
 //HOOKS
 onBeforeUnmount(() => abortController.abort());

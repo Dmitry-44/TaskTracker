@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { Operation } from "@/types/operation";
+import type { Operation } from "@/entities/operation";
 
 
 type OperationsById = {

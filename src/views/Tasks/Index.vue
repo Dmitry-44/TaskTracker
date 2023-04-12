@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Plus, MoreFilled } from "@element-plus/icons-vue";
 import { useTaskStore } from "@/stores/task";
-import type { Operation } from "@/types/operation";
-import type { Task } from "@/types/task";
+import type { Operation } from "@/entities/operation";
+import type { Task } from "@/entities/task";
 import { useRouter } from "vue-router";
 import { onBeforeMount, ref, computed } from "vue";
 import EventsModal from "../../components/EventsModal.vue";
@@ -22,16 +22,14 @@ const task = computed<Task | null>(() => taskStore.getSingleTask);
 const taskPipe = computed(
   () => PIPES.value.find((pipe) => pipe?.id === task.value?.pipe_id) || null
 );
-const priorityOptions = taskStore.getPriorityOptions;
-const statusOptions = taskStore.getStatusOptions;
 const eventsModalOpened = ref(false);
 const newEventId = ref();
-const taskPriority = computed(() => {
-  return priorityOptions.filter((v) => v.id === task?.value!.priority)[0];
-});
-const taskStatus = computed(() => {
-  return statusOptions.filter((v) => v.id === task?.value!.status)[0];
-});
+// const taskPriority = computed(() => {
+//   return priorityOptions.filter((v) => v.id === task?.value!.priority)[0];
+// });
+// const taskStatus = computed(() => {
+//   return statusOptions.filter((v) => v.id === task?.value!.status)[0];
+// });
 
 onBeforeMount(async () => {
   LOADING.value = true;
@@ -54,7 +52,7 @@ const addNewEvent = (value: Operation|null) => {};
       <div class="description">
         <el-tag size="large">{{ taskPipe?.name }}</el-tag>
       </div>
-      <div class="tags">
+      <!-- <div class="tags">
         <div class="wrapper" v-if="task?.priority">
           <el-tooltip
             class="item"
@@ -77,7 +75,7 @@ const addNewEvent = (value: Operation|null) => {};
             <el-tag :color="taskStatus.color">{{ taskStatus.value }}</el-tag>
           </el-tooltip>
         </div>
-      </div>
+      </div> -->
       <div class="title">
         <el-tooltip
           class="item"

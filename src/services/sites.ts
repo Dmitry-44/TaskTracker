@@ -1,7 +1,6 @@
-import { isResultWithPagination } from './../types/api';
+import { isResultWithPagination, isSuccessApiResponse } from '@/api';
 import { errRequestHandler } from '@/plugins/errorResponser';
-import { isSuccessApiResponse } from '@/types/api';
-import type { ISiteRepo } from '@/types/site';
+import type { ISiteRepo } from '@/entities/site';
 import type PiniaSiteAdapter from '@/adapters/piniaSiteAdapter';
 
 
@@ -21,7 +20,7 @@ export default class SiteService {
 			.then((respdata) => {
 				if (isSuccessApiResponse(respdata)) {
                     if (isResultWithPagination(respdata.result)) {
-                        this.siteStore.setSites(respdata.result.queryResult);
+                        this.siteStore.setSites(respdata.result.data);
                     } else {
                         this.siteStore.setSites(respdata.result);
                     }

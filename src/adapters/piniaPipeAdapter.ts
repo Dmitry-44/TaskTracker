@@ -1,6 +1,6 @@
 import type { IPipeStore } from './types';
 import { usePipeStore } from '@/stores/pipe';
-import type { Pipe } from '@/types/pipe';
+import type { Pipe } from '@/entities/pipe';
 
 
 export default class PiniaPipeAdapter implements IPipeStore {

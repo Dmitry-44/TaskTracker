@@ -1,8 +1,8 @@
 import { axiosClient } from "@/plugins/axios";
 import { envConfig } from "@/plugins/envConfig";
 import { errRequestHandler } from "@/plugins/errorResponser";
-import type { ApiResponse, UserResponse } from "@/types/api";
-import type { Division, IUserRepo, User, Person } from "@/types/user";
+import type { ApiResponse, UserResponse } from "@/api";
+import type { Division, IUserRepo, User, Person } from "@/entities/user";
 import type { AxiosResponse } from "axios";
 
 

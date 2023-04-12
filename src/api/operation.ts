@@ -1,8 +1,8 @@
 import { envConfig } from "@/plugins/envConfig";
 import { errRequestHandler } from "@/plugins/errorResponser";
-import type { FilterPayload } from "@/types/api";
-import type { ApiResponse } from "@/types/api";
-import type { IOperationRepo, Operation } from "@/types/operation";
+import type { FilterPayload } from "@/api";
+import type { ApiResponse } from "@/api";
+import type { IOperationRepo, Operation } from "@/entities/operation";
 import { axiosClient } from "../plugins/axios";
 
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { emptyTask, type Task } from "@/types/task";
+import { emptyTask, type Task } from "@/entities/task";
 import { useUserStore } from "@/stores/user";
 import {
   EditPen,

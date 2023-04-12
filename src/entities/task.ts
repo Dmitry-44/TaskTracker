@@ -1,6 +1,6 @@
-import type { Event } from "@/types/event";
-import type { FilterPayload } from "@/types/api";
-import type { ApiResponse } from "./api";
+import type { Event } from "@/entities/event";
+import type { FilterPayload, ApiResponse } from "@/api";
+
 
 interface Task {
 	id: UniqueId;
@@ -12,6 +12,7 @@ interface Task {
 	event_id?: UniqueId;
 	division_id?: UniqueId;
 	created_by?: UniqueId;
+	created_at?: DateTimeStamp;
 	pipe_data: Record<string, any>
 	events?: UniqueId[];
 	event_entities?: Event[];

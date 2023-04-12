@@ -1,7 +1,7 @@
 import type { ITaskStore } from '@/adapters/types';
-import { WSEvents } from '@/types/api'
-import type { Event } from '@/types/event';
-import type { Task } from '@/types/task';
+import { WSEvents } from '@/api'
+import type { Event } from '@/entities/event';
+import type { Task } from '@/entities/task';
 import type { Socket } from "socket.io-client";
 
 

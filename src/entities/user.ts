@@ -1,5 +1,5 @@
 import type { AxiosResponse } from "axios";
-import type { ApiResponse, UserResponse } from "./api";
+import type { ApiResponse, UserResponse } from "@/api";
 
 type User = {
 	id: UniqueId;

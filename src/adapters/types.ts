@@ -1,9 +1,9 @@
-import type { Event } from '@/types/event';
-import type{ Operation } from '@/types/operation';
-import type { Pipe } from '@/types/pipe';
-import type { Site } from '@/types/site';
-import type { Task } from '@/types/task';
-import type { Division, User, Person } from '@/types/user';
+import type { Event } from '@/entities/event';
+import type{ Operation } from '@/entities/operation';
+import type { Pipe } from '@/entities/pipe';
+import type { Site } from '@/entities/site';
+import type { Task } from '@/entities/task';
+import type { Division, User, Person } from '@/entities/user';
 
 
 interface IUserStore {

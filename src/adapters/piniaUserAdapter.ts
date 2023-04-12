@@ -1,5 +1,5 @@
 import { useUserStore } from '@/stores/user';
-import type { Division, User, Person } from "@/types/user";
+import type { Division, User, Person } from "@/entities/user";
 import type { IUserStore } from './types';
 
 

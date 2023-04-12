@@ -8,7 +8,7 @@ import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
 import { services } from "@/main";
-import { taskStatusOptions, taskPriorityOptions } from "@/types/task"
+import { taskStatusOptions, taskPriorityOptions } from "@/entities/task"
 
 
 const taskStore = useTaskStore();

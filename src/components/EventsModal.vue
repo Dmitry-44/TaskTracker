@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useOperationStore } from "@/stores/operation";
-import type { Operation } from "@/types/operation";
+import type { Operation } from "@/entities/operation";
 import { computed, onBeforeMount, ref } from "vue";
 
 const props = defineProps({

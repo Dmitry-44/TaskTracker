@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Event } from "@/types/event";
-import type { Operation } from "@/types/operation";
+import type { Event } from "@/entities/event";
+import type { Operation } from "@/entities/operation";
 import type { PropType } from "vue";
 
 const props = defineProps({
