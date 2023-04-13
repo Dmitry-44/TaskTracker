@@ -5,9 +5,8 @@ import router from '@/router';
 import { envConfig } from '@/plugins/envConfig';
 import type { NavigationGuardNext } from 'vue-router';
 import { services } from "@/main";
-import type PiniaUserAdapter from "@/adapters/piniaUserAdapter";
-import type PiniaInterfaceAdapter from "@/adapters/piniaInterfaceAdapter";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
+import type { IInterfaceStore, IUserStore } from '@/adapters';
 
 
 export default class UserService {
@@ -16,7 +15,7 @@ export default class UserService {
 	userStore;
 	interfaceStore;
 
-	constructor(userRepo: IUserRepo, userStore: PiniaUserAdapter, interfaceStore: PiniaInterfaceAdapter) {
+	constructor(userRepo: IUserRepo, userStore: IUserStore, interfaceStore: IInterfaceStore) {
 		this.userRepo = userRepo;
 		this.userStore = userStore;
 		this.interfaceStore = interfaceStore;
@@ -112,7 +111,7 @@ export default class UserService {
 	}
 
 	chechRights(
-		userStore: PiniaUserAdapter,
+		userStore: IUserStore,
 		rightsObj: User['rights'],
 		next: NavigationGuardNext
 	) {

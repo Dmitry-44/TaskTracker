@@ -1,5 +1,5 @@
 import { useInterfaceStore } from './../stores/interface';
-import type { IInterfaceStore } from './types';
+import type { IInterfaceStore } from '.';
 
 
 export default class PiniaInterfaceAdapter implements IInterfaceStore {

@@ -2,7 +2,7 @@ import type { Operation } from '@/entities/operation';
 import { isSuccessApiResponse, type FilterPayload } from "@/api";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
 import type { IOperationRepo } from '@/entities/operation';
-import type PiniaOperationAdapter from '@/adapters/piniaOperationAdapter';
+import type { IOperationStore } from '@/adapters';
 
 
 export default class OperationService {
@@ -10,7 +10,7 @@ export default class OperationService {
 	operationRepo;
 	operationStore;
 
-	constructor(operationRepo: IOperationRepo, operationStore: PiniaOperationAdapter) {
+	constructor(operationRepo: IOperationRepo, operationStore: IOperationStore) {
 		this.operationRepo = operationRepo;
 		this.operationStore = operationStore
 	}

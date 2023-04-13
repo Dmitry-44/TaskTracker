@@ -1,6 +1,6 @@
 import { useSitesStore } from '@/stores/sites';
 import type { Site } from '@/entities/site';
-import type { ISiteStore } from './types';
+import type { ISiteStore } from '.';
 
 
 export default class PiniaSiteAdapter implements ISiteStore {

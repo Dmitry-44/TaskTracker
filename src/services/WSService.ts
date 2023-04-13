@@ -1,4 +1,4 @@
-import type { ITaskStore } from '@/adapters/types';
+import type { ITaskStore } from '@/adapters';
 import { WSEvents } from '@/api'
 import type { Event } from '@/entities/event';
 import type { Task } from '@/entities/task';

@@ -1,4 +1,4 @@
-import type PiniaUserAdapter from '@/adapters/piniaUserAdapter';
+import type { IUserStore } from '@/adapters';
 import type { FilterPayload } from '@/api';
 
 
@@ -6,7 +6,7 @@ export default class SearchFiltersService {
 
 	userStore;
 	
-	constructor(userStore: PiniaUserAdapter){
+	constructor(userStore: IUserStore){
 		this.userStore = userStore
 	}
 
