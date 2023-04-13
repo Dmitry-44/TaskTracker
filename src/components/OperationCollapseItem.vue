@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { eventStatusOptions, type Event } from "@/entities/event";
 import type { Operation } from "@/entities/operation";
+import { taskDateFormat } from "@/entities/task";
 import type { PropType } from "vue";
 import SelectExecutor from "./SelectExecutor.vue";
 
@@ -36,26 +37,25 @@ const eventStatus = eventStatusOptions.find((ev) => props.event?.status === ev['
     <div class="row" v-if="event?.status">
       <div class="left">Статус</div>
       <div class="right">
-        <!-- <template v-if="event?.status === 3">
-          <el-tag type="success">Готово</el-tag>
-        </template>
-        <el-tag v-else-if="event?.status === 2" color="#f8df72"
-          >В работе</el-tag
-        >
-        <el-tag v-else color="">Создан</el-tag> -->
         <el-tag :color="eventStatus?.['color']">{{ eventStatus?.['value'] }}</el-tag>
       </div>
     </div>
     <div class="row" v-if="event?.created">
       <div class="left">Старт</div>
       <div class="right">
-        <el-tag>{{ new Date(event!.created * 1000).toLocaleString() }}</el-tag>
+        <el-tag>{{ taskDateFormat(event.created) }}</el-tag>
+      </div>
+    </div>
+    <div class="row" v-if="event?.modified">
+      <div class="left">Изменено</div>
+      <div class="right">
+        <el-tag>{{ taskDateFormat(event.modified) }}</el-tag>
       </div>
     </div>
     <div class="row" v-if="event?.finished">
-      <div class="left">Финиш</div>
+      <div class="left">Закончена</div>
       <div class="right">
-        <el-tag>{{ new Date(event.finished * 1000).toLocaleString() }}</el-tag>
+        <el-tag>{{ taskDateFormat(event.finished) }}</el-tag>
       </div>
     </div>
     <div class="row" v-if="event?.user_name">
@@ -64,13 +64,20 @@ const eventStatus = eventStatusOptions.find((ev) => props.event?.status === ev['
         <el-tag>{{ event.user_name }}</el-tag>
       </div>
     </div>
+    <div class="row" v-if="event?.result">
+      <div class="left">Результат</div>
+      <div class="right">
+        {{ event.result['text']||'-' }}
+      </div>
+    </div>
     <div v-if="!event">
       <div class="row">
-        <div>Исполнители</div>
+        <!-- <div>Исполнители</div>
         <div class="left">Исполнитель</div>
         <div class="right">
           <SelectExecutor :operation="operation"/>
-        </div>
+        </div> -->
+        <SelectExecutor :operation="operation"/>
       </div>
     </div>
   </el-collapse-item>

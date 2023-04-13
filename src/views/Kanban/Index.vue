@@ -1,16 +1,22 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
-import type { Task } from "@/entities/task";
+import { useInterfaceStore } from "@/stores/interface";
+import type{ Task } from "@/entities/task";
 import type { FilterPayload } from "@/api";
 import DetailsWindow from "../../components/DetailsWindow.vue";
 import { ref, computed, onBeforeUnmount, nextTick } from "vue";
 import Filters from "../../components/Filters.vue";
 import KanbanColumn from "@/components/KanbanColumn.vue";
 import { services } from "@/main";
+import FinishTaskModal from "@/components/FinishTaskModal.vue";
+import type { User } from "@/entities/user";
+import { ElMessage } from "element-plus";
+import { EventStatus } from "@/entities/event";
 
 
 const taskStore = useTaskStore();
+const interfaceStore = useInterfaceStore();
 const $filters = ref<typeof Filters | null>(null);
 const abortController = new AbortController();
 const abortSignal = abortController.signal;
@@ -43,13 +49,6 @@ const filterUpdate = async (payload: FilterPayload) => {
   await TaskService.fetchTasks(payload, abortSignal);
   LOADING.value = false;
 };
-function dialogCancelHandle(){
-  dialogFinishTaskIsOpen.value=false
-}
-function dialogOkHandle(){
-  TaskService.dragAndDropTask(transferTask.value!, 3, user)
-  dialogFinishTaskIsOpen.value=false
-}
 
 //HOOKS
 onBeforeUnmount(() => abortController.abort());
@@ -84,15 +83,11 @@ const dragleaveHandler = (ev: DragEvent) => {
   clearDragAndDrop()
 };
 const dropHandler = async (ev: DragEvent, area: number) => {
-  if(area===3){
-    dialogFinishTaskIsOpen.value=true
-    clearDragAndDrop()
-    return;
-  }
   TaskService.dragAndDropTask(transferTask.value!, area, user)
   clearDragAndDrop()
 };
 const clearDragAndDrop = () => {
+  // transferTask.value=null;
   tasksToTakeArea.value?.classList.remove("dragOver");
   taskInProcessArea.value?.classList.remove("dragOver");
   finishedTasksArea.value?.classList.remove("dragOver");
@@ -157,13 +152,18 @@ const clearDragAndDrop = () => {
       </div>
     </div>
   </div>
-  <el-dialog
+  <FinishTaskModal />
+  <!-- <el-dialog
     v-model="dialogFinishTaskIsOpen"
     width="30%"
     @close="dialogCancelHandle"
   >
     <el-row justify="center">
-      Уверены что хотите завершить задачу?</el-row>
+      Уверены что хотите завершить задачу?
+    </el-row>
+    <el-row justify="center">
+      
+    </el-row>
     <template #footer>
       <span class="dialog-footer">
         <el-button
@@ -177,7 +177,7 @@ const clearDragAndDrop = () => {
         Ок</el-button>
       </span>
     </template>
-  </el-dialog>
+  </el-dialog> -->
 </template>
 
 <style lang="sass" scoped>

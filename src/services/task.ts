@@ -185,7 +185,7 @@ export default class TaskService {
 			})
 	}
 
-	completeEvent(taskId: Task['id'], eventId: Event['id']): Promise<boolean> {
+	completeEvent(taskId: Task['id'], eventId: Event['id'], eventResult: Event['result']): Promise<boolean> {
 		const msg = ElMessage({
 			message: "Обновляю статус задачи..",
 			type: "success",
@@ -193,7 +193,7 @@ export default class TaskService {
 			duration: 1000,
 		});
 		return this.taskRepo
-			.CompleteEvent(taskId, eventId)
+			.CompleteEvent(taskId, eventId, eventResult)
 			.then((respdata) => {
 				if (isSuccessApiResponse(respdata)) {
 					ElMessage({
@@ -283,9 +283,6 @@ export default class TaskService {
 		if(eventToUpdate.status === newEventStatus) {
 			return false;
 		}
-		if(eventToUpdate.status===EventStatus.COMPLETED){
-			return false;
-		}
 		switch (newEventStatus) {
 			case EventStatus.CREATED:
 				return this.returnTaskToBacklog(task, user)
@@ -305,7 +302,20 @@ export default class TaskService {
 				}
 				break;
 			case EventStatus.COMPLETED:
-				return this.finishTask(task, user)
+				const canFinishTask = this.canFinishTask(task, user)
+				if(!canFinishTask){
+					ElMessage({
+						message: "Вы не можете завершить данную задачу",
+						type: "info",
+						center: true,
+						duration: 1500,
+						showClose: true,
+					})
+					return false
+				}
+				this.taskStore.setTaskToFinish(Object.assign({}, task))
+    			this.interfaceStore.openFinishTaskModal()
+				return true
 				break;
 			default:
 				return false
@@ -342,7 +352,7 @@ export default class TaskService {
 			return this.updateEventStatus(task.id, eventToUpdate.id, EventStatus.IN_PROGRESS)
 		}
 	}
-	async finishTask(task: Task, user: User): Promise<boolean> {
+	async finishTask(task: Task, user: User, eventResult: Event['result']): Promise<boolean> {
 		if(!this.canFinishTask(task, user)){
 			ElMessage({
 				message: "Вы не можете завершить данную задачу",
@@ -354,7 +364,7 @@ export default class TaskService {
 			return false
 		} else {
 			const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
-			return this.completeEvent(task.id, eventToUpdate.id)
+			return this.completeEvent(task.id, eventToUpdate.id, eventResult)
 		}
 	}
 

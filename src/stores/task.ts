@@ -7,6 +7,7 @@ interface State {
 	tasks: Task[];
 	singleTask: Task | null;
 	activeTask: Task;
+	taskToFinish: Task|null;
 	taskByEventIdHash: Map<number, Task>
 }
 
@@ -17,12 +18,14 @@ export const useTaskStore = defineStore({
 		activeTask: Object.assign({}, emptyTask),
 		tasks: [],
 		singleTask: null,
+		taskToFinish: null,
 		taskByEventIdHash: new Map()
 	}),
 	getters: {
 		getList: (state): Task[] => state.tasks,
 		getSingleTask: (state) => state.singleTask,
 		getActiveTask: (state) => state.activeTask,
+		getTaskToFinish: (state) => state.taskToFinish
 	},
 	actions: {
 		setActiveTask(payload: Task): void {
@@ -33,6 +36,9 @@ export const useTaskStore = defineStore({
 		},
 		setSingleTask(payload: Task | null): void {
 			this.singleTask = payload;
+		},
+		setTaskToFinish(payload: Task|null): void {
+			this.taskToFinish = payload
 		},
 		updateTask(payload: Partial<Task>): void {
 			const index = this.tasks.findIndex(task => task.id === payload.id)

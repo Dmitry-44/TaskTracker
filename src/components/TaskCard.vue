@@ -5,6 +5,7 @@ import type { PropType } from "vue";
 import SelectOptions from "./SelectOptions.vue";
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
+import { useInterfaceStore } from "@/stores/interface";
 import { taskPriorityOptions, taskStatusOptions, type Task } from "@/entities/task";
 import { services } from "@/main";
 
@@ -28,6 +29,7 @@ const taskStore = useTaskStore();
 const task = ref(props.task);
 const readonlyTask = computed(() => task.value.status === 4);
 const userStore = useUserStore();
+const interfaceStore = useInterfaceStore();
 const user = userStore.getUser;
 const activeTask = computed(()=>taskStore.getActiveTask)
 const TaskService = services.Task
@@ -45,6 +47,13 @@ const taskStatus = computed(
 // const taskDivision = computed(
 //   () => DIVISIONS_OPTIONS.value.find((division) => division?.id === task.value?.division_id)
 // );
+
+
+//METHODS
+const finishTask = () => {
+    taskStore.setTaskToFinish(Object.assign({}, task.value))
+    interfaceStore.openFinishTaskModal()
+}
 
 watch(
   () => task.value,
@@ -148,7 +157,7 @@ onMounted(()=>{
           >
             <el-button
               :icon="Finished"
-              @click.stop="TaskService.finishTask(task,user)"
+              @click.stop="finishTask()"
             ></el-button>
           </el-tooltip>
         </div>
@@ -183,7 +192,7 @@ onMounted(()=>{
     margin-bottom: 8px
     transition-duration: 200ms
     transition-property: background,border-color,box-shadow
-    box-shadow: inset 0px 2px 12px -8px var(--priority-color)
+    box-shadow: inset 0px 2px 15px -8px var(--priority-color)
 
     &:hover
         border-color: #afabac

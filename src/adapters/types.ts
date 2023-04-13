@@ -28,6 +28,7 @@ interface ITaskStore {
     pushNewEventToTask(event: Event): void
     updateEvent(taskId: Task['id'], event: Partial<Event>):void
     updateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): void
+    setTaskToFinish(payload: Task|null):void
 }
 interface IInterfaceStore {
     getGlobalLoading(): boolean
@@ -37,6 +38,7 @@ interface IInterfaceStore {
 	toggleCreatingTaskProcess(bool: boolean): void
     showGlobalLoader(): void
     hideGlobalLoader(): void
+    openFinishTaskModal(): void
 }
 interface ISiteStore {
     getList(): Site[],

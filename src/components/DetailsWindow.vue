@@ -45,6 +45,12 @@ const taskStatus = computed(
   () => taskStatusOptions.find((v) => v['id'] === task.value.status)
 );
 
+//METHODS
+const finishTask = () => {
+    taskStore.setTaskToFinish(Object.assign({},task.value))
+    interfaceStore.openFinishTaskModal()
+}
+
 onMounted(()=>{
   oldContent.value=JSON.stringify(task.value);
 })
@@ -141,7 +147,7 @@ const save = () => {
           >
             <el-button 
               :icon="Finished"
-              @click.stop="TaskService.finishTask(task, user)"
+              @click.stop="finishTask()"
             >
             </el-button>
           </el-tooltip>

@@ -43,6 +43,7 @@ declare module '@vue/runtime-core' {
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     EventsModal: typeof import('./src/components/EventsModal.vue')['default']
     Filters: typeof import('./src/components/Filters.vue')['default']
+    FinishTaskModal: typeof import('./src/components/FinishTaskModal.vue')['default']
     JsonEditor: typeof import('./src/components/JsonEditor.vue')['default']
     KanbanColumn: typeof import('./src/components/KanbanColumn.vue')['default']
     KanbanColumnSortPicker: typeof import('./src/components/KanbanColumnSortPicker.vue')['default']

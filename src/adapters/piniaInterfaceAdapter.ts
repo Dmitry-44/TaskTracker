@@ -13,23 +13,26 @@ export default class PiniaInterfaceAdapter implements IInterfaceStore {
 	getGlobalLoading(): boolean {
 		return this.interfaceStore.getGlobalLoading;
 	}
-	getIsCreatingTaskProcess(){
+	getIsCreatingTaskProcess(): boolean{
 		return this.interfaceStore.getIsCreatingTaskProcess;
 	}
-    getDetailWindowIsOpen() {
+    getDetailWindowIsOpen(): boolean {
         return this.interfaceStore.getDetailWindowIsOpen;
     }
 	toggleDetailsWindow(bool: boolean){
-        return this.interfaceStore.toggleDetailsWindow(bool);
+    	 this.interfaceStore.toggleDetailsWindow(bool);
     }
 	toggleCreatingTaskProcess(bool: boolean){
-        return this.interfaceStore.toggleCreatingTaskProcess(bool);
+        this.interfaceStore.toggleCreatingTaskProcess(bool);
     }
 	showGlobalLoader(): void {
-		return this.interfaceStore.toggleGlobalLoading(true);
+		this.interfaceStore.toggleGlobalLoading(true);
 	}
 	hideGlobalLoader(): void {
-		return this.interfaceStore.toggleGlobalLoading(false);
+		this.interfaceStore.toggleGlobalLoading(false);
+	}
+	openFinishTaskModal(): void {
+		this.interfaceStore.openFinishTaskModal()
 	}
 
 }

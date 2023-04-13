@@ -43,4 +43,7 @@ export default class PiniaTaskAdapter implements ITaskStore {
 	updateEventStatus(taskId: number, eventId: number, status: number): void {
 		return this.taskStore.updateEventStatus(taskId, eventId, status)
 	}
+	setTaskToFinish(payload: Task|null): void {
+		return this.taskStore.setTaskToFinish(payload)
+	}
 }

@@ -57,12 +57,14 @@ export const taskStatusOptions: Readonly<Record<string, any>[]> = [
 	{ id: TaskStatus.COMPLETED, value: "Закончена", color: "#909399" },
 ]
 
+export const taskDateFormat = (date: DateTimeStamp) => new Date(date * 1000).toLocaleString()
+
 interface ITaskRepo {
 	GetTasks(filterPayload?: Partial<FilterPayload>, signal?: AbortSignal): Promise<ApiResponse<Task>>
 	UpsertTask(payload: Partial<Task>): Promise<ApiResponse<Task>>
 	TakeTask(taskId: Task['id'], eventId: Event['id']): Promise<ApiResponse<Task>>
 	UpdateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): Promise<ApiResponse<Task>>
-	CompleteEvent(taskId: Task['id'], eventId: Event['id']): Promise<ApiResponse<Task>>
+	CompleteEvent(taskId: Task['id'], eventId: Event['id'], eventResult: Event['result']): Promise<ApiResponse<Task>>
 }
 
 export type { Task, ITaskRepo };

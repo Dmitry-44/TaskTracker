@@ -4,6 +4,7 @@ type State = {
 	detailWindowIsOpen: boolean;
 	isCreatingTaskProcess: boolean;
 	globalLoading: boolean;
+	showFinishTaskModal: boolean;
 };
 
 export const useInterfaceStore = defineStore({
@@ -11,12 +12,14 @@ export const useInterfaceStore = defineStore({
 	state: (): State => ({
 		detailWindowIsOpen: false,
 		isCreatingTaskProcess: false,
-		globalLoading: false
+		globalLoading: false,
+		showFinishTaskModal: false,
 	}),
 	getters: {
 		getIsCreatingTaskProcess: (state) => state.isCreatingTaskProcess,
 		getDetailWindowIsOpen: (state) => state.detailWindowIsOpen,
-		getGlobalLoading: (state) => state.globalLoading
+		getGlobalLoading: (state) => state.globalLoading,
+		getShowFinishTaskModal: (state) => state.showFinishTaskModal
 	},
 	actions: {
 		toggleDetailsWindow(bool: boolean): void {
@@ -27,6 +30,12 @@ export const useInterfaceStore = defineStore({
 		},
 		toggleGlobalLoading(bool: boolean): void {
 			this.globalLoading = bool
+		},
+		openFinishTaskModal(): void {
+			this.showFinishTaskModal = true
+		},
+		hideFinishTaskModal(): void {
+			this.showFinishTaskModal = false
 		}
 	},
 });

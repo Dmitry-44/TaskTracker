@@ -80,9 +80,9 @@ export default class TaskRepo implements ITaskRepo {
 		
 	}
 
-	CompleteEvent(taskId: Task['id'], eventId: Event['id']): Promise<ApiResponse<Task>> {
+	CompleteEvent(taskId: Task['id'], eventId: Event['id'], eventResult: Event['result']): Promise<ApiResponse<Task>> {
 		return axiosClient
-        	.post(`${envConfig.API_URL}tasktracker/task/${taskId}/event/${eventId}/complete`, {result: {}})
+        	.post(`${envConfig.API_URL}tasktracker/task/${taskId}/event/${eventId}/complete`, {result: eventResult})
 			.then(res => res.data)
 			.catch(err=> {
 				return {message: errRequestHandler(err)}
