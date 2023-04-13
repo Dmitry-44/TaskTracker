@@ -11,7 +11,6 @@ import {
 import { ref, onMounted, computed } from "vue";
 import type { PropType } from "vue";
 import { useRouter } from "vue-router";
-import TaskRepo from "@/api/task";
 import { services } from "@/main";
 
 const props = defineProps({

@@ -1,4 +1,4 @@
-import { isResultWithPagination, isSuccessApiResponse, type ApiResponse } from '@/api';
+import { isSuccessApiResponse, type ApiResponse } from '@/api';
 import { emptyUser, type Division } from '@/entities/user';
 import type { IUserRepo, User, Person } from "@/entities/user";
 import router from '@/router';
@@ -22,7 +22,7 @@ export default class UserService {
 		this.interfaceStore = interfaceStore;
 	}
 
-	checkAuth(): Promise<boolean> {
+	async checkAuth(): Promise<boolean> {
 		return this.userRepo
 			.CheckLogin()
 			.then(resp => {
@@ -37,13 +37,13 @@ export default class UserService {
 			});
 	}
 
-	logout(): Promise<boolean> {
+	async logout(): Promise<boolean> {
 		return this.userRepo
 			.Logout()
 			.then(()=>true)
 	}
 
-	getAllUsers(): Promise<ApiResponse<User>> {
+	async getAllUsers(): Promise<ApiResponse<User>> {
 		return this.userRepo
 			.GetUsersList()
 			.then((respdata) => {
@@ -51,13 +51,13 @@ export default class UserService {
 					this.userStore.setUsers(respdata.result as Person[])
 					return true
 				} else {
-					return respdata.message || -1;
+					return errVueHandler(respdata.message || -1)
 				}
 			})
 			.catch(err => errRequestHandler(err));
 	}
 
-	getDivisions(): Promise<boolean> {
+	async getDivisions(): Promise<boolean> {
 		return this.userRepo
 			.GetDivisions()
 			.then(respdata => {
@@ -65,23 +65,18 @@ export default class UserService {
 					this.userStore.setDivisions(respdata.result as Division[])
 					return true;
 				} else {
-					return respdata.message || -1;
+					return errVueHandler(respdata.message || -1)
 				}
 			})
 			.catch(err => errRequestHandler(err))
 	}
 
-	getPersonsByDivision(divisionId: Division['id']): Promise<boolean> {
+	async getPersonsByDivision(divisionId: Division['id']): Promise<boolean> {
 		return this.userRepo
 			.GetPersonsByDivision(divisionId)
 			.then(respdata => {
 				if (isSuccessApiResponse(respdata)) {
-						const persons = 
-							isResultWithPagination(respdata.result)
-							? respdata.result.data
-							: respdata.result
-
-						this.userStore.setPersons(divisionId, persons);
+					this.userStore.setPersons(divisionId, respdata.result);
 					return true;
 				} else {
 					return errVueHandler(respdata.message || -1)

@@ -1,5 +1,5 @@
-import { isResultWithPagination, isSuccessApiResponse } from '@/api';
-import { errRequestHandler } from '@/plugins/errorResponser';
+import { isSuccessApiResponse } from '@/api';
+import { errRequestHandler, errVueHandler } from '@/plugins/errorResponser';
 import type { ISiteRepo } from '@/entities/site';
 import type PiniaSiteAdapter from '@/adapters/piniaSiteAdapter';
 
@@ -14,19 +14,15 @@ export default class SiteService {
 		this.siteStore = siteStore
 	}
 
-	fetchSites = () => {
+	async fetchSites(): Promise<boolean> {
 		return this.siteRepo
             .GetAll()
 			.then((respdata) => {
 				if (isSuccessApiResponse(respdata)) {
-                    if (isResultWithPagination(respdata.result)) {
-                        this.siteStore.setSites(respdata.result.data);
-                    } else {
                         this.siteStore.setSites(respdata.result);
-                    }
 					return true;
 				} else {
-					return respdata.message || -1;
+					return errVueHandler(respdata.message || -1)
 				}
 			})
 			.catch(err => errRequestHandler(err));

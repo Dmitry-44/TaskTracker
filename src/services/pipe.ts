@@ -1,5 +1,5 @@
-import { errRequestHandler } from "@/plugins/errorResponser";
-import { isSuccessApiResponse, isResultWithPagination, type FilterPayload } from "@/api";
+import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
+import { isSuccessApiResponse, type FilterPayload } from "@/api";
 import type { IPipeRepo, Pipe } from "@/entities/pipe";
 import type PiniaPipeAdapter from "@/adapters/piniaPipeAdapter";
 
@@ -14,43 +14,35 @@ export default class PipeService {
 		this.pipeStore = pipeStore;
 	}
 
-	fetchPipes = (payload?: FilterPayload) => {
+	async fetchPipes (payload?: FilterPayload): Promise<boolean> {
 		return this.pipeRepo.GetPipes(payload)
 			.then(respdata => {
 				if (isSuccessApiResponse(respdata)) {
 					if (payload?.filter!["id"]) {
-						if (isResultWithPagination(respdata.result)) {
-							this.pipeStore.setSinglePipe(respdata.result.data[0])
-						} else {
-							const payload =
-								respdata.result.length > 0
-									? respdata.result[0]
-									: null;
-							this.pipeStore.setSinglePipe(payload);
-						}
+						const payload =
+							respdata.result.length > 0
+								? respdata.result[0]
+								: null;
+						this.pipeStore.setSinglePipe(payload);
 					} else {
-						if (isResultWithPagination(respdata.result)) {
-							this.pipeStore.setPipes(respdata.result.data);
-						} else {
-							this.pipeStore.setPipes(respdata.result);
-						}
+						this.pipeStore.setPipes(respdata.result);
 					}
 					return true;
 				} else {
-					return respdata.message || -1;
+					return errVueHandler(respdata.message || -1)
 				}
 			})
 			.catch(err => errRequestHandler(err))
 	}
 
-	sendPipe = (payload: Partial<Pipe>) => {
+	async sendPipe(payload: Partial<Pipe>): Promise<boolean> {
 		return this.pipeRepo
 			.SendPipe(payload)
 			.then((respdata) => {
 				if (isSuccessApiResponse(respdata)) {
 					return true;
 				} else {
-					return respdata.message || -1;
+					return errVueHandler(respdata.message || -1)
 				}
 			})
 			.catch(err => errRequestHandler(err));

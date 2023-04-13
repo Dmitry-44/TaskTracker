@@ -25,7 +25,7 @@ export default class TaskService {
 		this.userStore = userStore;
 	}
 
-	fetchTasks (payload?: FilterPayload | Partial<FilterPayload>, signal?: AbortSignal) {
+	async fetchTasks (payload?: FilterPayload | Partial<FilterPayload>, signal?: AbortSignal): Promise<boolean> {
 		return this.taskRepo
 			.GetTasks(payload, signal)
 			.then(respdata => {

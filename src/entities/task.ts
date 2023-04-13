@@ -44,7 +44,7 @@ export enum TaskPriority {
 }
 
 export const taskPriorityOptions: Readonly<Record<string, any>[]> = [
-	{ id: TaskPriority.EXTRA, value: "Молния", color: "#E6A23C" },
+	{ id: TaskPriority.EXTRA, value: "Молния", color: "#FCEC52" },
 	{ id: TaskPriority.URGENT, value: "Срочная", color: "#F56C6C" },
 	{ id: TaskPriority.BASIC, value: "Базовая", color: "#409EFF" },
 	{ id: TaskPriority.LOW, value: "Низкая", color: "#909399" },

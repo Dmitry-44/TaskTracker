@@ -1,3 +1,4 @@
+import type { Task } from "@/entities/task";
 import type { User } from "@/entities/user";
 
 interface SuccessApiResponse<T> {
@@ -18,15 +19,15 @@ type UserResponse = {
 	auth: User
 }
 
-type ApiResult<T> = ResultWithPagination<T> | T[];
+type ApiResult<T> = T extends Task ? ResultWithPagination<T>|T[] : T[];
 
 type ApiResponse<T> = SuccessApiResponse<T> | FailureApiResponse;
 
 //TYPE GUARDS
 export const isSuccessApiResponse = <T>(res: ApiResponse<T>): res is SuccessApiResponse<T> => res.message === "ok";
 export const isFailureApiResponse = <T>(res: ApiResponse<T>): res is FailureApiResponse => res.message != "ok";
-export const isResultWithPagination = <T>(res: ApiResult<T>): res is ResultWithPagination<T> => res.hasOwnProperty("pagination");
-
+export const isResultWithPagination = <T>(res: ApiResult<T> | ResultWithPagination<T>): res is ResultWithPagination<T> => (res as ResultWithPagination<T>).hasOwnProperty("pagination") && Array.isArray((res as ResultWithPagination<T>).data)
+  
 
 interface FilterPayload {
 	select: string[];

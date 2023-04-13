@@ -27,20 +27,24 @@ const props = defineProps({
 const taskStore = useTaskStore();
 const task = ref(props.task);
 const readonlyTask = computed(() => task.value.status === 4);
-const user = useUserStore().getUser;
+const userStore = useUserStore();
+const user = userStore.getUser;
 const activeTask = computed(()=>taskStore.getActiveTask)
 const TaskService = services.Task
+// const DIVISIONS_OPTIONS = computed(()=>userStore.getDivisions)
 
 const selectMore = ref<any | HTMLInputElement>(null);
 const taskCardElement = ref<any | HTMLInputElement>(null);
 
 const taskPriority = computed(
-  () => taskPriorityOptions.filter((v) => v.id === task.value.priority)[0]
+  () => taskPriorityOptions.find((v) => v['id'] === task.value.priority)
 );
 const taskStatus = computed(
-  () => taskStatusOptions.find((v) => v.id === task.value.status)
+  () => taskStatusOptions.find((v) => v['id'] === task.value.status)
 );
-
+// const taskDivision = computed(
+//   () => DIVISIONS_OPTIONS.value.find((division) => division?.id === task.value?.division_id)
+// );
 
 watch(
   () => task.value,
@@ -66,7 +70,7 @@ onMounted(()=>{
 </script>
 
 <template>
-  <div :class="['card', active ? 'active' : '', readonlyTask ? 'done' : '']" ref='taskCardElement'>
+  <div :class="['card', active ? 'active' : '', readonlyTask ? 'done' : '']" :style="{ '--priority-color': taskPriority!['color'] }" ref='taskCardElement'>
     <div class="content">
       <div class="title-indicator">
         <span class="title">
@@ -78,11 +82,11 @@ onMounted(()=>{
           <el-tooltip
             class="item"
             effect="dark"
-            :content="`Приоритет: ${taskPriority.value}`"
+            :content="`Приоритет: ${taskPriority!['value']}`"
             placement="top-start"
           >
-            <el-tag :color="taskPriority.color">{{
-              taskPriority.value
+            <el-tag :color="taskPriority!['color']">{{
+              taskPriority!['value']
             }}</el-tag>
           </el-tooltip>
         </div>
@@ -90,10 +94,10 @@ onMounted(()=>{
           <el-tooltip
             class="item"
             effect="dark"
-            :content="`Статус: ${taskStatus.value}`"
+            :content="`Статус: ${taskStatus['value']}`"
             placement="top-start"
           >
-            <el-tag :color="taskStatus.color">{{ taskStatus.value }}</el-tag>
+            <el-tag :color="taskStatus['color']">{{ taskStatus['value'] }}</el-tag>
           </el-tooltip>
         </div>
       </div>
@@ -179,6 +183,8 @@ onMounted(()=>{
     margin-bottom: 8px
     transition-duration: 200ms
     transition-property: background,border-color,box-shadow
+    box-shadow: inset 0px 2px 12px -8px var(--priority-color)
+
     &:hover
         border-color: #afabac
     &.done .content
