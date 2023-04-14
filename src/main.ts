@@ -1,3 +1,4 @@
+import PiniaTaskAdapter from '@/adapters/piniaTaskAdapter';
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import ElementPlus from "element-plus";
@@ -17,7 +18,12 @@ import "element-plus/theme-chalk/display.css";
 import "./assets/b-spacing.css";
 import "./assets/common.css";
 import RuLocale from "element-plus/es/locale/lang/ru";
+import initServices from "./services";
+import { listenTaskTrackerChannel } from "./services/WSService";
+import socket from "./plugins/io";
 
+
+// socket
 const app = createApp(App);
 
 // Sentry.init({
@@ -54,8 +60,14 @@ app.use(ElementPlus, {
 });
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 app.use(createPinia());
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 app.use(router);
+
+export const services = initServices()
+services.User.initAuthMiddleware()
+listenTaskTrackerChannel(socket, new PiniaTaskAdapter())
+
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component);
 }

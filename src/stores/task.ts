@@ -1,153 +1,100 @@
+import { emptyTask } from '../entities/task';
 import { defineStore } from "pinia";
-import { axiosClient } from "@/plugins/axios";
-import { errRequestHandler } from "@/plugins/errorResponser";
-import { envConfig } from "@/plugins/envConfig";
-import { type ApiResponse, isSuccessApiResponse } from "@/types/api";
-import type { FilterPayload } from "@/types/index";
-import type { Task } from "@/types/task";
-import { useInterfaceStore } from "./interface";
+import type { Task } from "@/entities/task";
+import type { Event } from '@/entities/event';
 
-
-interface ActiveTask extends Task {
-  readonly?: boolean
-}
-const taskDefault: ActiveTask = {
-  id: -1,
-  title: '',
-  created_at: -1,
-  status: 1,
-  text: '',
-}
-
-interface TaskOption {
-  id: number,
-  value: string,
-  color: string
-}
-interface EventStatusOption {
-  id: number,
-  value: string,
-  color: string
-}
 interface State {
-  tasks: Task[]
-  singleTask: Task|null
-  priorityOptions: TaskOption[]
-  statusOptions: TaskOption[]
-  eventStatusOptions: EventStatusOption[]
-  activeTask: ActiveTask,
-  filterBase: FilterPayload,
-  filterVersion: string
+	tasks: Task[];
+	singleTask: Task | null;
+	activeTask: Task;
+	taskToFinish: Task|null;
+	taskByEventIdHash: Map<number, Task>
 }
 
-export type { ActiveTask };
 
 export const useTaskStore = defineStore({
-  id: "task",
-  state: (): State => ({
-    priorityOptions: [
-      {id:1,value:'Молния',color:'#E6A23C'},
-      {id:2,value:'Срочная',color:'#F56C6C'},
-      {id:3,value:'Базовая',color:'#409EFF'},
-      {id:4,value:'Низкая',color:'#909399'},
-    ],
-    statusOptions: [
-      {id:1,value:'Создана',color:'#f06a6a'},
-      {id:2,value:'Обработана',color:'#4ecbc4'},
-      {id:3,value:'В работе',color:'#f8df72'},
-      {id:4,value:'Закончена',color:'#909399'},
-    ],
-    eventStatusOptions: [
-      {id:1,value:'Создана',color:''},
-      {id:2,value:'В работе',color:'#f8df72'},
-      {id:3,value:'Готово',color:'#67C23A'},
-    ],
-    activeTask: {...taskDefault},
-    tasks: [],
-    singleTask: null,
-    filterBase: {
-      select: [],
-      filter: {},
-      options: {
-        onlyLimit: false,
-        page: 1,
-        itemsPerPage: 50,
-        sortBy: ['id'],
-        sortDesc: [false],
-        groupBy: [],
-        groupDesc: [false],
-        mustSort: false,
-        multiSort: false,
-      }
-    },
-    filterVersion: '1.0',
-  }),
-  getters: {
-    getList: (state): Task[] => state.tasks,
-    getSingleTask: (state) => state.singleTask,
-    getFilterVersion:(state): string => state.filterVersion,
-    getPriorityOptions: (state): TaskOption[] => state.priorityOptions,
-    getStatusOptions: (state): TaskOption[] => state.statusOptions,
-    getActiveTask:(state)=> state.activeTask,
-    getEventStatusOptions:(state): EventStatusOption[]=> state.eventStatusOptions
-  },
-  actions: {
-    setActiveTask(task: Task | null): void {
-      const interfaceStore = useInterfaceStore()
-      if(this.activeTask?.id == task?.id && !interfaceStore.getIsCreatingTaskProcess)return;
-      this.activeTask = task || {...taskDefault}
-    },
-    setTasksList(payload: Task[]): void {
-      this.tasks=payload
-    },
-    setSingleTask(payload: Task[]):void {
-      this.singleTask=payload[0]
-    },
-    
-    async fetchTasksList(filterPayload?: FilterPayload|Partial<FilterPayload>, signal?: AbortSignal): Promise<string|boolean> {
-      return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/tasks`, {...this.filterBase, ...filterPayload}, {signal})
-        .then((resp) => {
-          const respdata: ApiResponse = resp.data;
-          if(isSuccessApiResponse(respdata)) {
-            if(filterPayload?.filter!['id']) {
-              this.setSingleTask(respdata.result.queryResult as Task[])
-            } else {
-              this.setTasksList(respdata.result.queryResult as Task[]);
-            }
-            return true;
-          } else {
-              return respdata.message || -1;
-            }
-        })
-        .catch((e) => errRequestHandler(e));
-    },
-    async upsertTask(payload: Partial<Task>|Task): Promise<string|boolean> {
-      console.log('upsertTask')
-      return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/taskUpsert`, payload)
-        .then((resp) => {
-          const respdata: ApiResponse = resp.data;
-          if(isSuccessApiResponse(respdata)) {
-            return true;
-          } else {
-            return respdata.message || -1;
-          }
-        })
-        .catch((e) => errRequestHandler(e));
-    },
-    async takeTask(id: number): Promise<string|boolean> {
-      return axiosClient
-        .post(`${envConfig.API_URL}tasktracker/takeTaskSmi`, {id: id})
-        .then((resp) => {
-          const respdata: ApiResponse = resp.data;
-          if(isSuccessApiResponse(respdata)) {
-            return true;
-          } else {
-            return respdata.message || -1;
-          }
-        })
-        .catch((e) => errRequestHandler(e));
-    },
-}
+	id: "task",
+	state: (): State => ({
+		activeTask: Object.assign({}, emptyTask),
+		tasks: [],
+		singleTask: null,
+		taskToFinish: null,
+		taskByEventIdHash: new Map()
+	}),
+	getters: {
+		getList: (state): Task[] => state.tasks,
+		getSingleTask: (state) => state.singleTask,
+		getActiveTask: (state) => state.activeTask,
+		getTaskToFinish: (state) => state.taskToFinish
+	},
+	actions: {
+		setActiveTask(payload: Task): void {
+			this.activeTask = payload;
+		},
+		setTasksList(payload: Task[]): void {
+			this.tasks = payload;
+		},
+		setSingleTask(payload: Task | null): void {
+			this.singleTask = payload;
+		},
+		setTaskToFinish(payload: Task|null): void {
+			this.taskToFinish = payload
+		},
+		updateTask(payload: Partial<Task>): void {
+			const index = this.tasks.findIndex(task => task.id === payload.id)
+			if(!index)return;
+			this.tasks[index]=Object.assign(this.tasks[index], payload)
+		},
+		addNewTask(payload: Task): void {
+			this.tasks = [payload, ...this.tasks]
+		},
+		updateTaskStatus(taskId: Task['id'], status: Task['status']):void {
+			let task = this.tasks.find(task=>task.id===taskId)
+			console.log('task_to_update___', task?.status)
+			if(!task)return;
+			task.status=status
+			console.log('task_to_update___', task.status)
+		},
+		pushNewEventToTask(event: Event): void {
+			let task = this.tasks.find(task=>task.id===event.task_id)
+			if(!task)return;
+			task.events?.push(event.id)
+			task.event_entities?.push(event)
+			this.updateTask(task)
+		},
+		getTaskByEventId(eventId: Event['id']): Task|null {
+			return this.tasks.find(task=>task.events?.includes(eventId)) || null
+		},
+		eventUpdate(taskId: Task['id'], event: Partial<Event>): void {
+			let task;
+			task = this.taskByEventIdHash.get(event.id!) as Task
+			if(!task){
+				task = this.tasks.find(task=>task.id===taskId)
+				if(!task)return;
+				this.taskByEventIdHash.set(event.id!,task)
+			}
+			let eventToUpdate = task?.event_entities?.find(ev=>ev.id===event.id)
+			if(!eventToUpdate)return;
+			eventToUpdate = Object.assign(eventToUpdate,event)
+		},
+		updateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): void {
+			console.log('store update event status')
+			let task = this.tasks.find(task=>task.id===taskId)
+			if(!task)return;
+			let eventToUpdate = task?.event_entities?.find(ev=>ev.id===eventId)
+			if(!eventToUpdate)return;
+			eventToUpdate.status=status
+		},
+		getTaskFromHashByEvent(taskId: Task['id'], eventId: Event['id']): Task|undefined {
+			let task = this.taskByEventIdHash.get(eventId)
+			if(!task){
+				task = this.tasks.find(task=>task.id===taskId)
+				if(!task)return task;
+				this.taskByEventIdHash.set(eventId,task)
+				return task
+			} else {
+				return task
+			}
+		}
+	},
 });

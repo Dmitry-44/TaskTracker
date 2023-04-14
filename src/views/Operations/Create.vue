@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-import OperationCard from "../../components/kanban/OperationCard.vue";
-
+import OperationCard from "../../components/OperationCard.vue";
 </script>
 
 <template>
-    <OperationCard />
+  <OperationCard />
 </template>

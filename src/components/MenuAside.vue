@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { Folder, FolderDelete, Menu, DataAnalysis, SetUp, Connection } from "@element-plus/icons-vue";
+import {
+  Folder,
+  FolderDelete,
+  Menu,
+  DataAnalysis,
+  SetUp,
+  Connection,
+} from "@element-plus/icons-vue";
 import { useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import { computed } from "vue";

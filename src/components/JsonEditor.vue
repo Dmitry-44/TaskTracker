@@ -1,94 +1,112 @@
 <script setup lang="ts">
-import { Checked } from '@element-plus/icons-vue';
-import { computed, ref, getCurrentInstance } from 'vue';
+import { Checked } from "@element-plus/icons-vue";
+import { computed, ref, getCurrentInstance } from "vue";
 
 const props = defineProps({
-    data: {
-        type: Object,
-        default: {},
-        required: true
+  data: {
+    type: Object,
+    default: {},
+    required: true,
+  },
+  options: {
+    type: Object,
+    default: {
+      tabSize: 2,
+      readonly: false,
+      placeholder: "",
+      rows: 6,
+      width: "100%",
     },
-    options: {
-        type: Object,
-        default: {
-            tabSize: 2,
-            readonly: false,
-            placeholder: '',
-            rows: 6,
-            width: '100%'
-        }
-    }
-})
+  },
+});
 
 const emit = defineEmits<{
-    (e: 'update', value: Object): void
-}>()
+  (e: "update", value: Object): void;
+}>();
 
 //VARIABLES
-let value = ref(props.data)
-let OPTIONS = ref(props.options)
-let valueString = ref(JSON.stringify(value.value, null, OPTIONS.value['tabSize']))
-let error = ref(false)
+const value = ref(props.data);
+const OPTIONS = ref(props.options);
+const valueString = ref(
+  JSON.stringify(value.value, null, OPTIONS.value["tabSize"])
+);
+const error = ref(false);
 
 //METHODS
 const tabHandler = (e: KeyboardEvent) => {
-    e.preventDefault();
-    document.execCommand('insertText', false, ' '.repeat(OPTIONS.value['tabSize']));
-}
+  e.preventDefault();
+  document.execCommand(
+    "insertText",
+    false,
+    " ".repeat(OPTIONS.value["tabSize"])
+  );
+};
 const inputHandle = (e: Event) => {
-    const target = e.target as HTMLInputElement
-    // if(!isJsonData(target.value))return;
-    value.value=JSON.parse(target.value)
-    emit('update', value.value)
-}
+  const target = e.target as HTMLInputElement;
+  // if(!isJsonData(target.value))return;
+  value.value = JSON.parse(target.value);
+  emit("update", value.value);
+};
 const format = () => {
-    valueString.value=JSON.stringify(JSON.parse(JSON.stringify(value.value)), null, OPTIONS.value['tabSize'])
-}
+  valueString.value = JSON.stringify(
+    JSON.parse(JSON.stringify(value.value)),
+    null,
+    OPTIONS.value["tabSize"]
+  );
+};
 const isJsonData = (data: any) => {
-    try {
-        JSON.parse(data);
-    } catch (e) {
-        console.log('error parse', e)
-        error.value=true
-        return false;
-    }
-    error.value=false
-    return true;
-}
+  try {
+    JSON.parse(data);
+  } catch (e) {
+    console.log("error parse", e);
+    error.value = true;
+    return false;
+  }
+  error.value = false;
+  return true;
+};
 
 const getValue = () => {
-    return value.value
-}
+  return value.value;
+};
 const getValueJson = () => {
-    return JSON.stringify(value.value)
-}
+  return JSON.stringify(value.value);
+};
 
 defineExpose({
-    getValue,
-    getValueJson,
-    format
-})
-
+  getValue,
+  getValueJson,
+  format,
+});
 </script>
 
 <template>
-    <div class="json-editor" :style="{'width':OPTIONS['width']}" :class="{'error': error}">
-        <textarea 
-        class="textarea"
-        :value="valueString" 
-        :rows="OPTIONS['rows']" 
-        :readonly="OPTIONS['readonly']"
-        :placeholder="OPTIONS['placeholder']"
-        @keydown.tab.prevent="tabHandler($event)" 
-        @input="inputHandle($event)"
-        >
-        </textarea>
-        <div class="actions_block">
-            <el-tooltip class="item" effect="dark" content="Отформатировать" placement="right-start">
-                <el-button :icon="Checked" @click="format()"/>
-            </el-tooltip>
-        </div>
+  <div
+    class="json-editor"
+    :style="{ width: OPTIONS['width'] }"
+    :class="{ error: error }"
+  >
+    <textarea
+      class="textarea"
+      :value="valueString"
+      :rows="OPTIONS['rows']"
+      :readonly="OPTIONS['readonly']"
+      :placeholder="OPTIONS['placeholder']"
+      @keydown.tab.prevent="tabHandler($event)"
+      @input="inputHandle($event)"
+    >
+    </textarea>
+    <div class="actions_block">
+      <el-tooltip
+        class="item"
+        effect="dark"
+        content="Отформатировать"
+        placement="right-start"
+      >
+        <el-button :icon="Checked" @click="format()" />
+      </el-tooltip>
     </div>
+  </div>
 </template>
 
 <style lang="sass" scope>
