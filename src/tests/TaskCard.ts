@@ -1,7 +1,7 @@
 import { flushPromises, shallowMount, VueWrapper, mount } from '@vue/test-utils';
 import TaskCard from '@/components/kanban/TaskCard.vue';
 import { createPinia } from 'pinia';
-import type { Task } from "@/types/task"
+import type { Task } from '@/entities/task';
 
 
 // let wrapper: VueWrapper

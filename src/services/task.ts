@@ -7,7 +7,6 @@ import type { ITaskRepo, Task } from "@/entities/task";
 import type { ITaskStore, IInterfaceStore, IUserStore } from '@/adapters';
 import { EventStatus, type Event } from '@/entities/event';
 import type { User } from '@/entities/user';
-import { WebSocketIsConnected } from '@/plugins/io';
 
 
 export default class TaskService {
