@@ -7,6 +7,7 @@ import type { ITaskRepo, Task } from "@/entities/task";
 import type { ITaskStore, IInterfaceStore, IUserStore } from '@/adapters';
 import { EventStatus, type Event } from '@/entities/event';
 import type { User } from '@/entities/user';
+import { WebSocketIsConnected } from '@/plugins/io';
 
 
 export default class TaskService {
@@ -163,6 +164,9 @@ export default class TaskService {
 						duration: 1500,
 						showClose: true,
 					});
+					// if (!WebSocketIsConnected) {
+					// 	this.taskStore.updateEventStatus(taskId, eventId, status)
+					// }
 					return true;
 				} else {
 					return errVueHandler(respdata.message || -1)

@@ -92,7 +92,7 @@ const save = () => {
       <div class="actions">
         <el-button
           :loading="LOADING"
-          :disabled="!wasChanged||!task.pipe_id"
+          :disabled="!wasChanged"
           type="success"
           @click="save()"
           >Сохранить</el-button
