@@ -1,4 +1,4 @@
-import type { IPipeStore } from './types';
+import type { IPipeStore } from '.';
 import { usePipeStore } from '@/stores/pipe';
 import type { Pipe } from '@/entities/pipe';
 

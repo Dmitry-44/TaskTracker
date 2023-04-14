@@ -1,7 +1,7 @@
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
 import { isSuccessApiResponse, type FilterPayload } from "@/api";
 import type { IPipeRepo, Pipe } from "@/entities/pipe";
-import type PiniaPipeAdapter from "@/adapters/piniaPipeAdapter";
+import type { IPipeStore } from "@/adapters";
 
 
 
@@ -9,7 +9,7 @@ export default class PipeService {
 	pipeRepo;
 	pipeStore;
 
-	constructor(pipeRepo: IPipeRepo, pipeStore: PiniaPipeAdapter) {
+	constructor(pipeRepo: IPipeRepo, pipeStore: IPipeStore) {
 		this.pipeRepo = pipeRepo;
 		this.pipeStore = pipeStore;
 	}

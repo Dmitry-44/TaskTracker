@@ -1,12 +1,10 @@
 import router from '@/router';
-import type PiniaUserAdapter from '@/adapters/piniaUserAdapter';
 import { TaskStatus, emptyTask } from '@/entities/task';
 import { ElMessage } from 'element-plus';
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
 import { isSuccessApiResponse, isResultWithPagination, type FilterPayload } from "@/api";
 import type { ITaskRepo, Task } from "@/entities/task";
-import type PiniaTaskAdapter from '@/adapters/piniaTaskAdapter';
-import type PiniaInterfaceAdapter from '@/adapters/piniaInterfaceAdapter';
+import type { ITaskStore, IInterfaceStore, IUserStore } from '@/adapters';
 import { EventStatus, type Event } from '@/entities/event';
 import type { User } from '@/entities/user';
 
@@ -18,7 +16,7 @@ export default class TaskService {
 	taskStore;
 	userStore;
 
-	constructor(taskRepo: ITaskRepo, taskStore: PiniaTaskAdapter, interfaceStore: PiniaInterfaceAdapter, userStore: PiniaUserAdapter) {
+	constructor(taskRepo: ITaskRepo, taskStore: ITaskStore, interfaceStore: IInterfaceStore, userStore: IUserStore) {
 		this.taskRepo = taskRepo;
 		this.taskStore = taskStore;
 		this.interfaceStore=interfaceStore;

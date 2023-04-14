@@ -1,7 +1,7 @@
 
 import type { Task } from '@/entities/task';
 import { useTaskStore } from '@/stores/task';
-import type { ITaskStore } from './types';
+import type { ITaskStore } from '.';
 import type { Event } from '@/entities/event';
 
 

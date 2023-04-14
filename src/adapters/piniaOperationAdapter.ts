@@ -1,6 +1,6 @@
 import type { Operation } from '@/entities/operation';
 import { useOperationStore } from '@/stores/operation';
-import type { IOperationStore } from './types';
+import type { IOperationStore } from '.';
 
 
 export default class PiniaOperationAdapter implements IOperationStore {
