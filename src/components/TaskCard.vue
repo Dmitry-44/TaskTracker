@@ -94,7 +94,7 @@ onMounted(()=>{
             :content="`Приоритет: ${taskPriority!['value']}`"
             placement="top-start"
           >
-            <el-tag :color="taskPriority!['color']">{{
+            <el-tag class="priority-tag" :color="taskPriority!['color']">{{
               taskPriority!['value']
             }}</el-tag>
           </el-tooltip>
@@ -106,7 +106,7 @@ onMounted(()=>{
             :content="`Статус: ${taskStatus['value']}`"
             placement="top-start"
           >
-            <el-tag :color="taskStatus['color']">{{ taskStatus['value'] }}</el-tag>
+            <el-tag class="status-tag" :color="taskStatus['color']">{{ taskStatus['value'] }}</el-tag>
           </el-tooltip>
         </div>
       </div>

@@ -44,6 +44,9 @@ const taskDivision = computed(
 const taskStatus = computed(
   () => taskStatusOptions.find((v) => v['id'] === task.value.status)
 );
+const taskPriority = computed(
+  () => taskPriorityOptions.find((v) => v['id'] === task.value.priority)
+);
 
 //METHODS
 const finishTask = () => {
@@ -191,7 +194,7 @@ const save = () => {
         <div class="row" v-if="taskStatus">
           <div class="left">Статус</div>
           <div class="right">
-            <el-tag size="large" :color="taskStatus['color']">{{ taskStatus['value'] }}</el-tag>
+            <el-tag size="large" class="status-tag" :color="taskStatus['color']">{{ taskStatus['value'] }}</el-tag>
           </div>
         </div>
         <div class="row">
@@ -199,7 +202,7 @@ const save = () => {
           <div class="right">
             <el-select
               v-model="task.priority"
-              :disabled="!TaskService.canChangeTaskPriority(task, user)"
+              v-if="TaskService.canChangeTaskPriority(task, user)"
               clearable
               placeholder="Приоритет"
             >
@@ -209,9 +212,10 @@ const save = () => {
                 :label="item['value']"
                 :value="item['id']"
               >
-                <el-tag :color="item['color']">{{ item['value'] }}</el-tag>
+                <el-tag class="priority-tag" :color="item['color']">{{ item['value'] }}</el-tag>
               </el-option>
             </el-select>
+            <el-tag v-else class="priority-tag" size="large" :color="taskPriority!['color']">{{ taskPriority!['value'] }}</el-tag>
           </div>
         </div>
         <div class="row">

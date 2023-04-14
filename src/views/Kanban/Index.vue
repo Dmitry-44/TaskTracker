@@ -55,13 +55,13 @@ onBeforeUnmount(() => abortController.abort());
 
 //DRAG AND DROP
 const transferTask = ref<Task | null>(null);
-const taskInProcessArea = ref<HTMLDivElement|null>(null);
-const tasksToTakeArea = ref<HTMLDivElement|null>(null);
-const finishedTasksArea = ref<HTMLDivElement|null>(null);
+const areaCreated = ref<HTMLDivElement|null>(null);
+const areaInProgress = ref<HTMLDivElement|null>(null);
+const areaCompleted = ref<HTMLDivElement|null>(null);
 const areaParams = new Map([
-  [1, { areaRef: tasksToTakeArea, status: 1 }],
-  [2, { areaRef: taskInProcessArea, status: 2 }],
-  [3, { areaRef: finishedTasksArea, status: 3 }],
+  [1, { areaRef: areaCreated, status: 1 }],
+  [2, { areaRef: areaInProgress, status: 2 }],
+  [3, { areaRef: areaCompleted, status: 3 }],
 ]);
 const stopAll = (e: DragEvent) => {
   e.preventDefault();
@@ -82,15 +82,15 @@ const dragleaveHandler = (ev: DragEvent) => {
   stopAll(ev);
   clearDragAndDrop()
 };
-const dropHandler = async (ev: DragEvent, area: number) => {
-  TaskService.dragAndDropTask(transferTask.value!, area, user)
+const dropHandler = async (newStatus: number) => {
+  TaskService.dragAndDropTask(transferTask.value!, newStatus, user)
   clearDragAndDrop()
 };
 const clearDragAndDrop = () => {
   // transferTask.value=null;
-  tasksToTakeArea.value?.classList.remove("dragOver");
-  taskInProcessArea.value?.classList.remove("dragOver");
-  finishedTasksArea.value?.classList.remove("dragOver");
+  areaCreated.value?.classList.remove("dragOver");
+  areaInProgress.value?.classList.remove("dragOver");
+  areaCompleted.value?.classList.remove("dragOver");
 }
 </script>
 <template>
@@ -106,8 +106,8 @@ const clearDragAndDrop = () => {
         class="draggable-area"
         @dragover="dragoverHandler($event, 1)"
         @dragleave="dragleaveHandler($event)"
-        @drop="dropHandler($event, 1)"
-        ref="tasksToTakeArea"
+        @drop="dropHandler(EventStatus.CREATED)"
+        ref="areaCreated"
       >
         <KanbanColumn
           :tasks="tasksToTake"
@@ -123,8 +123,8 @@ const clearDragAndDrop = () => {
         class="draggable-area"
         @dragover="dragoverHandler($event, 2)"
         @dragleave="dragleaveHandler($event)"
-        @drop="dropHandler($event, 2)"
-        ref="taskInProcessArea"
+        @drop="dropHandler(EventStatus.IN_PROGRESS)"
+        ref="areaInProgress"
       >
         <KanbanColumn
           :tasks="tasksInProcess"
@@ -139,9 +139,8 @@ const clearDragAndDrop = () => {
         class="draggable-area"
         @dragover="dragoverHandler($event, 3)"
         @dragleave="dragleaveHandler($event)"
-        @drop="dropHandler($event, 3)"
-        key="3"
-        ref="finishedTasksArea"
+        @drop="dropHandler(EventStatus.COMPLETED)"
+        ref="areaCompleted"
       >
         <KanbanColumn
           :tasks="tasksFinished"
@@ -153,31 +152,6 @@ const clearDragAndDrop = () => {
     </div>
   </div>
   <FinishTaskModal />
-  <!-- <el-dialog
-    v-model="dialogFinishTaskIsOpen"
-    width="30%"
-    @close="dialogCancelHandle"
-  >
-    <el-row justify="center">
-      Уверены что хотите завершить задачу?
-    </el-row>
-    <el-row justify="center">
-      
-    </el-row>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button
-        @click="dialogCancelHandle"
-        >Отмена
-      </el-button>
-        <el-button
-        type="primary"
-        @click="dialogOkHandle"
-        >
-        Ок</el-button>
-      </span>
-    </template>
-  </el-dialog> -->
 </template>
 
 <style lang="sass" scoped>

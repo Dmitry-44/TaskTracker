@@ -37,7 +37,7 @@ const eventStatus = eventStatusOptions.find((ev) => props.event?.status === ev['
     <div class="row" v-if="event?.status">
       <div class="left">Статус</div>
       <div class="right">
-        <el-tag :color="eventStatus?.['color']">{{ eventStatus?.['value'] }}</el-tag>
+        <el-tag class="status-tag" :color="eventStatus?.['color']">{{ eventStatus?.['value'] }}</el-tag>
       </div>
     </div>
     <div class="row" v-if="event?.created">

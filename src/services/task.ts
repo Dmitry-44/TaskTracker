@@ -407,7 +407,10 @@ export default class TaskService {
 		const division = this.userStore.getDivisionList().find(division=>division.id===task.division_id)
 		if(!division)return false;
 		const isUserMemberOfCurrentDivision = division.ttrace_ids.includes(user.selected_group)
+				//если я являюсь участником выбранного подразделения
 		return isUserMemberOfCurrentDivision
+				//если у меня есть право
+				&& user.rights['tt_task_accept']>=1
 	}
 	canChangeTaskTitle(task: Task, user: User): boolean {
 		if(!(task.id>0))return true;
