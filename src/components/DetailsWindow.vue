@@ -302,6 +302,7 @@ const save = () => {
     top: 60px
     bottom: 0
     z-index: 600
+    overflow-y: scroll
     transition: all .8s cubic-bezier(0.23, 1, 0.32, 1)
     width: min(700px, 60%)
     transform: translateX(1000px)
@@ -319,6 +320,7 @@ const save = () => {
     height: 50px
     padding: 0px 12px
     display: flex
+    flex-shrink: 0
     .actions
         margin-left: auto
         display: flex

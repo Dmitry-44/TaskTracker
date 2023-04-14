@@ -57,12 +57,12 @@ const finishTask = () => {
 
 watch(
   () => task.value,
-  (newVal) => {
-    console.log('newVal', newVal)
+  (newVal, oldVal) => {
+    console.log({'newVal': newVal, 'oldVal': oldVal})
     if(activeTask.value.id===newVal.id){
+      taskCardElement.value?.classList.add('card-update-anim')
       return;
     }
-    taskCardElement.value?.classList.add('card-update-anim')
     // setTimeout(()=>{
     //   taskCardElement.value?.classList.remove('card-update-anim')
     // },1000)
@@ -72,9 +72,9 @@ watch(
   }
 );
 
-onMounted(()=>{
-  taskCardElement.value?.classList.add('card-update-anim')
-})
+// onMounted(()=>{
+//   taskCardElement.value?.classList.add('card-update-anim')
+// })
 
 </script>
 
