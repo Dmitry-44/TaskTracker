@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { Folder, FolderDelete, Menu, DataAnalysis, SetUp, Connection } from "@element-plus/icons-vue";
+import {
+  Folder,
+  FolderDelete,
+  Menu,
+  DataAnalysis,
+  SetUp,
+  Connection,
+} from "@element-plus/icons-vue";
 import { useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import { computed } from "vue";
@@ -28,15 +35,9 @@ const rights = computed(() => UserStore.getRights);
   >
     <el-menu-item index="/">
       <el-icon>
-        <Folder />
-      </el-icon>
-      <template #title>Фотографии</template>
-    </el-menu-item>
-    <el-menu-item index="/kanban">
-      <el-icon>
         <DataAnalysis />
       </el-icon>
-      <template #title>Канбан</template>
+      <template #title>Задачи</template>
     </el-menu-item>
     <el-menu-item index="/operations">
       <el-icon>

@@ -3,23 +3,46 @@ import { ref, computed, onBeforeMount } from "vue";
 import { RouterView, useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import Menu from "@/components/MenuAside.vue";
-import Io from "@/plugins/io";
+import { services } from "@/main";
+
+
 const isCollapse = ref(true);
 const route = useRoute();
 const router = useRouter();
 const UserStore = useUserStore();
 const userInfo = computed(() => UserStore.getUser);
-const logout = () => UserStore.logout();
-onBeforeMount(() => {
+const logout = () => services.User.logout();
+// const operationsStore = useOperationStore();
+// const loader = computed(() => UserStore.getLoader);
+const loading = ref(false);
+onBeforeMount(async () => {
+  loading.value = true;
   const query = Object.assign({}, route.query);
-  delete query.auth;
+  delete query["auth"];
   router.replace({ query });
+
+  const operations = await services.Operation.fetchOperations();
+  const pipes = await services.Pipe.fetchPipes();
+  const sites = await services.Site.fetchSites();
+  const divisions = await services.User.getDivisions()
+                          .then(async res=>{
+                            if(res){
+                              const divisions = UserStore.getDivisions
+                              divisions.forEach(async division=>{
+                                await services.User.getPersonsByDivision(division.id)
+                              })
+                            }
+                            return true
+                          })
+
+  Promise.allSettled([operations, pipes, sites, divisions]).then(
+    () => (loading.value = false)
+  );
 });
-const loader = computed(() => UserStore.getLoader);
 </script>
 
 <template>
-  <div class="common-layout" v-loading="loader">
+  <div class="common-layout">
     <el-container>
       <el-header class="navbar">
         <el-container class="toolbar first">
@@ -37,7 +60,6 @@ const loader = computed(() => UserStore.getLoader);
                 <Expand />
               </el-icon>
             </el-button>
-            <el-image src="/favicon.png" class="ml-2 logo-image" />
             <span class="logo-text">Таск-трекер</span>
           </div>
           <div class="hidden-md-and-up menu-block-mobile">
@@ -67,7 +89,8 @@ const loader = computed(() => UserStore.getLoader);
           <Menu :is-collapse="isCollapse" />
         </el-aside>
         <el-container>
-          <el-main class="content">
+          <div class="loader_block" v-if="loading" v-loading="loading"></div>
+          <el-main v-else class="content">
             <RouterView />
           </el-main>
         </el-container>

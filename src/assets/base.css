@@ -93,7 +93,7 @@ body {
 
 .el-main.content {
     height: calc(100vh - 65px);
-    overflow-x: hidden;
+    /* overflow-x: hidden; */
     padding: 20px;
 }
 

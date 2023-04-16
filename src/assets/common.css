@@ -1,0 +1,13 @@
+
+
+.loader_block {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.status-tag,
+.priority-tag {
+    letter-spacing: 1px;
+}

@@ -1,57 +1,58 @@
+import { emptyUser, type Division } from '../entities/user';
 import { defineStore } from "pinia";
-import { axiosClient } from "@/plugins/axios";
-import { envConfig } from "@/plugins/envConfig";
-import type { SimpleObject } from "./photobank";
-
-type User = {
-  id: number;
-  fio: string;
-  rights: SimpleObject;
-} | null;
+import type { User, Person } from "@/entities/user";
 
 interface State {
-  is_auth: boolean;
-  user: User;
-  globalLoader: boolean;
+	is_auth: boolean
+	user: User
+	allUsers: Person[]
+	divisionsList: Division[]
+	persons: Person[]
+	divisionsData: Record<UniqueId, DivisionData>
+}
+
+export type DivisionData = Division & {
+	persons: Person[]
 }
 
 export const useUserStore = defineStore({
-  id: "user",
-  state: (): State => ({
-    user: null,
-    is_auth: false,
-    globalLoader: true,
-  }),
-  getters: {
-    getRights: (state): SimpleObject => state?.user?.rights || {},
-    getUser: (state): User => state.user,
-    getLoader: (state): boolean => state.globalLoader,
-  },
-  actions: {
-    showLoader() {
-      this.globalLoader = true;
-    },
-    hideLoader() {
-      setTimeout(() => (this.globalLoader = false), 100);
-    },
-    logout(): Promise<boolean> {
-      return axiosClient
-        .get(`${envConfig.AUTH_URL}/auth/logout`)
-        .then(() => true);
-    },
-    checkAuth(): Promise<boolean> {
-      return axiosClient
-        .get(`${envConfig.AUTH_URL}/auth/checkLogin`)
-        .then((resp) => {
-          this.is_auth = true;
-          this.user = resp.data.auth;
-          return true;
-        })
-        .catch(() => {
-          this.is_auth = true;
-          this.user = null;
-          return false;
-        });
-    },
-  },
+	id: "user",
+	state: (): State => ({
+		user: emptyUser,
+		is_auth: false,
+		allUsers: [],
+		divisionsList: [],
+		persons: [],
+		divisionsData: {}
+	}),
+	getters: {
+		getRights: (state) => state?.user?.rights || {},
+		getUser: (state) => state.user,
+		getIsAuth: (state) => state.is_auth,
+		getAllUsers: (state) => state.allUsers,
+		getDivisions: (state) => state.divisionsList,
+		getDivisionsData: (state) => state.divisionsData,
+	},
+	actions: {
+		setUser(payload: User) {
+			this.user = payload
+		},
+		setIsAuth(payload: boolean) {
+			this.is_auth = payload
+		},
+		setUsers(payload: Person[]) {
+			this.allUsers=payload
+		},
+		setDivisions(payload: Division[]){
+			this.divisionsList=payload
+		},
+		setPersons(payload: Person[]):void {
+			this.persons=payload
+		},
+		setDivisionData(divisionId: Division['id'], persons: Person[]): void {
+			const division = this.divisionsList.find(div=>div.id===divisionId)
+			if(!division)return;
+			this.divisionsData[divisionId]=Object.assign(division, { persons: persons })
+		}
+	},
 });
