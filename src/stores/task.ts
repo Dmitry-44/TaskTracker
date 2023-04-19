@@ -40,9 +40,12 @@ export const useTaskStore = defineStore({
 		setTaskToFinish(payload: Task|null): void {
 			this.taskToFinish = payload
 		},
+		updateActiveTask(task: Partial<Task>): void {
+			this.activeTask = Object.assign(this.activeTask, task)
+		},
 		updateTask(payload: Partial<Task>): void {
 			const index = this.tasks.findIndex(task => task.id === payload.id)
-			if(!index)return;
+			if(index<0)return;
 			this.tasks[index]=Object.assign(this.tasks[index], payload)
 		},
 		addNewTask(payload: Task): void {

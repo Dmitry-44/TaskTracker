@@ -412,7 +412,7 @@ export default class TaskService {
 				//если я являюсь участником выбранного подразделения
 		return isUserMemberOfCurrentDivision
 				//если у меня есть право
-				&& user.rights['tt_task_accept']>=1
+				// && user.rights['tt_task_accept']>=1
 	}
 	canChangeTaskTitle(task: Task, user: User): boolean {
 		if(!(task.id>0))return true;
@@ -424,6 +424,13 @@ export default class TaskService {
 	}
 	canChangeTaskDivision(task: Task, user: User): boolean {
 		return task.id < 0
+	}
+	canChangeEventParams(task: Task, user: User): boolean {
+		console.log('canChangeEventParams')
+		// user.id=33
+		//если у меня есть право
+		// && user.rights['tt_task_accept']>=1
+		return task.id<0 || task.created_by===user.id 
 	}
 
 	clearTask(){

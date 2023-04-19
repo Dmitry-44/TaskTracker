@@ -3,12 +3,13 @@ import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
 import { useInterfaceStore } from "@/stores/interface";
 import { Close, Pointer, Notification, Finished, ArrowRightBold, ArrowLeftBold } from "@element-plus/icons-vue";
-import { computed, onMounted, watch } from "vue";
+import { computed, onMounted, reactive, watch } from "vue";
 import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
 import { services } from "@/main";
-import { taskStatusOptions, taskPriorityOptions } from "@/entities/task"
+import { taskStatusOptions, taskPriorityOptions, type Task } from "@/entities/task"
+import type { Operation } from "@/entities/operation";
 
 
 const taskStore = useTaskStore();
@@ -54,6 +55,10 @@ const finishTask = () => {
     interfaceStore.openFinishTaskModal()
 }
 
+const pipeDataUpdate = (data: Task['pipe_data'], operId: Operation['id']) => {
+  task.value['pipe_data'][operId] = data
+}
+
 onMounted(()=>{
   oldContent.value=JSON.stringify(task.value);
 })
@@ -66,6 +71,19 @@ watch(
     }
   }
 );
+
+// watch(
+//   () => task.value.pipe_id,
+//   (newVal, oldVal) => {
+//     if(newVal != oldVal){
+//       console.log('task.value', task.value)
+//       if(task.value.id<0){
+//         const updatedTask = Object.assign(task.value, {pipe_data: {}})
+//         taskStore.updateActiveTask(updatedTask)
+//       }
+//     }
+//   }
+// );
 
 //METHODS
 const save = () => {
@@ -282,6 +300,8 @@ const save = () => {
                 :operation="operation"
                 :event="task?.event_entities!.find(event=>event?.operation_id===operation?.id) || null"
                 :task-id="task.id"
+                :pipe-data="task.pipe_data[operation.id]"
+                @update="pipeDataUpdate($event, operation.id)"
               />
             </template>
           </el-collapse>
