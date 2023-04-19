@@ -5,9 +5,10 @@ import { emptyTask, taskDateFormat, type Task } from "@/entities/task";
 import { useOperationStore } from "@/stores/operation";
 import { useUserStore } from "@/stores/user";
 import { useTaskStore } from "@/stores/task";
-import { computed, onBeforeMount, ref, toRef, watch, type PropType, type Ref } from "vue";
+import { computed, onBeforeMount, onBeforeUnmount, ref, toRef, watch, type PropType, type Ref } from "vue";
 import OperationParamsGenerator from "./OperationParamsGenerator.vue";
 import { services } from "@/main";
+import cloneDeep from 'lodash/cloneDeep';
 // import SelectExecutor from "./SelectExecutor.vue";
 
 const props = defineProps({
@@ -29,6 +30,10 @@ const props = defineProps({
     default: {}
   }
 });
+
+const taskPipeData = toRef(props, 'pipeData')
+
+console.log('props pipeData', props.pipeData);
 
 const emit = defineEmits<{
   (e: "update", value: Task['pipe_data']): void;
@@ -64,30 +69,32 @@ function optionChangeHandle(value: number) {
 const executors = ref(1)
 
 onBeforeMount(()=> {
-  pipe_data.value = JSON.parse(JSON.stringify(props.pipeData))
+  // pipe_data.value = JSON.parse(JSON.stringify(props.pipeData))
   if(props.taskId<0){
-      pipe_data.value['selected_divisions'] = [],
-      pipe_data.value['selected_users']= []
+      taskPipeData.value['selected_divisions'] = [],
+      taskPipeData.value['selected_users']= []
+      emit("update", cloneDeep(taskPipeData.value));
   } else {
-    if(pipe_data.value['selected_divisions'].length>0){
+    if(taskPipeData.value['selected_divisions'].length>0){
       executors.value=2
     }
-    if(pipe_data.value['selected_users'].length>0){
+    if(taskPipeData.value['selected_users'].length>0){
       executors.value=3
     }
   }
 })
 
 
-watch(
-  () => pipe_data.value,
-  (newPipeData, oldPipeData) => {
-    if(JSON.parse(JSON.stringify(newPipeData)) != JSON.parse(JSON.stringify(oldPipeData))){
-      emit("update", pipe_data.value);
-    }
-  },
-  {deep: true}
-);
+
+// watch(
+//   () => pipe_data.value,
+//   (newPipeData, oldPipeData) => {
+//     if(JSON.parse(JSON.stringify(newPipeData)) != JSON.parse(JSON.stringify(oldPipeData))){
+//       emit("update", pipe_data.value);
+//     }
+//   },
+//   {deep: true}
+// );
 
 </script>
 <template>
@@ -155,7 +162,7 @@ watch(
       <el-row>
           <span style="margin-top:15px;" v-show="executors === 1">{{taskId>0 ? 'Задача видна всем пользователям' : 'Задача будет видна всем пользователям'}}</span>
           <el-select
-              v-model="pipe_data['selected_divisions']"
+              v-model="taskPipeData['selected_divisions']"
               v-show="executors === 2"
               :disabled="!canChangeEventParams"
               multiple
@@ -173,7 +180,7 @@ watch(
           />
           </el-select>
           <el-select
-              v-model="pipe_data['selected_users']"
+              v-model="taskPipeData['selected_users']"
               v-show="executors === 3"
               :disabled="!canChangeEventParams"
               multiple
