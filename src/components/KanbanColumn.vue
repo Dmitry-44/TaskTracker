@@ -2,7 +2,7 @@
 import TaskCard from "./TaskCard.vue";
 import { useTaskStore } from "@/stores/task";
 import type { Task } from "@/entities/task";
-import { toRef, type PropType, watch } from "vue";
+import { toRef, type PropType, watch, type Ref } from "vue";
 import { ref, computed } from "vue";
 import { Plus, Top, Bottom, CloseBold } from "@element-plus/icons-vue";
 import KanbanColumnFilter from "./KanbanColumnSortPicker.vue";
@@ -11,7 +11,7 @@ import { services } from "@/main";
 
 const props = defineProps({
   tasks: {
-    type: Object as PropType<Task[]>,
+    type: Object as PropType<Ref<Task>[]>,
     default: [],
   },
   title: {
@@ -45,23 +45,24 @@ const activeTask = computed(() => taskStore.getActiveTask);
 const LOADING = toRef(props, "loading");
 const searchValue = ref("");
 
-const tasks = ref<Task[]>([]);
+// const tasks = toRef(props, "tasks");
+// // const tasks = ref<Task[]>([]);
 
-watch(
-  () => props.tasks,
-  (newVal) => {
-    tasks.value = JSON.parse(JSON.stringify(newVal));
-  },
-  { deep: true }
-);
+// watch(
+//   () => props.tasks,
+//   (newVal) => {
+//     tasks.value = JSON.parse(JSON.stringify(newVal));
+//   },
+//   { deep: true }
+// );
 
 //METHODS
 
 const doSearch = () => {
-  tasks.value = TaskService.searchTasks(props.tasks, searchValue.value)
+  // tasks.value = TaskService.searchTasks(props.tasks, searchValue.value)
 };
 const setDefaultSort = () => {
-  tasks.value = JSON.parse(JSON.stringify(props.tasks));
+  // tasks.value = JSON.parse(JSON.stringify(props.tasks));
 };
 
 </script>
@@ -114,7 +115,7 @@ const setDefaultSort = () => {
           :draggable="isDraggable"
           :task="task"
           :active="task.id === activeTask?.id ? true : false"
-          @click.stop="TaskService.clickTask(task)"
+          @click.stop="TaskService.clickTask(task.value)"
           @dragstart="emit('taskDragStart', $event, task)"
         />
         <el-button

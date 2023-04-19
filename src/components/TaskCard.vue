@@ -8,6 +8,7 @@ import { useUserStore } from "@/stores/user";
 import { useCommonStore } from "@/stores/common";
 import { taskPriorityOptions, taskStatusOptions, type Task } from "@/entities/task";
 import { services } from "@/main";
+import { updatedTasksIds } from "@/services/WSService";
 
 const props = defineProps({
   task: {
@@ -59,6 +60,14 @@ watch(
   () => task.value,
   (newVal, oldVal) => {
     console.log({'newVal': newVal, 'oldVal': oldVal})
+    console.log('updatedTasksIds', updatedTasksIds)
+    if( updatedTasksIds.has(newVal.id) ) {
+      taskCardElement.value?.classList.add('card-update-anim')
+      setTimeout(()=>{
+        taskCardElement.value?.classList.remove('card-update-anim')
+      },2000)
+      console.log('URAAAAAAAA')
+    }
     if(activeTask.value.id===newVal.id){
       taskCardElement.value?.classList.add('card-update-anim')
       return;

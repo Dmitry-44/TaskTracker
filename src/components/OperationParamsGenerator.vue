@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useOperationStore } from '@/stores/operation';
 import { useSitesStore } from '@/stores/sites';
-import { onBeforeMount, onMounted, onUpdated, ref, toRef, watch, type PropType, type Ref } from 'vue';
-import { getPipeDataFromOperationParams, type Task } from '@/entities/task'
+import { toRef, watch, type PropType, type Ref } from 'vue';
+import type{ Task } from '@/entities/task'
 import { taskTimeOptions as TASK_TIME_OPTIONS } from '@/entities/task'
 import type { Operation } from '@/entities/operation';
 
@@ -25,34 +25,34 @@ const props = defineProps({
         default: true,
     }
 })
-const emit = defineEmits<{
-  (e: "update:value", value: Task['pipe_data']): void;
-}>();
 
-const pipeOptions: Ref<Task['pipe_data']> = ref(Object.assign(getPipeDataFromOperationParams(props.params), JSON.parse(JSON.stringify(props.pipeData))))
+const taskPipeData = toRef(props, 'pipeData')
 const DIRECTION_OPTIONS = useOperationStore().getDirectionOptions
 const SITE_OPTIONS = useSitesStore().getList
 
-watch(
-  () => pipeOptions.value,
-  () => {
-    emit('update:value', pipeOptions.value)
-  },
-  {deep: true}
-);
+
+const clearSiteId = () => {
+    console.log('ssssss clear!!')
+    delete taskPipeData.value['time']
+}
+const changeSiteId = (value: string) => {
+    console.log('change value', value)
+
+}
 
 </script>
 
 <template>
-    <span v-if="pipeOptions['auto']">Параметры данной операции будут заданы автоматически</span>
+    <span v-if="params['auto']">Параметры данной операции будут заданы автоматически</span>
     <div v-else>
-        <template v-if="'direction' in pipeOptions">
+        <template v-if="'direction' in params">
             <span class="param-name"><b>Направление</b></span>
             <el-row>
                 <el-select
-                    v-model="pipeOptions['direction']"
+                    v-model="taskPipeData['direction']"
                     placeholder="Выбрать направление"
                     :disabled="!canChangeEventParams"
+                    clearable
                 >
                 <el-option
                     v-for="item in DIRECTION_OPTIONS"
@@ -64,13 +64,16 @@ watch(
             </el-row>
             <el-divider></el-divider>
         </template>
-        <template v-if="'time' in pipeOptions">
+        <template v-if="'time' in params">
             <span class="param-name"><b>Время на задачу</b></span>
             <el-row>
                 <el-select
-                    v-model="pipeOptions['time']"
-                    placeholder="Выбрать сайты"
+                    v-model="taskPipeData['time']"
+                    placeholder="Выбрать время на задачу"
                     :disabled="!canChangeEventParams"
+                    clearable
+                    @clear="clearSiteId"
+                    @change="changeSiteId"
                 >
                 <el-option
                     v-for="item in TASK_TIME_OPTIONS"
@@ -82,11 +85,11 @@ watch(
             </el-row>
             <el-divider></el-divider>
         </template>
-        <template v-if="'site_ids' in pipeOptions">
+        <template v-if="'site_ids' in params">
             <span class="param-name"><b>На сайты</b></span>
             <el-row>
                 <el-select
-                    v-model="pipeOptions['site_ids']"
+                    v-model="taskPipeData['site_ids']"
                     multiple
                     collapse-tags
                     collapse-tags-tooltip
@@ -105,11 +108,11 @@ watch(
             </el-row>
             <el-divider></el-divider>
         </template>
-        <template v-if="'site_id' in pipeOptions">
+        <template v-if="'site_id' in params">
             <span class="param-name"><b>На сайт</b></span>
             <el-row>
                 <el-select
-                    v-model="pipeOptions['site_id']"
+                    v-model="taskPipeData['site_id']"
                     placeholder="Выбрать сайт"
                     :disabled="!canChangeEventParams"
                     clearable

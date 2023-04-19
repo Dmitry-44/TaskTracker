@@ -60,7 +60,6 @@ const finishTask = () => {
 }
 const updatePipeData = (data: Task['pipe_data'], operId: Operation['id']) => {
   task.value['pipe_data'][operId] = data
-  console.log('task pipe data ufter update', task.value['pipe_data'])
 }
 
 onMounted(()=>{

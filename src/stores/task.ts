@@ -2,9 +2,11 @@ import { emptyTask } from '../entities/task';
 import { defineStore } from "pinia";
 import type { Task } from "@/entities/task";
 import type { Event } from '@/entities/event';
+import cloneDeep from 'lodash/cloneDeep';
+import { reactive, ref, type Ref } from 'vue';
 
 interface State {
-	tasks: Task[];
+	tasks: Ref<Task>[];
 	singleTask: Task | null;
 	activeTask: Task;
 	taskToFinish: Task|null;
@@ -22,7 +24,7 @@ export const useTaskStore = defineStore({
 		taskByEventIdHash: new Map()
 	}),
 	getters: {
-		getList: (state): Task[] => state.tasks,
+		getList: (state) => state.tasks,
 		getSingleTask: (state) => state.singleTask,
 		getActiveTask: (state) => state.activeTask,
 		getTaskToFinish: (state) => state.taskToFinish
@@ -32,7 +34,10 @@ export const useTaskStore = defineStore({
 			this.activeTask = payload;
 		},
 		setTasksList(payload: Task[]): void {
-			this.tasks = payload;
+			payload.forEach(task=>{
+				this.tasks.push(ref(task));
+			})
+			
 		},
 		setSingleTask(payload: Task | null): void {
 			this.singleTask = payload;
@@ -44,9 +49,9 @@ export const useTaskStore = defineStore({
 			this.activeTask = Object.assign(this.activeTask, task)
 		},
 		updateTask(payload: Partial<Task>): void {
-			const index = this.tasks.findIndex(task => task.id === payload.id)
-			if(index<0)return;
-			this.tasks[index]=Object.assign(this.tasks[index], payload)
+			let task = this.tasks.find(task=>task.value.id===payload.id)
+			if(!task)return;
+			task.value=Object.assign(cloneDeep(task.value), payload)
 		},
 		addNewTask(payload: Task): void {
 			this.tasks = [payload, ...this.tasks]

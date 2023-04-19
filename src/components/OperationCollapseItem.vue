@@ -32,14 +32,10 @@ const props = defineProps({
 });
 
 const taskPipeData = toRef(props, 'pipeData')
-
-console.log('props pipeData', props.pipeData);
-
 const emit = defineEmits<{
   (e: "update", value: Task['pipe_data']): void;
 }>();
 
-const pipe_data: Ref<Task['pipe_data']> = ref({})
 
 const activeTask = computed(()=> useTaskStore().getActiveTask)
 const user = useUserStore().getUser
@@ -48,53 +44,43 @@ const eventStatus = eventStatusOptions.find((ev) => props.event?.status === ev['
 const DIVISIONS_OPTIONS = useOperationStore().getDirectionOptions
 const divisionsData = useUserStore().getDivisionsData
 const USERS_OPTIONS = computed(()=>divisionsData[activeTask.value.division_id!]?.persons || [])
-
 const canChangeEventParams = computed(()=>TaskService.canChangeEventParams(activeTask.value, user))
-
-const setParams = (data: Task['pipe_data']) => {
-  pipe_data.value=Object.assign(pipe_data.value, JSON.parse(JSON.stringify(data)))
-}
-
-function optionChangeHandle(value: number) {
-    if(value===1){
-      pipe_data.value['selected_users']=[]
-      pipe_data.value['selected_divisions']=[]
-    } else if (value===2){
-      pipe_data.value['selected_users']=[]
-    } else if (value===3){
-      pipe_data.value['selected_divisions']=[]
-    }
-}
-
 const executors = ref(1)
 
+function optionChangeHandle(value: number) {
+  console.log('optionChangeHandle')
+    if(value===1){
+      delete taskPipeData.value['selected_users']
+      delete taskPipeData.value['selected_divisions']
+    } else if (value===2){
+      delete taskPipeData.value['selected_users']
+    } else if (value===3){
+      delete taskPipeData.value['selected_divisions']
+    }
+}
+
+
 onBeforeMount(()=> {
-  // pipe_data.value = JSON.parse(JSON.stringify(props.pipeData))
   if(props.taskId<0){
-      taskPipeData.value['selected_divisions'] = [],
-      taskPipeData.value['selected_users']= []
       emit("update", cloneDeep(taskPipeData.value));
   } else {
-    if(taskPipeData.value['selected_divisions'].length>0){
+    if(taskPipeData.value['selected_divisions']?.length>0){
       executors.value=2
     }
-    if(taskPipeData.value['selected_users'].length>0){
+    if(taskPipeData.value['selected_users']?.length>0){
       executors.value=3
     }
   }
+  optionChangeHandle(executors.value)
 })
 
+watch(
+  () => executors.value,
+  (newValue, oldValue) => {
+    optionChangeHandle(newValue)
+  },
+);
 
-
-// watch(
-//   () => pipe_data.value,
-//   (newPipeData, oldPipeData) => {
-//     if(JSON.parse(JSON.stringify(newPipeData)) != JSON.parse(JSON.stringify(oldPipeData))){
-//       emit("update", pipe_data.value);
-//     }
-//   },
-//   {deep: true}
-// );
 
 </script>
 <template>
@@ -148,13 +134,12 @@ onBeforeMount(()=> {
       <OperationParamsGenerator 
         :key="taskId-operation.id" 
         :operation-id="operation.id" 
-        :pipe-data="pipe_data" 
+        :pipe-data="taskPipeData" 
         :params="operation['params']"
         :can-change-event-params="canChangeEventParams"
-        @update:value="setParams" 
       />
       <el-row><b>Кто видит задачу</b></el-row>
-      <el-radio-group v-show="canChangeEventParams" v-model="executors" @change="optionChangeHandle">
+      <el-radio-group v-show="canChangeEventParams" v-model="executors">
           <el-radio :label="1">Все</el-radio>
           <el-radio :label="2">Группы пользователей</el-radio>
           <el-radio :label="3">Пользователи</el-radio>
