@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
-import { useInterfaceStore } from "@/stores/interface";
+import { useCommonStore } from "@/stores/common";
 import type{ Task } from "@/entities/task";
 import type { FilterPayload } from "@/api";
 import DetailsWindow from "../../components/DetailsWindow.vue";
@@ -16,7 +16,7 @@ import { EventStatus } from "@/entities/event";
 
 
 const taskStore = useTaskStore();
-const interfaceStore = useInterfaceStore();
+const commonStore = useCommonStore();
 const $filters = ref<typeof Filters | null>(null);
 const abortController = new AbortController();
 const abortSignal = abortController.signal;

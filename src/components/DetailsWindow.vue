@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
-import { useInterfaceStore } from "@/stores/interface";
+import { useCommonStore } from "@/stores/common";
 import { Close, Pointer, Notification, Finished, ArrowRightBold, ArrowLeftBold } from "@element-plus/icons-vue";
 import { computed, onMounted, reactive, toRaw, toRef, watch, type Ref } from "vue";
 import { ref } from "vue";
@@ -14,19 +14,19 @@ import cloneDeep from 'lodash/cloneDeep';
 
 
 const taskStore = useTaskStore();
-const interfaceStore = useInterfaceStore();
+const commonStore = useCommonStore();
 const pipeStore = usePipeStore();
 const userStore = useUserStore();
 const user = userStore.getUser;
 const TaskService = services.Task
 
 //GETTERS
-const detailWindowIsOpen = computed(() => interfaceStore.getDetailWindowIsOpen);
+const detailWindowIsOpen = computed(() => commonStore.getDetailWindowIsOpen);
 const activeTask = computed(() => taskStore.getActiveTask);
 let task = ref(cloneDeep(activeTask.value)) as Ref<Task>
 // let task = ref(structuredClone(activeTask.value)) as Ref<Task>
 const isCreatingTaskProcess = computed(
-  () => interfaceStore.isCreatingTaskProcess
+  () => commonStore.isCreatingTaskProcess
 );
 const PIPES = computed(() => pipeStore.getPipes);
 const DIVISIONS_OPTIONS = computed(()=>userStore.getDivisions)
@@ -56,7 +56,7 @@ const taskPriority = computed(
 //METHODS
 const finishTask = () => {
     taskStore.setTaskToFinish(cloneDeep(task.value))
-    interfaceStore.openFinishTaskModal()
+    commonStore.openFinishTaskModal()
 }
 const updatePipeData = (data: Task['pipe_data'], operId: Operation['id']) => {
   task.value['pipe_data'][operId] = data

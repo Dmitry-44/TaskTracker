@@ -5,7 +5,7 @@ import type { PropType } from "vue";
 import SelectOptions from "./SelectOptions.vue";
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
-import { useInterfaceStore } from "@/stores/interface";
+import { useCommonStore } from "@/stores/common";
 import { taskPriorityOptions, taskStatusOptions, type Task } from "@/entities/task";
 import { services } from "@/main";
 
@@ -29,7 +29,7 @@ const taskStore = useTaskStore();
 const task = ref(props.task);
 const readonlyTask = computed(() => task.value.status === 4);
 const userStore = useUserStore();
-const interfaceStore = useInterfaceStore();
+const commonStore = useCommonStore();
 const user = userStore.getUser;
 const activeTask = computed(()=>taskStore.getActiveTask)
 const TaskService = services.Task
@@ -52,7 +52,7 @@ const taskStatus = computed(
 //METHODS
 const finishTask = () => {
     taskStore.setTaskToFinish(Object.assign({}, task.value))
-    interfaceStore.openFinishTaskModal()
+    commonStore.openFinishTaskModal()
 }
 
 watch(

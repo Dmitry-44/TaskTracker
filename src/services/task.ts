@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus';
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
 import { isSuccessApiResponse, isResultWithPagination, type FilterPayload } from "@/api";
 import type { ITaskRepo, Task } from "@/entities/task";
-import type { ITaskStore, IInterfaceStore, IUserStore } from '@/adapters';
+import type { ITaskStore, ICommonStore, IUserStore } from '@/adapters';
 import { EventStatus, type Event } from '@/entities/event';
 import type { User } from '@/entities/user';
 import { WebSocketIsConnected } from '@/plugins/io';
@@ -13,14 +13,14 @@ import { WebSocketIsConnected } from '@/plugins/io';
 export default class TaskService {
 
 	taskRepo;
-	interfaceStore;
+	commonStore;
 	taskStore;
 	userStore;
 
-	constructor(taskRepo: ITaskRepo, taskStore: ITaskStore, interfaceStore: IInterfaceStore, userStore: IUserStore) {
+	constructor(taskRepo: ITaskRepo, taskStore: ITaskStore, commonStore: ICommonStore, userStore: IUserStore) {
 		this.taskRepo = taskRepo;
 		this.taskStore = taskStore;
-		this.interfaceStore=interfaceStore;
+		this.commonStore=commonStore;
 		this.userStore = userStore;
 	}
 
@@ -229,7 +229,7 @@ export default class TaskService {
 		const activeTask = this.taskStore.getActiveTask()
 		if (
 			activeTask?.id == payload?.id &&
-			!this.interfaceStore.getIsCreatingTaskProcess()
+			!this.commonStore.getIsCreatingTaskProcess()
 		)
 			return;
 		payload  
@@ -239,26 +239,26 @@ export default class TaskService {
 
 	clickTask(task: Task) {
 		this.taskStore.setActiveTask(task)
-		this.interfaceStore.toggleCreatingTaskProcess(false)
-		this.interfaceStore.toggleDetailsWindow(true)
+		this.commonStore.toggleCreatingTaskProcess(false)
+		this.commonStore.toggleDetailsWindow(true)
 	}
 
 	clickOutsideTaskCard(){
-		this.interfaceStore.toggleDetailsWindow(false)
-		this.interfaceStore.toggleCreatingTaskProcess(false)
+		this.commonStore.toggleDetailsWindow(false)
+		this.commonStore.toggleCreatingTaskProcess(false)
 		this.taskStore.setActiveTask(Object.assign({},emptyTask))
 	}
 
 	createNewTask(){
-		this.interfaceStore.toggleCreatingTaskProcess(true)
+		this.commonStore.toggleCreatingTaskProcess(true)
 		this.taskStore.setActiveTask(Object.assign({},emptyTask))
-		this.interfaceStore.toggleDetailsWindow(true)
+		this.commonStore.toggleDetailsWindow(true)
 	}
 
 	closeDetailWindow(){
-		this.interfaceStore.toggleDetailsWindow(false),
+		this.commonStore.toggleDetailsWindow(false),
 		this.setActiveTask(Object.assign({},emptyTask)),
-		this.interfaceStore.toggleCreatingTaskProcess(false)
+		this.commonStore.toggleCreatingTaskProcess(false)
 	}
 
 	openTaskInNewTab(task: Task){
@@ -316,7 +316,7 @@ export default class TaskService {
 					return false
 				}
 				this.taskStore.setTaskToFinish(Object.assign({}, task))
-    			this.interfaceStore.openFinishTaskModal()
+    			this.commonStore.openFinishTaskModal()
 				return true
 				break;
 			default:

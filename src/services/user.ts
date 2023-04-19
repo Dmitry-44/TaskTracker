@@ -6,19 +6,19 @@ import { envConfig } from '@/plugins/envConfig';
 import type { NavigationGuardNext } from 'vue-router';
 import { services } from "@/main";
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
-import type { IInterfaceStore, IUserStore } from '@/adapters';
+import type { ICommonStore, IUserStore } from '@/adapters';
 
 
 export default class UserService {
 
 	userRepo;
 	userStore;
-	interfaceStore;
+	commonStore;
 
-	constructor(userRepo: IUserRepo, userStore: IUserStore, interfaceStore: IInterfaceStore) {
+	constructor(userRepo: IUserRepo, userStore: IUserStore, commonStore: ICommonStore) {
 		this.userRepo = userRepo;
 		this.userStore = userStore;
-		this.interfaceStore = interfaceStore;
+		this.commonStore = commonStore;
 	}
 
 	async checkAuth(): Promise<boolean> {
@@ -87,7 +87,7 @@ export default class UserService {
 	initAuthMiddleware() {
 		const COOKIE_LIFETIME = 24 * 60 * 60 * 1000; //ms
 		router.beforeEach((to, from, next) => {
-			this.interfaceStore.showGlobalLoader()
+			this.commonStore.showGlobalLoader()
 			if (to.query["auth"]) {
 				console.log("cookie exist");
 				document.cookie = `connect.sid=${to.query["auth"]};path=/;expires=${new Date(Date.now() + COOKIE_LIFETIME).toUTCString()}`;
@@ -104,7 +104,7 @@ export default class UserService {
 					}
 				});
 			} else {
-				this.interfaceStore.hideGlobalLoader()
+				this.commonStore.hideGlobalLoader()
 				next();
 			}
 		});
@@ -123,7 +123,7 @@ export default class UserService {
 				break;
 			}
 		}
-		this.interfaceStore.hideGlobalLoader()
+		this.commonStore.hideGlobalLoader()
 		return access ? next() : next({ path: "401" });
 	}
 }
