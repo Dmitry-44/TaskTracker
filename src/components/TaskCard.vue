@@ -243,33 +243,16 @@ watch(
 @keyframes card-pulse 
   0% 
     transform: scale(1)
-    box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.4)
-    // transform: translateX(0)
-
+    outline: 0 0 0 0 rgba(0, 255, 0, 0.4)
+    outline: 0px ridge rgba(0, 255, 0, 0.4)
   25% 
-    box-shadow: 0 0 0 5px rgba(0, 255, 0, 0.2)
-    // transform: translateX(-3px)
-
-
+    outline: 5px ridge rgba(0, 255, 0, 0.4)
   50%
-    box-shadow: 0 0 0 5px rgba(0, 255, 0, 0)
-    transform: scale(1.01)
-    // transform: translateX(0)
-
-  51%
-    // box-shadow: 0 0 0 10px rgba(0, 255, 0, 0.4)
-
-  75%
-    // box-shadow: 0 0 0 10px rgba(0, 255, 0, 0.2)
-    // transform: translateX(3px)
-
-  
+    outline: 0px ridge rgba(0, 255, 0, 0.4)
+    transform: scale(1.005)
   100% 
-    // box-shadow: 0 0 0 10px rgba(0, 255, 0, 0)
     transform: scale(1)
-    // transform: translateX(0)
 
-    
 .card .menu
     margin: 8px
     position: absolute

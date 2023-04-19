@@ -168,7 +168,7 @@ const setDefaultSort = () => {
         max-height: 100%
         overflow-y: auto
         overflow-x: hidden
-        padding: 0px 4px
+        padding: 5px
         margin-top: 20px
 
 .kanban-column .column-button-footer
