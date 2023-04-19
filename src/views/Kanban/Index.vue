@@ -10,8 +10,6 @@ import Filters from "../../components/Filters.vue";
 import KanbanColumn from "@/components/KanbanColumn.vue";
 import { services } from "@/main";
 import FinishTaskModal from "@/components/FinishTaskModal.vue";
-import type { User } from "@/entities/user";
-import { ElMessage } from "element-plus";
 import { EventStatus } from "@/entities/event";
 
 
@@ -22,7 +20,6 @@ const abortController = new AbortController();
 const abortSignal = abortController.signal;
 const TaskService = services.Task
 const user = useUserStore().getUser;
-const dialogFinishTaskIsOpen = ref(false)
 
 //GETTERS
 const tasks = computed(() => taskStore.getList);
