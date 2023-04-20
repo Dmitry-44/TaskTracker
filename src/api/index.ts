@@ -1,3 +1,4 @@
+import type { Event } from "@/entities/event";
 import type { Task } from "@/entities/task";
 import type { User } from "@/entities/user";
 
@@ -47,6 +48,16 @@ interface FilterPayload {
 	};
 }
 
+
+type WSTaskChannelMessage = 
+| {type: WSEvents.TASK_CREATE, data: Task} 
+| {type: WSEvents.TASK_UPDATE, data: Partial<Task>} 
+| {type: WSEvents.TASK_STATUS_UPDATE, data: {id: Task['id'], status: Task['status']}}
+| {type: WSEvents.EVENT_CREATE, data: Event} 
+| {type: WSEvents.EVENT_UPDATE, data: Partial<Event>}
+| {type: WSEvents.EVENT_STATUS_UPDATE, data: {task_id: Task['id'], id: Event['id'], status: Event['status'] }} 
+
+
 export const enum WSEvents {
 	TASK_CREATE = 'task:create',
 	TASK_UPDATE = 'task:update',
@@ -56,4 +67,4 @@ export const enum WSEvents {
 	EVENT_STATUS_UPDATE = 'event:status_update',
 }
 
-export type { ApiResponse, SuccessApiResponse, FailureApiResponse, FilterPayload, UserResponse };
+export type { ApiResponse, SuccessApiResponse, FailureApiResponse, FilterPayload, UserResponse, WSTaskChannelMessage };
