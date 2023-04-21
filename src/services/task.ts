@@ -6,7 +6,7 @@ import { isSuccessApiResponse, isResultWithPagination, type FilterPayload } from
 import type { ITaskRepo, Task } from "@/entities/task";
 import type { ITaskStore, ICommonStore, IUserStore } from '@/adapters';
 import { EventStatus, type Event } from '@/entities/event';
-import type { User } from '@/entities/user';
+import type { Division, User } from '@/entities/user';
 import { WebSocketIsConnected } from '@/plugins/io';
 
 
@@ -122,10 +122,6 @@ export default class TaskService {
 						duration: 2000,
 						showClose: true,
 					});
-					// taskLastEvent.status=this.#EVENT_BACKLOG_STATUS
-					// taskLastEvent.u_id=user.id
-					// this.taskStore.updateTask(task)
-					// this.taskStore.setActiveTask(task)
 					return true;
 				} else {
 					return errVueHandler(respdata.error!);
@@ -431,6 +427,10 @@ export default class TaskService {
 		//если у меня есть право
 		// && user.rights['tt_task_accept']>=1
 		return task.id<0 || task.created_by===user.id 
+	}
+	canChangeEventExecutors(division: Division, user: User): boolean {
+		//TO DO + право пользователя на выбор исполнителя
+		return division?.ttrace_ids?.includes(user.selected_group)
 	}
 
 	clearTask(){

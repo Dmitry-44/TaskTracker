@@ -27,12 +27,10 @@ const props = defineProps({
 });
 
 const taskStore = useTaskStore();
-const task = ref(props.task);
-const readonlyTask = computed(() => task.value.status === 4);
+const readonlyTask = computed(() => props.task.status === 4);
 const userStore = useUserStore();
 const commonStore = useCommonStore();
 const user = userStore.getUser;
-const activeTask = computed(()=>taskStore.getActiveTask)
 const TaskService = services.Task
 // const DIVISIONS_OPTIONS = computed(()=>userStore.getDivisions)
 
@@ -40,10 +38,10 @@ const selectMore = ref<any | HTMLInputElement>(null);
 const taskCardElement = ref<any | HTMLInputElement>(null);
 
 const taskPriority = computed(
-  () => taskPriorityOptions.find((v) => v['id'] === task.value.priority)
+  () => taskPriorityOptions.find((v) => v['id'] === props.task.priority)
 );
 const taskStatus = computed(
-  () => taskStatusOptions.find((v) => v['id'] === task.value.status)
+  () => taskStatusOptions.find((v) => v['id'] === props.task.status)
 );
 // const taskDivision = computed(
 //   () => DIVISIONS_OPTIONS.value.find((division) => division?.id === task.value?.division_id)
@@ -52,38 +50,34 @@ const taskStatus = computed(
 
 //METHODS
 const finishTask = () => {
-    taskStore.setTaskToFinish(Object.assign({}, task.value))
+    taskStore.setTaskToFinish(Object.assign({}, props.task))
     commonStore.openFinishTaskModal()
 }
 
 watch(
-  () => task.value,
+  () => props.task,
   (newVal, oldVal) => {
     console.log({'newVal': newVal, 'oldVal': oldVal})
-    console.log('updatedTasksIds', updatedTasksIds)
     if( updatedTasksIds.has(newVal.id) ) {
       taskCardElement.value?.classList.add('card-update-anim')
       setTimeout(()=>{
         taskCardElement.value?.classList.remove('card-update-anim')
-      },2000)
-      console.log('URAAAAAAAA')
+      },3000)
     }
-    if(activeTask.value.id===newVal.id){
-      taskCardElement.value?.classList.add('card-update-anim')
-      return;
-    }
-    // setTimeout(()=>{
-    //   taskCardElement.value?.classList.remove('card-update-anim')
-    // },1000)
   },
   {
     deep: true,
   }
 );
 
-// onMounted(()=>{
-//   taskCardElement.value?.classList.add('card-update-anim')
-// })
+onMounted(()=>{
+  if( updatedTasksIds.has(props.task.id) ) {
+      taskCardElement.value?.classList.add('card-update-anim')
+      setTimeout(()=>{
+        taskCardElement.value?.classList.remove('card-update-anim')
+      },3000)
+    }
+})
 
 </script>
 

@@ -33,7 +33,7 @@ const DIVISIONS_OPTIONS = computed(()=>userStore.getDivisions)
 
 //VARIABLES
 const LOADING = ref(false);
-const initialData = ref("");
+const initialData = ref(JSON.stringify(activeTask.value));
 const dataWasChanged = computed(() => {
   const updatedData = JSON.parse(JSON.stringify(task.value));
   return initialData.value != JSON.stringify(updatedData);
@@ -52,6 +52,7 @@ const taskStatus = computed(
 const taskPriority = computed(
   () => taskPriorityOptions.find((v) => v['id'] === task.value.priority)
 );
+const canChangeEventExecutors = computed(()=> TaskService.canChangeEventExecutors(taskDivision.value!, user))
 
 //METHODS
 const finishTask = () => {
@@ -71,7 +72,7 @@ watch(
   (newVal, oldVal) => {
     if(newVal != oldVal){
       task.value = cloneDeep(newVal)
-      initialData.value=JSON.stringify(task.value)
+      initialData.value=JSON.stringify(newVal)
     }
     console.log({'activeTask': activeTask.value, 'task': task.value})
   }
@@ -311,6 +312,7 @@ const save = () => {
                 :event="task?.event_entities!.find(event=>event?.operation_id===operation?.id) || null"
                 :task-id="task.id"
                 :pipe-data="task.pipe_data[operation.id]"
+                :can-select-executors="canChangeEventExecutors"
                 @update="updatePipeData($event, operation.id)"
               />
             </template>

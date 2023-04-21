@@ -26,13 +26,13 @@ const tasks = computed(() => taskStore.getList);
 const LOADING = ref(false);
 
 const tasksToTake = computed(() =>
-  tasks.value.filter((task) => task.value.event_entities![task.value.event_entities!.length-1]?.status === 1)
+  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1]?.status === 1)
 );
 const tasksInProcess = computed(() =>
-  tasks.value.filter((task) => task.value.event_entities![task.value.event_entities!.length-1]?.status === 2)
+  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1]?.status === 2)
 );
 const tasksFinished = computed(() =>
-  tasks.value.filter((task) => task.value.event_entities![task.value.event_entities!.length-1]?.status === 3)
+  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1]?.status === 3)
 );
 
 
@@ -107,7 +107,7 @@ const clearDragAndDrop = () => {
         ref="areaCreated"
       >
         <KanbanColumn
-          :tasks="tasksToTake"
+          :tasks-list="tasksToTake"
           title="К исполнению"
           :add-New-Task="true"
           :is-Draggable="true"
@@ -124,7 +124,7 @@ const clearDragAndDrop = () => {
         ref="areaInProgress"
       >
         <KanbanColumn
-          :tasks="tasksInProcess"
+          :tasks-list="tasksInProcess"
           title="В работе"
           :is-Draggable="true"
           :loading="LOADING"
@@ -140,7 +140,7 @@ const clearDragAndDrop = () => {
         ref="areaCompleted"
       >
         <KanbanColumn
-          :tasks="tasksFinished"
+          :tasks-list="tasksFinished"
           title="Завершенные"
           :loading="LOADING"
           key="3"

@@ -10,8 +10,8 @@ import { services } from "@/main";
 
 
 const props = defineProps({
-  tasks: {
-    type: Object as PropType<Ref<Task>[]>,
+  tasksList: {
+    type: Object as PropType<Task[]>,
     default: [],
   },
   title: {
@@ -45,8 +45,8 @@ const activeTask = computed(() => taskStore.getActiveTask);
 const LOADING = toRef(props, "loading");
 const searchValue = ref("");
 
-// const tasks = toRef(props, "tasks");
-// // const tasks = ref<Task[]>([]);
+const tasks = toRef(props, "tasksList");
+// const tasks = ref<Task[]>([]);
 
 // watch(
 //   () => props.tasks,
@@ -59,10 +59,10 @@ const searchValue = ref("");
 //METHODS
 
 const doSearch = () => {
-  // tasks.value = TaskService.searchTasks(props.tasks, searchValue.value)
+  tasks.value = TaskService.searchTasks(props.tasksList, searchValue.value)
 };
 const setDefaultSort = () => {
-  // tasks.value = JSON.parse(JSON.stringify(props.tasks));
+  tasks.value = JSON.parse(JSON.stringify(props.tasksList));
 };
 
 </script>
@@ -115,7 +115,7 @@ const setDefaultSort = () => {
           :draggable="isDraggable"
           :task="task"
           :active="task.id === activeTask?.id ? true : false"
-          @click.stop="TaskService.clickTask(task.value)"
+          @click.stop="TaskService.clickTask(task)"
           @dragstart="emit('taskDragStart', $event, task)"
         />
         <el-button
@@ -168,7 +168,7 @@ const setDefaultSort = () => {
         max-height: 100%
         overflow-y: auto
         overflow-x: hidden
-        padding: 5px
+        padding: 5px 10px 5px 5px
         margin-top: 20px
 
 .kanban-column .column-button-footer

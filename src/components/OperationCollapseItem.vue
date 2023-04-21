@@ -28,6 +28,10 @@ const props = defineProps({
   pipeData: {
     type: Object as PropType<Task['pipe_data']>,
     default: {}
+  },
+  canSelectExecutors: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -84,13 +88,13 @@ watch(
 
 </script>
 <template>
-  <el-collapse-item>
+  <el-collapse-item class="collapse-item">
     <template #title>
       <div class="collapse-item-header">
         <el-icon :color="eventStatus?.['color']">
           <SuccessFilled />
         </el-icon>
-        <span class="ml-1">{{ operation?.name }}</span>
+        <span class="ml-1 operation-item-name">{{ operation?.name.toUpperCase() }}</span>
       </div>
     </template>
     <div class="row" v-if="event?.status">
@@ -138,6 +142,7 @@ watch(
         :params="operation['params']"
         :can-change-event-params="canChangeEventParams"
       />
+      <template v-if="canSelectExecutors">
       <el-row><b>Кто видит задачу</b></el-row>
       <el-radio-group v-show="canChangeEventParams" v-model="executors">
           <el-radio :label="1">Все</el-radio>
@@ -184,10 +189,13 @@ watch(
           />
           </el-select>
       </el-row>
+      </template>
     </div>
   </el-collapse-item>
 </template>
 <style lang="sass">
+.collapse-item.is-active
+  border-bottom: 1px solid black
 .body .content
     display: flex
     flex-direction: column
