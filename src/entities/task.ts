@@ -32,16 +32,16 @@ export const emptyTask: Readonly<Task> = {
 
 export enum TaskStatus {
 	CREATED = 1,
-	READY_TO_PROGRESS = 2,
-	IN_PROGRESS = 3,
-	COMPLETED = 4,
+	READY_TO_PROGRESS,
+	IN_PROGRESS,
+	COMPLETED,
 }
 
 export enum TaskPriority {
 	EXTRA = 1,
-	URGENT = 2,
-	BASIC = 3,
-	LOW = 4,
+	URGENT,
+	BASIC,
+	LOW,
 }
 
 export const taskPriorityOptions: Readonly<Record<string, any>[]> = [
@@ -59,8 +59,6 @@ export const taskStatusOptions: Readonly<Record<string, any>[]> = [
 ]
 
 export const taskDateFormat = (date: DateTimeStamp) => new Date(date * 1000).toLocaleString()
-
-const DAY: DateTimeStamp = 24 * 3600
 
 export const taskTimeOptions = [
 	{ value: 15*60*100, time: '15 мин'},
