@@ -106,7 +106,7 @@ const setDefaultSort = () => {
         <template #template>
           <el-skeleton-item
             variant="rect"
-            style="width: 300px; height: calc(100vh - 230px)"
+            style="width: 300px; height: calc(100vh - 240px)"
           />
         </template>
         <TaskCard
