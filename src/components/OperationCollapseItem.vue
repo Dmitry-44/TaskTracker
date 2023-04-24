@@ -1,15 +1,11 @@
 <script setup lang="ts">
 import { eventStatusOptions, type Event } from "@/entities/event";
 import type { Operation } from "@/entities/operation";
-import { emptyTask, taskDateFormat, type Task } from "@/entities/task";
-import { useOperationStore } from "@/stores/operation";
+import { taskDateFormat, type Task } from "@/entities/task";
 import { useUserStore } from "@/stores/user";
-import { useTaskStore } from "@/stores/task";
 import { computed, onBeforeMount, onBeforeUnmount, ref, toRef, watch, type PropType, type Ref } from "vue";
 import OperationParamsGenerator from "./OperationParamsGenerator.vue";
-import { services } from "@/main";
 import cloneDeep from 'lodash/cloneDeep';
-// import SelectExecutor from "./SelectExecutor.vue";
 
 const props = defineProps({
   operation: {
@@ -25,6 +21,10 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  activeDivisionId: {
+    type: Number,
+    default: -1,
+  },
   pipeData: {
     type: Object as PropType<Task['pipe_data']>,
     default: {}
@@ -32,6 +32,10 @@ const props = defineProps({
   canSelectExecutors: {
     type: Boolean,
     default: false
+  },
+  canChangeEventParams: {
+    type: Boolean,
+    default: true,
   }
 });
 
@@ -41,14 +45,11 @@ const emit = defineEmits<{
 }>();
 
 
-const activeTask = computed(()=> useTaskStore().getActiveTask)
-const user = useUserStore().getUser
-const TaskService = services.Task
 const eventStatus = eventStatusOptions.find((ev) => props.event?.status === ev['id']);
-const DIVISIONS_OPTIONS = useOperationStore().getDirectionOptions
+//toDO
+const DIVISIONS_OPTIONS: any[] = []
 const divisionsData = useUserStore().getDivisionsData
-const USERS_OPTIONS = computed(()=>divisionsData[activeTask.value.division_id!]?.persons || [])
-const canChangeEventParams = computed(()=>TaskService.canChangeEventParams(activeTask.value, user))
+const USERS_OPTIONS = computed(()=>divisionsData[props.activeDivisionId]?.persons || [])
 const executors = ref(1)
 
 function optionChangeHandle(value: number) {
@@ -195,6 +196,7 @@ watch(
 </template>
 <style lang="sass">
 .collapse-item.is-active
+  transition: border .3s ease-in
   border-bottom: 1px solid black
 .body .content
     display: flex

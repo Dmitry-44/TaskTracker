@@ -8,7 +8,7 @@ import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
 import { services } from "@/main";
-import { taskStatusOptions, taskPriorityOptions, type Task } from "@/entities/task"
+import { taskStatusOptions, taskPriorityOptions, type Task, emptyTask } from "@/entities/task"
 import type { Operation } from "@/entities/operation";
 import cloneDeep from 'lodash/cloneDeep';
 
@@ -24,6 +24,7 @@ const TaskService = services.Task
 const detailWindowIsOpen = computed(() => commonStore.getDetailWindowIsOpen);
 const activeTask = computed(() => taskStore.getActiveTask);
 let task = ref(cloneDeep(activeTask.value)) as Ref<Task>
+const canChangeEventParams = computed(()=>TaskService.canChangeEventParams(task.value, user))
 // let task = ref(structuredClone(activeTask.value)) as Ref<Task>
 const isCreatingTaskProcess = computed(
   () => commonStore.isCreatingTaskProcess
@@ -61,6 +62,10 @@ const finishTask = () => {
 }
 const updatePipeData = (data: Task['pipe_data'], operId: Operation['id']) => {
   task.value['pipe_data'][operId] = data
+}
+const clearDivisionId = () => {
+  task.value.division_id=undefined
+  task.value.pipe_id=undefined
 }
 
 onMounted(()=>{
@@ -254,6 +259,7 @@ const save = () => {
               v-if="TaskService.canChangeTaskDivision(task, user)"
               v-model="task.division_id"
               clearable
+              @clear="clearDivisionId"
               placeholder="Назначить подразделение"
             >
               <el-option
@@ -301,8 +307,8 @@ const save = () => {
           </div>
         </div>
         <div v-if="task.pipe_id">
-          <span class="left mt-2">Операции</span>
-          <el-collapse>
+          <span class="left">Операции</span>
+          <el-collapse class="mt-2">
             <template
               v-for="operation in taskPipe?.operation_entities"
               :key="`${task.id}-${operation?.id}`"
@@ -313,6 +319,8 @@ const save = () => {
                 :task-id="task.id"
                 :pipe-data="task.pipe_data[operation.id]"
                 :can-select-executors="canChangeEventExecutors"
+                :can-change-event-params="canChangeEventParams"
+                :active-division-id="task.division_id"
                 @update="updatePipeData($event, operation.id)"
               />
             </template>

@@ -30,7 +30,6 @@ const taskPipeData = toRef(props, 'pipeData')
 const DIRECTION_OPTIONS = useOperationStore().getDirectionOptions
 const SITE_OPTIONS = useSitesStore().getList
 
-
 const clearSiteId = () => {
     console.log('ssssss clear!!')
     delete taskPipeData.value['time']

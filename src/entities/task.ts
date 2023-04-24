@@ -1,7 +1,14 @@
-import type { Operation } from '@/entities/operation';
+import { ElMessage } from 'element-plus';
 import type { Event } from "@/entities/event";
 import type { FilterPayload, ApiResponse } from "@/api";
 
+
+const TASK_TITLE_MIN_LENGTH = 5
+const TASK_TITLE_MAX_LENGTH = 200
+const TITLE_IS_REQUARED = true
+const DIVISION_IS_REQUARED = true
+//пока бэк не умеет сохранять без пайпа
+const PIPE_IS_REQUARED = true
 
 interface Task {
 	id: UniqueId;
@@ -24,7 +31,8 @@ interface Task {
 export const emptyTask: Readonly<Task> = {
 	id: -1,
 	title: "",
-	// division_id: -1,
+	division_id: undefined,
+	pipe_id: undefined,
 	text: "",
 	event_entities: [],
 	pipe_data: {}
@@ -75,21 +83,82 @@ export const taskTimeOptions = [
 	{ value: 2*24*60*60*100, time: '2 суток'},
 	{ value: 1*7*24*60*60*100, time: '1 неделя'},
 ]
-export const getPipeDataFromOperationParams = (params: Operation['params']): Task['pipe_data'] => {
-	let pipeData: Task['pipe_data'] = {}
-	if('direction' in params){
-		pipeData['direction']=0
+
+export const validateTask = (task: Partial<Task>): boolean => {
+	if(TITLE_IS_REQUARED && task.title!.length===0){
+		ElMessage({
+			message: "У задачи должен быть заголовок!",
+			type: "info",
+			center: true,
+			showClose: true,
+		});
+		return false
 	}
-	if('time' in params){
-		pipeData['time']=0
+	if(task.title!.length<TASK_TITLE_MIN_LENGTH){
+		ElMessage({
+			message: "Минимальная длина заголовка 5 символов",
+			type: "info",
+			center: true,
+			showClose: true,
+		});
+		return false
 	}
-	if('site_ids' in params){
-		pipeData['site_ids']=[]
+	if(task.title!.length>TASK_TITLE_MAX_LENGTH){
+		ElMessage({
+			message: "Заголовок не должен превышать 200 символов",
+			type: "info",
+			center: true,
+			showClose: true,
+		});
+		return false
 	}
-	if('site_id' in params){
-		pipeData['site_id']=null
+	console.log('task', task)
+	if(DIVISION_IS_REQUARED && task.division_id === undefined){
+		ElMessage({
+			message: "У задачи не выбрано подразделение!",
+			type: "info",
+			center: true,
+			showClose: true,
+		});
+		return false
 	}
-	return pipeData
+	if(task.pipe_id!<0){
+		ElMessage({
+			message: "Ошибка валидации пайплайна",
+			type: "info",
+			center: true,
+			showClose: true,
+		});
+		return false
+	}
+	if(PIPE_IS_REQUARED && task.pipe_id === undefined){
+		ElMessage({
+			message: "У задачи не задан пайплайн!",
+			type: "info",
+			center: true,
+			showClose: true,
+		});
+		return false
+	}
+	if(task.priority!<0){
+		ElMessage({
+			message: "Ошибка валидации приоритета",
+			type: "info",
+			center: true,
+			showClose: true,
+		});
+		return false
+	}
+	if(task.status!<0){
+		ElMessage({
+			message: "Ошибка валидации статуса",
+			type: "info",
+			center: true,
+			showClose: true,
+		});
+		return false
+	}
+	return true
 }
 
 interface ITaskRepo {
@@ -101,3 +170,20 @@ interface ITaskRepo {
 }
 
 export type { Task, ITaskRepo };
+
+// export const getPipeDataFromOperationParams = (params: Operation['params']): Task['pipe_data'] => {
+// 	let pipeData: Task['pipe_data'] = {}
+// 	if('direction' in params){
+// 		pipeData['direction']=0
+// 	}
+// 	if('time' in params){
+// 		pipeData['time']=0
+// 	}
+// 	if('site_ids' in params){
+// 		pipeData['site_ids']=[]
+// 	}
+// 	if('site_id' in params){
+// 		pipeData['site_id']=null
+// 	}
+// 	return pipeData
+// }

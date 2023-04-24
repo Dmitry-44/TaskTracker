@@ -1,5 +1,5 @@
 import router from '@/router';
-import { TaskStatus, emptyTask } from '@/entities/task';
+import { TaskStatus, emptyTask, validateTask } from '@/entities/task';
 import { ElMessage } from 'element-plus';
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
 import { isSuccessApiResponse, isResultWithPagination, type FilterPayload } from "@/api";
@@ -55,7 +55,11 @@ export default class TaskService {
 			.catch(err => errRequestHandler(err))
 	}
 
-	upsertTask(payload: Partial<Task>): Promise<boolean> {
+	async upsertTask(payload: Partial<Task>): Promise<boolean> {
+		const taskIsValid = validateTask(payload)
+		if(!taskIsValid){
+			return taskIsValid
+		};
 		const msg = ElMessage({
 			message: "Сохраняю задачу..",
 			type: "success",
