@@ -7,8 +7,8 @@ type State = {
 	showFinishTaskModal: boolean;
 };
 
-export const useInterfaceStore = defineStore({
-	id: "interface",
+export const useCommonStore = defineStore({
+	id: "common",
 	state: (): State => ({
 		detailWindowIsOpen: false,
 		isCreatingTaskProcess: false,

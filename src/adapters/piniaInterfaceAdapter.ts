@@ -1,38 +1,38 @@
-import { useInterfaceStore } from './../stores/interface';
-import type { IInterfaceStore } from '.';
+import { useCommonStore } from '../stores/common';
+import type { ICommonStore } from '.';
 
 
-export default class PiniaInterfaceAdapter implements IInterfaceStore {
+export default class PiniaInterfaceAdapter implements ICommonStore {
 
-	interfaceStore; 
+	commonStore; 
 
 	constructor(){
-		this.interfaceStore = useInterfaceStore();
+		this.commonStore = useCommonStore();
 	}
 
 	getGlobalLoading(): boolean {
-		return this.interfaceStore.getGlobalLoading;
+		return this.commonStore.getGlobalLoading;
 	}
 	getIsCreatingTaskProcess(): boolean{
-		return this.interfaceStore.getIsCreatingTaskProcess;
+		return this.commonStore.getIsCreatingTaskProcess;
 	}
     getDetailWindowIsOpen(): boolean {
-        return this.interfaceStore.getDetailWindowIsOpen;
+        return this.commonStore.getDetailWindowIsOpen;
     }
 	toggleDetailsWindow(bool: boolean){
-    	 this.interfaceStore.toggleDetailsWindow(bool);
+    	 this.commonStore.toggleDetailsWindow(bool);
     }
 	toggleCreatingTaskProcess(bool: boolean){
-        this.interfaceStore.toggleCreatingTaskProcess(bool);
+        this.commonStore.toggleCreatingTaskProcess(bool);
     }
 	showGlobalLoader(): void {
-		this.interfaceStore.toggleGlobalLoading(true);
+		this.commonStore.toggleGlobalLoading(true);
 	}
 	hideGlobalLoader(): void {
-		this.interfaceStore.toggleGlobalLoading(false);
+		this.commonStore.toggleGlobalLoading(false);
 	}
 	openFinishTaskModal(): void {
-		this.interfaceStore.openFinishTaskModal()
+		this.commonStore.openFinishTaskModal()
 	}
 
 }

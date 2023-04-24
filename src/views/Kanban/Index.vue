@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
-import { useInterfaceStore } from "@/stores/interface";
+import { useCommonStore } from "@/stores/common";
 import type{ Task } from "@/entities/task";
 import type { FilterPayload } from "@/api";
 import DetailsWindow from "../../components/DetailsWindow.vue";
@@ -10,19 +10,18 @@ import Filters from "../../components/Filters.vue";
 import KanbanColumn from "@/components/KanbanColumn.vue";
 import { services } from "@/main";
 import FinishTaskModal from "@/components/FinishTaskModal.vue";
-import type { User } from "@/entities/user";
-import { ElMessage } from "element-plus";
 import { EventStatus } from "@/entities/event";
 
 
+
 const taskStore = useTaskStore();
-const interfaceStore = useInterfaceStore();
+const commonStore = useCommonStore();
 const $filters = ref<typeof Filters | null>(null);
 const abortController = new AbortController();
 const abortSignal = abortController.signal;
 const TaskService = services.Task
 const user = useUserStore().getUser;
-const dialogFinishTaskIsOpen = ref(false)
+const THROTTLE_DURATION = 100 
 
 //GETTERS
 const tasks = computed(() => taskStore.getList);
@@ -54,43 +53,40 @@ const filterUpdate = async (payload: FilterPayload) => {
 onBeforeUnmount(() => abortController.abort());
 
 //DRAG AND DROP
-const transferTask = ref<Task | null>(null);
 const areaCreated = ref<HTMLDivElement|null>(null);
 const areaInProgress = ref<HTMLDivElement|null>(null);
 const areaCompleted = ref<HTMLDivElement|null>(null);
-const areaParams = new Map([
-  [1, { areaRef: areaCreated, status: 1 }],
-  [2, { areaRef: areaInProgress, status: 2 }],
-  [3, { areaRef: areaCompleted, status: 3 }],
-]);
+
 const stopAll = (e: DragEvent) => {
   e.preventDefault();
   e.stopPropagation();
 };
-const dragstartHandler = (ev: DragEvent, task: Task) => {
-  transferTask.value = task;
-  ev.dataTransfer!.effectAllowed = "link";
+const dragstartHandler = (event: DragEvent, task: Task) => {
+  event.dataTransfer?.setData('text/plain', JSON.stringify(task));
+  event.dataTransfer!.effectAllowed = "link";
 };
-const dragoverHandler = (ev: DragEvent, areaId: number): void => {
-  stopAll(ev);
-  const taskLastevent = transferTask.value?.event_entities![transferTask.value?.event_entities!.length-1];
-  const area = areaParams.get(areaId);
-  if (taskLastevent && taskLastevent.status === area!.status)return;
-  area?.areaRef.value?.classList.add("dragOver");
+const dragoverHandler = (event: DragEvent, areElement: HTMLElement): void => {
+  stopAll(event);
+  areElement.classList.add("dragOver")
 };
 const dragleaveHandler = (ev: DragEvent) => {
   stopAll(ev);
   clearDragAndDrop()
 };
-const dropHandler = async (newStatus: number) => {
-  TaskService.dragAndDropTask(transferTask.value!, newStatus, user)
-  clearDragAndDrop()
+const dropHandler = async (event: DragEvent, newStatus: number) => {
+  const task = JSON.parse(event.dataTransfer?.getData('text/plain')||'') as Task;
+  if(!!task && typeof task === 'object') {
+    TaskService.dragAndDropTask(task, newStatus, user)
+    clearDragAndDrop()
+  }
 };
 const clearDragAndDrop = () => {
-  // transferTask.value=null;
-  areaCreated.value?.classList.remove("dragOver");
-  areaInProgress.value?.classList.remove("dragOver");
-  areaCompleted.value?.classList.remove("dragOver");
+  setTimeout(()=> {
+    areaCreated.value?.classList.remove("dragOver");
+    areaInProgress.value?.classList.remove("dragOver");
+    areaCompleted.value?.classList.remove("dragOver");
+  }, THROTTLE_DURATION)
+
 }
 </script>
 <template>
@@ -104,13 +100,13 @@ const clearDragAndDrop = () => {
       <DetailsWindow />
       <div
         class="draggable-area"
-        @dragover="dragoverHandler($event, 1)"
+        @dragover="dragoverHandler($event, areaCreated!)"
         @dragleave="dragleaveHandler($event)"
-        @drop="dropHandler(EventStatus.CREATED)"
+        @drop="dropHandler($event, EventStatus.CREATED)"
         ref="areaCreated"
       >
         <KanbanColumn
-          :tasks="tasksToTake"
+          :tasks-list="tasksToTake"
           title="К исполнению"
           :add-New-Task="true"
           :is-Draggable="true"
@@ -121,13 +117,13 @@ const clearDragAndDrop = () => {
       </div>
       <div
         class="draggable-area"
-        @dragover="dragoverHandler($event, 2)"
+        @dragover="dragoverHandler($event, areaInProgress!)"
         @dragleave="dragleaveHandler($event)"
-        @drop="dropHandler(EventStatus.IN_PROGRESS)"
+        @drop="dropHandler($event, EventStatus.IN_PROGRESS)"
         ref="areaInProgress"
       >
         <KanbanColumn
-          :tasks="tasksInProcess"
+          :tasks-list="tasksInProcess"
           title="В работе"
           :is-Draggable="true"
           :loading="LOADING"
@@ -137,13 +133,13 @@ const clearDragAndDrop = () => {
       </div>
       <div
         class="draggable-area"
-        @dragover="dragoverHandler($event, 3)"
+        @dragover="dragoverHandler($event, areaCompleted!)"
         @dragleave="dragleaveHandler($event)"
-        @drop="dropHandler(EventStatus.COMPLETED)"
+        @drop="dropHandler($event, EventStatus.COMPLETED)"
         ref="areaCompleted"
       >
         <KanbanColumn
-          :tasks="tasksFinished"
+          :tasks-list="tasksFinished"
           title="Завершенные"
           :loading="LOADING"
           key="3"

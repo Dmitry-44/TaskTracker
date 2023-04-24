@@ -30,7 +30,7 @@ interface ITaskStore {
     updateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): void
     setTaskToFinish(payload: Task|null):void
 }
-interface IInterfaceStore {
+interface ICommonStore {
     getGlobalLoading(): boolean
 	getIsCreatingTaskProcess(): boolean
     getDetailWindowIsOpen(): boolean
@@ -55,4 +55,4 @@ interface IPipeStore {
 
 
 
-export type { IUserStore, ITaskStore, IInterfaceStore, ISiteStore, IOperationStore, IPipeStore }
+export type { IUserStore, ITaskStore, ICommonStore, ISiteStore, IOperationStore, IPipeStore }

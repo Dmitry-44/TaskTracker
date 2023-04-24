@@ -2,7 +2,7 @@
 import TaskCard from "./TaskCard.vue";
 import { useTaskStore } from "@/stores/task";
 import type { Task } from "@/entities/task";
-import { toRef, type PropType, watch } from "vue";
+import { toRef, type PropType, watch, type Ref } from "vue";
 import { ref, computed } from "vue";
 import { Plus, Top, Bottom, CloseBold } from "@element-plus/icons-vue";
 import KanbanColumnFilter from "./KanbanColumnSortPicker.vue";
@@ -10,7 +10,7 @@ import { services } from "@/main";
 
 
 const props = defineProps({
-  tasks: {
+  tasksList: {
     type: Object as PropType<Task[]>,
     default: [],
   },
@@ -45,23 +45,24 @@ const activeTask = computed(() => taskStore.getActiveTask);
 const LOADING = toRef(props, "loading");
 const searchValue = ref("");
 
-const tasks = ref<Task[]>([]);
+const tasks = toRef(props, "tasksList");
+// const tasks = ref<Task[]>([]);
 
-watch(
-  () => props.tasks,
-  (newVal) => {
-    tasks.value = JSON.parse(JSON.stringify(newVal));
-  },
-  { deep: true }
-);
+// watch(
+//   () => props.tasks,
+//   (newVal) => {
+//     tasks.value = JSON.parse(JSON.stringify(newVal));
+//   },
+//   { deep: true }
+// );
 
 //METHODS
 
 const doSearch = () => {
-  tasks.value = TaskService.searchTasks(props.tasks, searchValue.value)
+  tasks.value = TaskService.searchTasks(props.tasksList, searchValue.value)
 };
 const setDefaultSort = () => {
-  tasks.value = JSON.parse(JSON.stringify(props.tasks));
+  tasks.value = JSON.parse(JSON.stringify(props.tasksList));
 };
 
 </script>
@@ -105,7 +106,7 @@ const setDefaultSort = () => {
         <template #template>
           <el-skeleton-item
             variant="rect"
-            style="width: 300px; height: calc(100vh - 230px)"
+            style="width: 300px; height: calc(100vh - 240px)"
           />
         </template>
         <TaskCard
@@ -167,7 +168,7 @@ const setDefaultSort = () => {
         max-height: 100%
         overflow-y: auto
         overflow-x: hidden
-        padding: 0px 4px
+        padding: 5px 10px 5px 5px
         margin-top: 20px
 
 .kanban-column .column-button-footer

@@ -4,6 +4,7 @@ import type { ApiResponse, UserResponse } from "@/api";
 type User = {
 	id: UniqueId;
 	fio: string;
+	groups: UniqueId[];
 	rights: Record<string, any>;
 	selected_group: UniqueId;
 }
@@ -23,7 +24,7 @@ type Division = {
 	ttrace_ids: UniqueId[]
 }
 
-export const emptyUser: Readonly<User> = Object.freeze({id:-1,fio:'', rights:{}, selected_group: -1});
+export const emptyUser: Readonly<User> = Object.freeze({id:-1,fio:'', rights:{}, groups: [], selected_group: -1});
 
 interface IUserRepo {
 	CheckLogin(): Promise<UserResponse>
