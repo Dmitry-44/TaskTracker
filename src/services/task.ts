@@ -371,9 +371,10 @@ export default class TaskService {
 	}
 
 	canTakeTask(task: Task, user: User): boolean {
+		if(task.id<=0)return false;
 		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
 		if(!taskLastEvent){return false};
-		return ((taskLastEvent.selected_users.length===0 && taskLastEvent.selected_divisions.length===0) || taskLastEvent.selected_users.includes(user.id))
+		return ((taskLastEvent.selected_users==undefined && taskLastEvent.selected_divisions==undefined) || (Array.isArray(taskLastEvent.selected_users) && taskLastEvent.selected_users?.includes(user.id)) || (Array.isArray(taskLastEvent.selected_divisions) && taskLastEvent.selected_divisions?.includes(user.selected_group)))
 				&& !taskLastEvent.u_id
 				&& taskLastEvent.status === EventStatus.CREATED
 	}
@@ -386,8 +387,7 @@ export default class TaskService {
 	canReturnTaskToBacklog(task: Task, user: User): boolean {
 		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
 		if(!taskLastEvent){return false};
-		return ((taskLastEvent.selected_users.length===0 && taskLastEvent.selected_divisions.length===0) || taskLastEvent.selected_users.includes(user.id))
-				&& taskLastEvent.u_id === user.id
+		return  taskLastEvent.u_id === user.id
 				&& taskLastEvent.status === EventStatus.IN_PROGRESS
 	}
 	canFinishTask(task: Task, user: User): boolean {
@@ -423,7 +423,7 @@ export default class TaskService {
 		return task.status! < TaskStatus.COMPLETED || !task.status
 	}
 	canChangeTaskDivision(task: Task, user: User): boolean {
-		return task.id < 0
+		return task.id <= 0
 	}
 	canChangeEventParams(task: Task, user: User): boolean {
 		console.log('canChangeEventParams')

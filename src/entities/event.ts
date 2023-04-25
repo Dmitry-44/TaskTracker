@@ -8,8 +8,8 @@ export interface Event {
 	u_id?: UniqueId;
 	user_name?: string;
 	status: EventStatus;
-	selected_users: UniqueId[];
-	selected_divisions: UniqueId[];
+	selected_users?: UniqueId[];
+	selected_divisions?: UniqueId[];
 	result: Record<string, unknown>;
 	params?: Record<string, unknown>;
 }
