@@ -5,9 +5,10 @@ import type { PropType } from "vue";
 import SelectOptions from "./SelectOptions.vue";
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
-import { useInterfaceStore } from "@/stores/interface";
+import { useCommonStore } from "@/stores/common";
 import { taskPriorityOptions, taskStatusOptions, type Task } from "@/entities/task";
 import { services } from "@/main";
+import { updatedTasksIds } from "@/services/WSService";
 
 const props = defineProps({
   task: {
@@ -26,12 +27,10 @@ const props = defineProps({
 });
 
 const taskStore = useTaskStore();
-const task = ref(props.task);
-const readonlyTask = computed(() => task.value.status === 4);
+const readonlyTask = computed(() => props.task.status === 4);
 const userStore = useUserStore();
-const interfaceStore = useInterfaceStore();
+const commonStore = useCommonStore();
 const user = userStore.getUser;
-const activeTask = computed(()=>taskStore.getActiveTask)
 const TaskService = services.Task
 // const DIVISIONS_OPTIONS = computed(()=>userStore.getDivisions)
 
@@ -39,10 +38,10 @@ const selectMore = ref<any | HTMLInputElement>(null);
 const taskCardElement = ref<any | HTMLInputElement>(null);
 
 const taskPriority = computed(
-  () => taskPriorityOptions.find((v) => v['id'] === task.value.priority)
+  () => taskPriorityOptions.find((v) => v['id'] === props.task.priority)
 );
 const taskStatus = computed(
-  () => taskStatusOptions.find((v) => v['id'] === task.value.status)
+  () => taskStatusOptions.find((v) => v['id'] === props.task.status)
 );
 // const taskDivision = computed(
 //   () => DIVISIONS_OPTIONS.value.find((division) => division?.id === task.value?.division_id)
@@ -51,21 +50,20 @@ const taskStatus = computed(
 
 //METHODS
 const finishTask = () => {
-    taskStore.setTaskToFinish(Object.assign({}, task.value))
-    interfaceStore.openFinishTaskModal()
+    taskStore.setTaskToFinish(Object.assign({}, props.task))
+    commonStore.openFinishTaskModal()
 }
 
 watch(
-  () => task.value,
-  (newVal) => {
-    console.log('newVal', newVal)
-    if(activeTask.value.id===newVal.id){
-      return;
+  () => props.task,
+  (newVal, oldVal) => {
+    console.log({'newVal': newVal, 'oldVal': oldVal})
+    if( updatedTasksIds.has(newVal.id) ) {
+      taskCardElement.value?.classList.add('card-update-anim')
+      setTimeout(()=>{
+        taskCardElement.value?.classList.remove('card-update-anim')
+      },3000)
     }
-    taskCardElement.value?.classList.add('card-update-anim')
-    // setTimeout(()=>{
-    //   taskCardElement.value?.classList.remove('card-update-anim')
-    // },1000)
   },
   {
     deep: true,
@@ -73,7 +71,12 @@ watch(
 );
 
 onMounted(()=>{
-  taskCardElement.value?.classList.add('card-update-anim')
+  if( updatedTasksIds.has(props.task.id) ) {
+      taskCardElement.value?.classList.add('card-update-anim')
+      setTimeout(()=>{
+        taskCardElement.value?.classList.remove('card-update-anim')
+      },3000)
+    }
 })
 
 </script>
@@ -234,33 +237,16 @@ onMounted(()=>{
 @keyframes card-pulse 
   0% 
     transform: scale(1)
-    box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.4)
-    // transform: translateX(0)
-
+    outline: 0 0 0 0 rgba(0, 255, 0, 0.4)
+    outline: 0px ridge rgba(0, 255, 0, 0.4)
   25% 
-    box-shadow: 0 0 0 5px rgba(0, 255, 0, 0.2)
-    // transform: translateX(-3px)
-
-
+    outline: 5px ridge rgba(0, 255, 0, 0.4)
   50%
-    box-shadow: 0 0 0 5px rgba(0, 255, 0, 0)
-    transform: scale(1.01)
-    // transform: translateX(0)
-
-  51%
-    // box-shadow: 0 0 0 10px rgba(0, 255, 0, 0.4)
-
-  75%
-    // box-shadow: 0 0 0 10px rgba(0, 255, 0, 0.2)
-    // transform: translateX(3px)
-
-  
+    outline: 0px ridge rgba(0, 255, 0, 0.4)
+    transform: scale(1.005)
   100% 
-    // box-shadow: 0 0 0 10px rgba(0, 255, 0, 0)
     transform: scale(1)
-    // transform: translateX(0)
 
-    
 .card .menu
     margin: 8px
     position: absolute

@@ -1,42 +1,47 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
-import { useInterfaceStore } from "@/stores/interface";
+import { useCommonStore } from "@/stores/common";
 import { Close, Pointer, Notification, Finished, ArrowRightBold, ArrowLeftBold } from "@element-plus/icons-vue";
-import { computed, onMounted, watch } from "vue";
+import { computed, onMounted, reactive, toRaw, toRef, watch, type Ref } from "vue";
 import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
 import { services } from "@/main";
-import { taskStatusOptions, taskPriorityOptions } from "@/entities/task"
+import { taskStatusOptions, taskPriorityOptions, type Task } from "@/entities/task"
+import type { Operation } from "@/entities/operation";
+import cloneDeep from 'lodash/cloneDeep';
 
 
 const taskStore = useTaskStore();
-const interfaceStore = useInterfaceStore();
+const commonStore = useCommonStore();
 const pipeStore = usePipeStore();
 const userStore = useUserStore();
 const user = userStore.getUser;
 const TaskService = services.Task
 
 //GETTERS
-const detailWindowIsOpen = computed(() => interfaceStore.getDetailWindowIsOpen);
-const task = computed(() => taskStore.getActiveTask);
+const detailWindowIsOpen = computed(() => commonStore.getDetailWindowIsOpen);
+const activeTask = computed(() => taskStore.getActiveTask);
+let task = ref(cloneDeep(activeTask.value)) as Ref<Task>
+// let task = ref(structuredClone(activeTask.value)) as Ref<Task>
 const isCreatingTaskProcess = computed(
-  () => interfaceStore.isCreatingTaskProcess
+  () => commonStore.isCreatingTaskProcess
 );
 const PIPES = computed(() => pipeStore.getPipes);
 const DIVISIONS_OPTIONS = computed(()=>userStore.getDivisions)
 
 //VARIABLES
 const LOADING = ref(false);
-const oldContent = ref("");
-const wasChanged = computed(() => {
+const initialData = ref(JSON.stringify(activeTask.value));
+const dataWasChanged = computed(() => {
   const updatedData = JSON.parse(JSON.stringify(task.value));
-  return oldContent.value != JSON.stringify(updatedData);
+  return initialData.value != JSON.stringify(updatedData);
 });
 const detailWindowTitleInput = ref<HTMLInputElement|null>(null);
+
 const taskPipe = computed(
-  () => PIPES.value.find((pipe) => pipe?.id === task.value?.pipe_id) || null
+  () => PIPES.value.find((pipe) => pipe?.id === task.value?.pipe_id)
 );
 const taskDivision = computed(
   () => DIVISIONS_OPTIONS.value.find((division) => division?.id === task.value?.division_id)
@@ -47,22 +52,46 @@ const taskStatus = computed(
 const taskPriority = computed(
   () => taskPriorityOptions.find((v) => v['id'] === task.value.priority)
 );
+const canChangeEventExecutors = computed(()=> TaskService.canChangeEventExecutors(taskDivision.value!, user))
 
 //METHODS
 const finishTask = () => {
-    taskStore.setTaskToFinish(Object.assign({},task.value))
-    interfaceStore.openFinishTaskModal()
+    taskStore.setTaskToFinish(cloneDeep(task.value))
+    commonStore.openFinishTaskModal()
+}
+const updatePipeData = (data: Task['pipe_data'], operId: Operation['id']) => {
+  task.value['pipe_data'][operId] = data
 }
 
 onMounted(()=>{
-  oldContent.value=JSON.stringify(task.value);
+  initialData.value=JSON.stringify(task.value);
 })
 
 watch(
-  () => task.value,
+  () => activeTask.value,
   (newVal, oldVal) => {
     if(newVal != oldVal){
-      oldContent.value=JSON.stringify(newVal)
+      task.value = cloneDeep(newVal)
+      initialData.value=JSON.stringify(newVal)
+    }
+    console.log({'activeTask': activeTask.value, 'task': task.value})
+  }
+);
+
+
+watch(
+  () => taskPipe.value,
+  (newTaskPipe, oldTaskPipe) => {
+    if(newTaskPipe != oldTaskPipe && task.value.id < 0){
+      task.value.pipe_data={}
+      newTaskPipe?.operation_entities.forEach(oper=>{
+        task.value.pipe_data[oper?.id]={}
+      })
+      console.log('task.value', task.value)
+      // if(task.value.id<0){
+      //   const updatedTask = Object.assign(task.value, {pipe_data: {}})
+      //   taskStore.updateActiveTask(updatedTask)
+      // }
     }
   }
 );
@@ -75,7 +104,7 @@ const save = () => {
     .upsertTask(task.value)
     .then(res => {
       if (res) {
-        oldContent.value=JSON.stringify(task.value)
+        initialData.value=JSON.stringify(task.value)
       }
     })
     .finally(() => {
@@ -92,7 +121,7 @@ const save = () => {
       <div class="actions">
         <el-button
           :loading="LOADING"
-          :disabled="!wasChanged||!task.pipe_id"
+          :disabled="!dataWasChanged"
           type="success"
           @click="save()"
           >Сохранить</el-button
@@ -282,6 +311,9 @@ const save = () => {
                 :operation="operation"
                 :event="task?.event_entities!.find(event=>event?.operation_id===operation?.id) || null"
                 :task-id="task.id"
+                :pipe-data="task.pipe_data[operation.id]"
+                :can-select-executors="canChangeEventExecutors"
+                @update="updatePipeData($event, operation.id)"
               />
             </template>
           </el-collapse>
@@ -302,6 +334,7 @@ const save = () => {
     top: 60px
     bottom: 0
     z-index: 600
+    overflow-y: scroll
     transition: all .8s cubic-bezier(0.23, 1, 0.32, 1)
     width: min(700px, 60%)
     transform: translateX(1000px)
@@ -319,6 +352,7 @@ const save = () => {
     height: 50px
     padding: 0px 12px
     display: flex
+    flex-shrink: 0
     .actions
         margin-left: auto
         display: flex

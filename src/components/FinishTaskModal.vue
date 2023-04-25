@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import { useTaskStore } from '@/stores/task'
-import { useInterfaceStore } from '@/stores/interface'
+import { useCommonStore } from '@/stores/common'
 import { useUserStore } from '@/stores/user'
 import { computed, ref, watch, type Ref } from 'vue';
 import { services } from '@/main';
@@ -9,8 +9,8 @@ import { services } from '@/main';
 
 const taskStore = useTaskStore()
 const task = computed(()=> taskStore.getTaskToFinish)
-const interfaceStore = useInterfaceStore()
-const showModal = computed(()=> interfaceStore.getShowFinishTaskModal)
+const commonStore = useCommonStore()
+const showModal = computed(()=> commonStore.getShowFinishTaskModal)
 const user = useUserStore().getUser
 const TaskService = services.Task
 const eventResult: Ref<Record<string, any>> = ref({})
@@ -20,7 +20,7 @@ const myTaskEvent = ref(task.value?.event_entities?.find(event=>event.u_id===use
 //METHODS
 function dialogCancelHandle(){
 	taskStore.setTaskToFinish(null)
-	interfaceStore.hideFinishTaskModal()
+	commonStore.hideFinishTaskModal()
 }
 
 function dialogOkHandle(){
@@ -30,7 +30,7 @@ function dialogOkHandle(){
 	}
 
 	TaskService.finishTask(task.value!, user, eventResult.value)
-  	interfaceStore.hideFinishTaskModal()
+  	commonStore.hideFinishTaskModal()
 }
 
 watch(

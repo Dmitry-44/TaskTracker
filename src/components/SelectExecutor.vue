@@ -2,15 +2,15 @@
 import { useOperationStore } from '@/stores/operation';
 import { useUserStore } from '@/stores/user';
 import { useTaskStore } from '@/stores/task';
-import { computed, onBeforeMount, onMounted, ref, toRef, type PropType } from 'vue';
+import { computed, onBeforeMount, onMounted, onUpdated, ref, toRef, watch, type PropType } from 'vue';
 import type { Operation } from '@/entities/operation';
 
 const props = defineProps({
-    users: {
+    selectedUsers: {
         type: Array,
         default: []
     },
-    groups: {
+    selectedDivisions: {
         type: Array,
         default: []
     },
@@ -28,9 +28,9 @@ const executors = ref(1)
 
 onBeforeMount(()=> {
     // if(!(task.value.id > 0)){
-        task.value.pipe_data[operationId.value]= {}
-        task.value.pipe_data[operationId.value]['selected_users']=[]
-        task.value.pipe_data[operationId.value]['selected_divisions']=[]
+        // task.value.pipe_data[operationId.value]= {}
+        // task.value.pipe_data[operationId.value]['selected_users']=[]
+        // task.value.pipe_data[operationId.value]['selected_divisions']=[]
     // } else {
     //     if(task.value.pipe_data[operationId.value]['selected_users'].length > 0) {
     //         executors.value=3
@@ -38,9 +38,15 @@ onBeforeMount(()=> {
     //         executors.value=2
     //     }
     // }
-
-
 })
+
+// watch(
+//   () => date.value,
+//   () => {
+//     addDataFilter()
+//     emit("update", filterPayload.value);
+//   }
+// );
 
 function optionChangeHandle(value: number) {
     if(value===1){
@@ -55,6 +61,7 @@ function optionChangeHandle(value: number) {
 </script>
 
 <template>
+    <el-row>Кто видит задачу</el-row>
     <el-radio-group v-model="executors" @change="optionChangeHandle">
         <el-radio :label="1">Все</el-radio>
         <el-radio :label="2">Группы пользователей</el-radio>
@@ -62,7 +69,7 @@ function optionChangeHandle(value: number) {
     </el-radio-group>
     <el-row>
         <el-select
-            v-model="task.pipe_data[operationId]['selected_divisions']"
+            v-model="selectedDivisions"
             v-show="executors === 2"
             multiple
             collapse-tags
@@ -79,7 +86,7 @@ function optionChangeHandle(value: number) {
         />
         </el-select>
         <el-select
-            v-model="task.pipe_data[operationId]['selected_users']"
+            v-model="selectedUsers"
             v-show="executors === 3"
             multiple
             filterable

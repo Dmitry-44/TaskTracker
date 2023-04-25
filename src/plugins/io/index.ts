@@ -23,3 +23,4 @@ socket.on("disconnect", function () {
 infoChannelHandler(socket);
 
 export default socket;
+export { connected as WebSocketIsConnected }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
-import { useInterfaceStore } from "@/stores/interface";
+import { useCommonStore } from "@/stores/common";
 import type{ Task } from "@/entities/task";
 import type { FilterPayload } from "@/api";
 import DetailsWindow from "../../components/DetailsWindow.vue";
@@ -10,19 +10,16 @@ import Filters from "../../components/Filters.vue";
 import KanbanColumn from "@/components/KanbanColumn.vue";
 import { services } from "@/main";
 import FinishTaskModal from "@/components/FinishTaskModal.vue";
-import type { User } from "@/entities/user";
-import { ElMessage } from "element-plus";
 import { EventStatus } from "@/entities/event";
 
 
 const taskStore = useTaskStore();
-const interfaceStore = useInterfaceStore();
+const commonStore = useCommonStore();
 const $filters = ref<typeof Filters | null>(null);
 const abortController = new AbortController();
 const abortSignal = abortController.signal;
 const TaskService = services.Task
 const user = useUserStore().getUser;
-const dialogFinishTaskIsOpen = ref(false)
 
 //GETTERS
 const tasks = computed(() => taskStore.getList);
@@ -110,7 +107,7 @@ const clearDragAndDrop = () => {
         ref="areaCreated"
       >
         <KanbanColumn
-          :tasks="tasksToTake"
+          :tasks-list="tasksToTake"
           title="К исполнению"
           :add-New-Task="true"
           :is-Draggable="true"
@@ -127,7 +124,7 @@ const clearDragAndDrop = () => {
         ref="areaInProgress"
       >
         <KanbanColumn
-          :tasks="tasksInProcess"
+          :tasks-list="tasksInProcess"
           title="В работе"
           :is-Draggable="true"
           :loading="LOADING"
@@ -143,7 +140,7 @@ const clearDragAndDrop = () => {
         ref="areaCompleted"
       >
         <KanbanColumn
-          :tasks="tasksFinished"
+          :tasks-list="tasksFinished"
           title="Завершенные"
           :loading="LOADING"
           key="3"

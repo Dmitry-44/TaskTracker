@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useOperationStore } from "@/stores/operation";
 import type { Operation } from "@/entities/operation";
 import { computed, type PropType, ref, onMounted, toRef } from "vue";
 import { useRouter } from "vue-router";
