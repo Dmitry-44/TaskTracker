@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
-import { useCommonStore } from "@/stores/common";
 import type{ Task } from "@/entities/task";
 import type { FilterPayload } from "@/api";
 import DetailsWindow from "../../components/DetailsWindow.vue";
@@ -15,7 +14,6 @@ import { EventStatus } from "@/entities/event";
 
 
 const taskStore = useTaskStore();
-const commonStore = useCommonStore();
 const $filters = ref<typeof Filters | null>(null);
 const abortController = new AbortController();
 const abortSignal = abortController.signal;
@@ -23,18 +21,10 @@ const TaskService = services.Task
 const user = useUserStore().getUser;
 
 //GETTERS
-const tasks = computed(() => taskStore.getList);
 const LOADING = ref(false);
-
-const tasksToTake = computed(() =>
-  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1]?.status === 1)
-);
-const tasksInProcess = computed(() =>
-  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1]?.status === 2)
-);
-const tasksFinished = computed(() =>
-  tasks.value.filter((task) => task.event_entities![task.event_entities!.length-1]?.status === 3)
-);
+const readyTasks = computed(() => taskStore.getTasksByEventStatus(user, EventStatus.CREATED));
+const tasksInProgress = computed(() => taskStore.getTasksByEventStatus(user, EventStatus.IN_PROGRESS));
+const completedTasks = computed(() => taskStore.getTasksByEventStatus(user, EventStatus.COMPLETED));
 
 
 //METHODS
@@ -102,7 +92,7 @@ const clearDragAndDrop = () => {
         ref="areaCreated"
       >
         <KanbanColumn
-          :tasks-list="tasksToTake"
+          :tasks-list="readyTasks"
           title="К исполнению"
           :add-New-Task="true"
           :is-Draggable="true"
@@ -119,7 +109,7 @@ const clearDragAndDrop = () => {
         ref="areaInProgress"
       >
         <KanbanColumn
-          :tasks-list="tasksInProcess"
+          :tasks-list="tasksInProgress"
           title="В работе"
           :is-Draggable="true"
           :loading="LOADING"
@@ -135,7 +125,7 @@ const clearDragAndDrop = () => {
         ref="areaCompleted"
       >
         <KanbanColumn
-          :tasks-list="tasksFinished"
+          :tasks-list="completedTasks"
           title="Завершенные"
           :loading="LOADING"
           key="3"

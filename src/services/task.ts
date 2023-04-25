@@ -8,6 +8,7 @@ import type { ITaskStore, ICommonStore, IUserStore } from '@/adapters';
 import { EventStatus, type Event } from '@/entities/event';
 import type { Division, User } from '@/entities/user';
 import { WebSocketIsConnected } from '@/plugins/io';
+import { lastFromArray } from '@/plugins/utils';
 
 
 export default class TaskService {
@@ -62,7 +63,7 @@ export default class TaskService {
 				message: validateTaskResult.message,
 				type: "info",
 				center: true,
-				duration: 1000,
+				duration: 2000,
 				showClose: true,
 			});
 			return false
@@ -115,7 +116,7 @@ export default class TaskService {
 			})
 			return false
 		}
-		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		const taskLastEvent = lastFromArray(task.event_entities!) as Event
 		const msg = ElMessage({
 			message: "Хватаю задачу..",
 			type: "success",

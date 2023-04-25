@@ -53,14 +53,13 @@ const USERS_OPTIONS = computed(()=>divisionsData[props.activeDivisionId]?.person
 const executors = ref(1)
 
 function optionChangeHandle(value: number) {
-  console.log('optionChangeHandle')
     if(value===1){
-      delete taskPipeData.value['selected_users']
-      delete taskPipeData.value['selected_divisions']
+      taskPipeData.value['selected_users']=[]
+      taskPipeData.value['selected_divisions']=[]
     } else if (value===2){
-      delete taskPipeData.value['selected_users']
+      taskPipeData.value['selected_users']=[]
     } else if (value===3){
-      delete taskPipeData.value['selected_divisions']
+      taskPipeData.value['selected_divisions']=[]
     }
 }
 

@@ -75,7 +75,6 @@ watch(
       task.value = cloneDeep(newVal)
       initialData.value=JSON.stringify(newVal)
     }
-    console.log({'activeTask': activeTask.value, 'task': task.value})
   }
 );
 
@@ -291,7 +290,7 @@ const save = () => {
           </div>
         </div>
         <div class="row">
-          <div class="left">Текст</div>
+          <div class="left align-start">Текст</div>
           <div class="right text">
             <el-input
               v-model="task.text"
@@ -407,8 +406,10 @@ const save = () => {
     flex-direction: column
     gap: 14px
     .row
-        display: flex
-        align-items: baseline
+      display: flex
+      align-items: baseline
+      .align-start
+        align-self: flex-start
     .left
         flex: 0 0 120px
         color: #6d6e6f
