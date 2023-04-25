@@ -21,7 +21,6 @@ const abortController = new AbortController();
 const abortSignal = abortController.signal;
 const TaskService = services.Task
 const user = useUserStore().getUser;
-const THROTTLE_DURATION = 100 
 
 //GETTERS
 const tasks = computed(() => taskStore.getList);
@@ -81,12 +80,9 @@ const dropHandler = async (event: DragEvent, newStatus: number) => {
   }
 };
 const clearDragAndDrop = () => {
-  setTimeout(()=> {
-    areaCreated.value?.classList.remove("dragOver");
-    areaInProgress.value?.classList.remove("dragOver");
-    areaCompleted.value?.classList.remove("dragOver");
-  }, THROTTLE_DURATION)
-
+  areaCreated.value?.classList.remove("dragOver");
+  areaInProgress.value?.classList.remove("dragOver");
+  areaCompleted.value?.classList.remove("dragOver");
 }
 </script>
 <template>

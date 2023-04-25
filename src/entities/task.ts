@@ -31,8 +31,6 @@ interface Task {
 export const emptyTask: Readonly<Task> = {
 	id: -1,
 	title: "",
-	division_id: undefined,
-	pipe_id: undefined,
 	text: "",
 	event_entities: [],
 	pipe_data: {}
@@ -84,81 +82,51 @@ export const taskTimeOptions = [
 	{ value: 1*7*24*60*60*100, time: '1 неделя'},
 ]
 
-export const validateTask = (task: Partial<Task>): boolean => {
+export type validateTaskMessage = true | Error
+export const validateTask = (task: Partial<Task>): validateTaskMessage => {
 	if(TITLE_IS_REQUARED && task.title!.length===0){
-		ElMessage({
-			message: "У задачи должен быть заголовок!",
-			type: "info",
-			center: true,
-			showClose: true,
-		});
-		return false
+		return new Error("У задачи должен быть заголовок!")
 	}
 	if(task.title!.length<TASK_TITLE_MIN_LENGTH){
-		ElMessage({
-			message: "Минимальная длина заголовка 5 символов",
-			type: "info",
-			center: true,
-			showClose: true,
-		});
-		return false
+		return new Error("Минимальная длина заголовка 5 символов")
 	}
 	if(task.title!.length>TASK_TITLE_MAX_LENGTH){
-		ElMessage({
-			message: "Заголовок не должен превышать 200 символов",
-			type: "info",
-			center: true,
-			showClose: true,
-		});
-		return false
+		return new Error("Заголовок не должен превышать 200 символов")
 	}
-	console.log('task', task)
 	if(DIVISION_IS_REQUARED && task.division_id === undefined){
-		ElMessage({
-			message: "У задачи не выбрано подразделение!",
-			type: "info",
-			center: true,
-			showClose: true,
-		});
-		return false
+		return new Error("У задачи не выбрано подразделение!")
 	}
 	if(task.pipe_id!<0){
-		ElMessage({
-			message: "Ошибка валидации пайплайна",
-			type: "info",
-			center: true,
-			showClose: true,
-		});
-		return false
+		return new Error("Ошибка валидации пайплайна")
 	}
 	if(PIPE_IS_REQUARED && task.pipe_id === undefined){
-		ElMessage({
-			message: "У задачи не задан пайплайн!",
-			type: "info",
-			center: true,
-			showClose: true,
-		});
-		return false
+		return new Error("У задачи не задан пайплайн!")
 	}
 	if(task.priority!<0){
-		ElMessage({
-			message: "Ошибка валидации приоритета",
-			type: "info",
-			center: true,
-			showClose: true,
-		});
-		return false
+		return new Error("Ошибка валидации приоритета")
 	}
 	if(task.status!<0){
-		ElMessage({
-			message: "Ошибка валидации статуса",
-			type: "info",
-			center: true,
-			showClose: true,
-		});
-		return false
+		return new Error("Ошибка валидации статуса")
 	}
 	return true
+}
+
+export const formatTask = (task: Task) => {
+	if(!(task.priority! in TaskPriority)) {
+		delete task.priority
+	}
+	if(!(task.status! in TaskStatus)) {
+		delete task.status
+	}
+	if(task.pipe_id!<=0) {
+		delete task.pipe_id
+	}
+	if(typeof task.division_id != 'number') {
+		delete task.division_id
+	}
+	if(task.division_id == undefined){
+		delete task.pipe_id
+	}
 }
 
 interface ITaskRepo {
@@ -170,20 +138,3 @@ interface ITaskRepo {
 }
 
 export type { Task, ITaskRepo };
-
-// export const getPipeDataFromOperationParams = (params: Operation['params']): Task['pipe_data'] => {
-// 	let pipeData: Task['pipe_data'] = {}
-// 	if('direction' in params){
-// 		pipeData['direction']=0
-// 	}
-// 	if('time' in params){
-// 		pipeData['time']=0
-// 	}
-// 	if('site_ids' in params){
-// 		pipeData['site_ids']=[]
-// 	}
-// 	if('site_id' in params){
-// 		pipeData['site_id']=null
-// 	}
-// 	return pipeData
-// }

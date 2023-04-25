@@ -8,7 +8,7 @@ import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
 import { services } from "@/main";
-import { taskStatusOptions, taskPriorityOptions, type Task, emptyTask } from "@/entities/task"
+import { taskStatusOptions, taskPriorityOptions, type Task, formatTask } from "@/entities/task"
 import type { Operation } from "@/entities/operation";
 import cloneDeep from 'lodash/cloneDeep';
 
@@ -63,10 +63,6 @@ const finishTask = () => {
 const updatePipeData = (data: Task['pipe_data'], operId: Operation['id']) => {
   task.value['pipe_data'][operId] = data
 }
-const clearDivisionId = () => {
-  task.value.division_id=undefined
-  task.value.pipe_id=undefined
-}
 
 onMounted(()=>{
   initialData.value=JSON.stringify(task.value);
@@ -83,6 +79,13 @@ watch(
   }
 );
 
+watch(
+  () => task.value,
+  (newVal, oldVal) => {
+    formatTask(task.value)
+  },
+  {deep: true}
+);
 
 watch(
   () => taskPipe.value,
@@ -92,11 +95,6 @@ watch(
       newTaskPipe?.operation_entities.forEach(oper=>{
         task.value.pipe_data[oper?.id]={}
       })
-      console.log('task.value', task.value)
-      // if(task.value.id<0){
-      //   const updatedTask = Object.assign(task.value, {pipe_data: {}})
-      //   taskStore.updateActiveTask(updatedTask)
-      // }
     }
   }
 );
@@ -259,7 +257,6 @@ const save = () => {
               v-if="TaskService.canChangeTaskDivision(task, user)"
               v-model="task.division_id"
               clearable
-              @clear="clearDivisionId"
               placeholder="Назначить подразделение"
             >
               <el-option

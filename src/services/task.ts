@@ -56,9 +56,16 @@ export default class TaskService {
 	}
 
 	async upsertTask(payload: Partial<Task>): Promise<boolean> {
-		const taskIsValid = validateTask(payload)
-		if(!taskIsValid){
-			return taskIsValid
+		const validateTaskResult = validateTask(payload)
+		if(validateTaskResult != true){
+			ElMessage({
+				message: validateTaskResult.message,
+				type: "info",
+				center: true,
+				duration: 1000,
+				showClose: true,
+			});
+			return false
 		};
 		const msg = ElMessage({
 			message: "Сохраняю задачу..",

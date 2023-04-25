@@ -40,7 +40,9 @@ export default class TaskRepo implements ITaskRepo {
 	}
 
 	GetTasks(filterPayload?: Partial<FilterPayload>, signal?: AbortSignal | undefined): Promise<ApiResponse<Task>> {
-		const data = Object.assign(TaskRepo.filterBase, {filter: filterPayload!.filter})
+		const filter = Object.assign(TaskRepo.filterBase.filter, filterPayload?.filter)
+		const options = Object.assign(TaskRepo.filterBase.options, filterPayload?.options)
+		const data = {select: TaskRepo.filterBase.select, filter: filter, options: options}
 		return axiosClient
 			.post(
 				`${envConfig.API_URL}tasktracker/tasks`,
