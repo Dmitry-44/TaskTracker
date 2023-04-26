@@ -7,6 +7,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    copy: typeof import('./src/components/FinishTaskModal copy.vue')['default']
     DetailsWindow: typeof import('./src/components/DetailsWindow.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -58,6 +59,7 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     SelectExecutor: typeof import('./src/components/SelectExecutor.vue')['default']
     SelectOptions: typeof import('./src/components/SelectOptions.vue')['default']
+    TakeTaskModal: typeof import('./src/components/TakeTaskModal.vue')['default']
     TaskCard: typeof import('./src/components/TaskCard.vue')['default']
   }
   export interface ComponentCustomProperties {

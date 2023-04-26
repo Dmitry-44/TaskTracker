@@ -15,7 +15,6 @@ const user = useUserStore().getUser
 const TaskService = services.Task
 const eventResult: Ref<Record<string, any>> = ref({})
 const finishConfirmed = ref(false)
-const myTaskEvent = ref(task.value?.event_entities?.find(event=>event.u_id===user.id))
 
 //METHODS
 function dialogCancelHandle(){
@@ -46,9 +45,11 @@ watch(
 
 <template>
 	<el-dialog v-model="showModal" width="30%" @close="dialogCancelHandle">
-		<el-row v-show="!finishConfirmed" justify="center">
-			Уверены что хотите завершить задачу?
-		</el-row>
+		<template #header>
+			<el-row justify="center">
+				<span class="modal__title">Уверены что хотите завершить задачу?</span>
+			</el-row>
+		</template>
 		<el-row justify="center">
 			"{{ task?.title }}"
 		</el-row>

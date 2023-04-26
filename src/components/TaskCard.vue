@@ -61,6 +61,10 @@ const finishTask = () => {
     taskStore.setTaskToFinish(Object.assign({}, props.task))
     commonStore.openFinishTaskModal()
 }
+const takeTask = () => {
+    taskStore.setTaskToTake(Object.assign({}, props.task))
+    commonStore.openTakeTaskModal()
+}
 
 watch(
   () => props.task,
@@ -131,7 +135,7 @@ onMounted(()=>{
           >
             <el-button
               :icon="Pointer"
-              @click.stop="TaskService.takeTask(task, user)"
+              @click.stop="takeTask()"
             ></el-button>
           </el-tooltip>
           <el-tooltip

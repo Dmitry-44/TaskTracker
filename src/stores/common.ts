@@ -5,6 +5,7 @@ type State = {
 	isCreatingTaskProcess: boolean;
 	globalLoading: boolean;
 	showFinishTaskModal: boolean;
+	showTakeTaskModal: boolean;
 };
 
 export const useCommonStore = defineStore({
@@ -14,12 +15,14 @@ export const useCommonStore = defineStore({
 		isCreatingTaskProcess: false,
 		globalLoading: false,
 		showFinishTaskModal: false,
+		showTakeTaskModal: false
 	}),
 	getters: {
 		getIsCreatingTaskProcess: (state) => state.isCreatingTaskProcess,
 		getDetailWindowIsOpen: (state) => state.detailWindowIsOpen,
 		getGlobalLoading: (state) => state.globalLoading,
-		getShowFinishTaskModal: (state) => state.showFinishTaskModal
+		getShowFinishTaskModal: (state) => state.showFinishTaskModal,
+		getShowTakeTaskModal: (state) => state.showTakeTaskModal
 	},
 	actions: {
 		toggleDetailsWindow(bool: boolean): void {
@@ -36,6 +39,12 @@ export const useCommonStore = defineStore({
 		},
 		hideFinishTaskModal(): void {
 			this.showFinishTaskModal = false
+		},
+		openTakeTaskModal(): void {
+			this.showTakeTaskModal = true
+		},
+		hideTakeTaskModal(): void {
+			this.showTakeTaskModal = false
 		}
 	},
 });

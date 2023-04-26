@@ -9,6 +9,7 @@ import Filters from "../../components/Filters.vue";
 import KanbanColumn from "@/components/KanbanColumn.vue";
 import { services } from "@/main";
 import FinishTaskModal from "@/components/FinishTaskModal.vue";
+import TakeTaskModal from "@/components/TakeTaskModal.vue";
 import { EventStatus } from "@/entities/event";
 
 
@@ -34,6 +35,7 @@ const clickOutsideCards = () => {
 };
 const filterUpdate = async (payload: FilterPayload) => {
   LOADING.value = true;
+  TaskService.clickOutsideTaskCard()
   await TaskService.fetchTasks(payload, abortSignal);
   LOADING.value = false;
 };
@@ -134,6 +136,7 @@ const clearDragAndDrop = () => {
     </div>
   </div>
   <FinishTaskModal />
+  <TakeTaskModal />
 </template>
 
 <style lang="sass" scoped>

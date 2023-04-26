@@ -10,6 +10,7 @@ interface State {
 	singleTask: Task | null;
 	activeTask: Task;
 	taskToFinish: Task|null;
+	taskToTake: Task|null;
 }
 
 
@@ -20,6 +21,7 @@ export const useTaskStore = defineStore({
 		tasks: [],
 		singleTask: null,
 		taskToFinish: null,
+		taskToTake: null,
 	}),
 	getters: {
 		getList: (state) => state.tasks,
@@ -38,7 +40,8 @@ export const useTaskStore = defineStore({
 		},
 		getSingleTask: (state) => state.singleTask,
 		getActiveTask: (state) => state.activeTask,
-		getTaskToFinish: (state) => state.taskToFinish
+		getTaskToFinish: (state) => state.taskToFinish,
+		getTaskToTake: (state) => state.taskToTake
 	},
 	actions: {
 		setActiveTask(payload: Task): void {
@@ -52,6 +55,9 @@ export const useTaskStore = defineStore({
 		},
 		setTaskToFinish(payload: Task|null): void {
 			this.taskToFinish = payload
+		},
+		setTaskToTake(payload: Task|null): void {
+			this.taskToTake = payload
 		},
 		updateActiveTask(task: Partial<Task>): void {
 			this.activeTask = Object.assign(this.activeTask, task)
