@@ -1,7 +1,14 @@
-import type { Operation } from '@/entities/operation';
+import { ElMessage } from 'element-plus';
 import type { Event } from "@/entities/event";
 import type { FilterPayload, ApiResponse } from "@/api";
 
+
+const TASK_TITLE_MIN_LENGTH = 5
+const TASK_TITLE_MAX_LENGTH = 200
+const TITLE_IS_REQUARED = true
+const DIVISION_IS_REQUARED = true
+//пока бэк не умеет сохранять без пайпа
+const PIPE_IS_REQUARED = true
 
 interface Task {
 	id: UniqueId;
@@ -24,7 +31,6 @@ interface Task {
 export const emptyTask: Readonly<Task> = {
 	id: -1,
 	title: "",
-	// division_id: -1,
 	text: "",
 	event_entities: [],
 	pipe_data: {}
@@ -75,21 +81,52 @@ export const taskTimeOptions = [
 	{ value: 2*24*60*60*100, time: '2 суток'},
 	{ value: 1*7*24*60*60*100, time: '1 неделя'},
 ]
-export const getPipeDataFromOperationParams = (params: Operation['params']): Task['pipe_data'] => {
-	let pipeData: Task['pipe_data'] = {}
-	if('direction' in params){
-		pipeData['direction']=0
+
+export type validateTaskMessage = true | Error
+export const validateTask = (task: Partial<Task>): validateTaskMessage => {
+	if(TITLE_IS_REQUARED && task.title!.length===0){
+		return new Error("У задачи должен быть заголовок!")
 	}
-	if('time' in params){
-		pipeData['time']=0
+	if(task.title!.length<TASK_TITLE_MIN_LENGTH){
+		return new Error("Минимальная длина заголовка 5 символов")
 	}
-	if('site_ids' in params){
-		pipeData['site_ids']=[]
+	if(task.title!.length>TASK_TITLE_MAX_LENGTH){
+		return new Error("Заголовок не должен превышать 200 символов")
 	}
-	if('site_id' in params){
-		pipeData['site_id']=null
+	if(DIVISION_IS_REQUARED && task.division_id === undefined){
+		return new Error("У задачи не выбрано подразделение!")
 	}
-	return pipeData
+	if(task.pipe_id!<0){
+		return new Error("Ошибка валидации пайплайна")
+	}
+	if(PIPE_IS_REQUARED && task.pipe_id === undefined){
+		return new Error("У задачи не задан пайплайн!")
+	}
+	if(task.priority!<0){
+		return new Error("Ошибка валидации приоритета")
+	}
+	if(task.status!<0){
+		return new Error("Ошибка валидации статуса")
+	}
+	return true
+}
+
+export const formatTask = (task: Task) => {
+	if(!(task.priority! in TaskPriority)) {
+		delete task.priority
+	}
+	if(!(task.status! in TaskStatus)) {
+		delete task.status
+	}
+	if(task.pipe_id!<=0) {
+		delete task.pipe_id
+	}
+	if(typeof task.division_id != 'number') {
+		delete task.division_id
+	}
+	if(task.division_id == undefined){
+		delete task.pipe_id
+	}
 }
 
 interface ITaskRepo {

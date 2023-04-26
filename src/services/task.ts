@@ -1,5 +1,5 @@
 import router from '@/router';
-import { TaskStatus, emptyTask } from '@/entities/task';
+import { TaskStatus, emptyTask, validateTask } from '@/entities/task';
 import { ElMessage } from 'element-plus';
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
 import { isSuccessApiResponse, isResultWithPagination, type FilterPayload } from "@/api";
@@ -8,6 +8,7 @@ import type { ITaskStore, ICommonStore, IUserStore } from '@/adapters';
 import { EventStatus, type Event } from '@/entities/event';
 import type { Division, User } from '@/entities/user';
 import { WebSocketIsConnected } from '@/plugins/io';
+import { lastFromArray } from '@/plugins/utils';
 
 
 export default class TaskService {
@@ -55,7 +56,18 @@ export default class TaskService {
 			.catch(err => errRequestHandler(err))
 	}
 
-	upsertTask(payload: Partial<Task>): Promise<boolean> {
+	async upsertTask(payload: Partial<Task>): Promise<boolean> {
+		const validateTaskResult = validateTask(payload)
+		if(validateTaskResult != true){
+			ElMessage({
+				message: validateTaskResult.message,
+				type: "info",
+				center: true,
+				duration: 2000,
+				showClose: true,
+			});
+			return false
+		};
 		const msg = ElMessage({
 			message: "Сохраняю задачу..",
 			type: "success",
@@ -104,7 +116,8 @@ export default class TaskService {
 			})
 			return false
 		}
-		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		const taskLastEvent = lastFromArray(task.event_entities!)
+		if(!taskLastEvent)return false;
 		const msg = ElMessage({
 			message: "Хватаю задачу..",
 			type: "success",
@@ -277,7 +290,8 @@ export default class TaskService {
 		if(newEventStatus<EventStatus.CREATED || newEventStatus>EventStatus.COMPLETED){
 			return false
 		}
-		const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
+		const eventToUpdate = lastFromArray(task.event_entities!)
+		if(!eventToUpdate)return false;
 		if(eventToUpdate.status === newEventStatus) {
 			return false;
 		}
@@ -331,7 +345,8 @@ export default class TaskService {
 			})
 			return false
 		} else {
-			const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
+			const eventToUpdate = lastFromArray(task.event_entities!)
+			if(!eventToUpdate)return false;
 			return this.updateEventStatus(task.id, eventToUpdate.id, EventStatus.CREATED)
 		}
 	}
@@ -346,7 +361,8 @@ export default class TaskService {
 			})
 			return false
 		} else {
-			const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
+			const eventToUpdate = lastFromArray(task.event_entities!)
+			if(!eventToUpdate)return false;
 			return this.updateEventStatus(task.id, eventToUpdate.id, EventStatus.IN_PROGRESS)
 		}
 	}
@@ -361,33 +377,34 @@ export default class TaskService {
 			})
 			return false
 		} else {
-			const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
+			const eventToUpdate = lastFromArray(task.event_entities!)
+			if(!eventToUpdate)return false;
 			return this.completeEvent(task.id, eventToUpdate.id, eventResult)
 		}
 	}
 
 	canTakeTask(task: Task, user: User): boolean {
-		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		const taskLastEvent = lastFromArray(task.event_entities!)
 		if(!taskLastEvent){return false};
 		return ((taskLastEvent.selected_users.length===0 && taskLastEvent.selected_divisions.length===0) || taskLastEvent.selected_users.includes(user.id))
 				&& !taskLastEvent.u_id
 				&& taskLastEvent.status === EventStatus.CREATED
 	}
 	canTakeTaskToProgress(task: Task, user: User): boolean {
-		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		const taskLastEvent = lastFromArray(task.event_entities!)
 		if(!taskLastEvent){return false};
 		return taskLastEvent.u_id===user.id
 			&& taskLastEvent.status === EventStatus.CREATED
 	}
 	canReturnTaskToBacklog(task: Task, user: User): boolean {
-		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		const taskLastEvent = lastFromArray(task.event_entities!)
 		if(!taskLastEvent){return false};
 		return ((taskLastEvent.selected_users.length===0 && taskLastEvent.selected_divisions.length===0) || taskLastEvent.selected_users.includes(user.id))
 				&& taskLastEvent.u_id === user.id
 				&& taskLastEvent.status === EventStatus.IN_PROGRESS
 	}
 	canFinishTask(task: Task, user: User): boolean {
-		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		const taskLastEvent = lastFromArray(task.event_entities!)
 		if(!taskLastEvent){return false};
 		return taskLastEvent.u_id===user.id && taskLastEvent.status === EventStatus.IN_PROGRESS
 	}
@@ -422,7 +439,6 @@ export default class TaskService {
 		return task.id < 0
 	}
 	canChangeEventParams(task: Task, user: User): boolean {
-		console.log('canChangeEventParams')
 		// user.id=33
 		//если у меня есть право
 		// && user.rights['tt_task_accept']>=1

@@ -8,7 +8,7 @@ import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
 import { services } from "@/main";
-import { taskStatusOptions, taskPriorityOptions, type Task } from "@/entities/task"
+import { taskStatusOptions, taskPriorityOptions, type Task, formatTask } from "@/entities/task"
 import type { Operation } from "@/entities/operation";
 import cloneDeep from 'lodash/cloneDeep';
 
@@ -24,6 +24,7 @@ const TaskService = services.Task
 const detailWindowIsOpen = computed(() => commonStore.getDetailWindowIsOpen);
 const activeTask = computed(() => taskStore.getActiveTask);
 let task = ref(cloneDeep(activeTask.value)) as Ref<Task>
+const canChangeEventParams = computed(()=>TaskService.canChangeEventParams(task.value, user))
 // let task = ref(structuredClone(activeTask.value)) as Ref<Task>
 const isCreatingTaskProcess = computed(
   () => commonStore.isCreatingTaskProcess
@@ -53,6 +54,16 @@ const taskPriority = computed(
   () => taskPriorityOptions.find((v) => v['id'] === task.value.priority)
 );
 const canChangeEventExecutors = computed(()=> TaskService.canChangeEventExecutors(taskDivision.value!, user))
+const canChangeTaskText = computed(()=> TaskService.canChangeTaskText(task.value, user))
+const canTakeTask = computed(()=> TaskService.canTakeTask(task.value, user))
+const canTakeTaskToProgress = computed(()=> TaskService.canTakeTaskToProgress(task.value, user))
+const canReturnTaskToBacklog = computed(()=> TaskService.canReturnTaskToBacklog(task.value, user))
+const canFinishTask = computed(()=> TaskService.canFinishTask(task.value, user))
+const canChangeTaskTitle = computed(()=> TaskService.canChangeTaskTitle(task.value, user))
+const canChangeTaskPriority = computed(()=> TaskService.canChangeTaskPriority(task.value, user))
+const canChangeTaskDivision = computed(()=> TaskService.canChangeTaskDivision(task.value, user))
+const canSetTaskPipeline = computed(()=> TaskService.canSetTaskPipeline(task.value, user))
+const canChangeTaskPipeline = computed(()=> TaskService.canChangeTaskPipeline(task.value, user))
 
 //METHODS
 const finishTask = () => {
@@ -74,10 +85,16 @@ watch(
       task.value = cloneDeep(newVal)
       initialData.value=JSON.stringify(newVal)
     }
-    console.log({'activeTask': activeTask.value, 'task': task.value})
   }
 );
 
+watch(
+  () => task.value,
+  (newVal, oldVal) => {
+    formatTask(task.value)
+  },
+  {deep: true}
+);
 
 watch(
   () => taskPipe.value,
@@ -87,11 +104,6 @@ watch(
       newTaskPipe?.operation_entities.forEach(oper=>{
         task.value.pipe_data[oper?.id]={}
       })
-      console.log('task.value', task.value)
-      // if(task.value.id<0){
-      //   const updatedTask = Object.assign(task.value, {pipe_data: {}})
-      //   taskStore.updateActiveTask(updatedTask)
-      // }
     }
   }
 );
@@ -135,7 +147,7 @@ const save = () => {
         >
         <template v-if="!isCreatingTaskProcess">
           <el-tooltip
-            v-if="TaskService.canTakeTask(task, user)"
+            v-if="canTakeTask"
             class="item"
             effect="dark"
             content="Взять задачу"
@@ -147,7 +159,7 @@ const save = () => {
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canTakeTaskToProgress(task, user)"
+            v-if="canTakeTaskToProgress"
             class="item"
             effect="dark"
             content="В работу"
@@ -159,7 +171,7 @@ const save = () => {
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canReturnTaskToBacklog(task, user)"
+            v-if="canReturnTaskToBacklog"
             class="item"
             effect="dark"
             content="Вернуть к исполнению"
@@ -171,7 +183,7 @@ const save = () => {
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canFinishTask(task, user)"
+            v-if="canFinishTask"
             class="item"
             effect="dark"
             content="Завершить задачу"
@@ -213,7 +225,7 @@ const save = () => {
       <div class="title_block">
         <input
           v-model.trim="task.title"
-          :disabled="!TaskService.canChangeTaskTitle(task, user)"
+          :disabled="!canChangeTaskTitle"
           class="title-input"
           placeholder="Ввести название задачи"
           ref="detailWindowTitleInput"
@@ -231,7 +243,7 @@ const save = () => {
           <div class="right">
             <el-select
               v-model="task.priority"
-              v-if="TaskService.canChangeTaskPriority(task, user)"
+              v-if="canChangeTaskPriority"
               clearable
               placeholder="Приоритет"
             >
@@ -251,7 +263,7 @@ const save = () => {
           <div class="left">Подразделение</div>
           <div class="right">
             <el-select
-              v-if="TaskService.canChangeTaskDivision(task, user)"
+              v-if="canChangeTaskDivision"
               v-model="task.division_id"
               clearable
               placeholder="Назначить подразделение"
@@ -267,11 +279,11 @@ const save = () => {
             <el-tag v-else size="large">{{taskDivision?.name.toUpperCase()}}</el-tag>
           </div>
         </div>
-        <div class="row" v-if="TaskService.canSetTaskPipeline(task, user)">
+        <div class="row" v-if="canSetTaskPipeline">
           <div class="left">Пайплайн</div>
           <div class="right">
             <el-select
-              v-if="TaskService.canChangeTaskPipeline(task, user)"
+              v-if="canChangeTaskPipeline"
               v-model="task.pipe_id"
               clearable
               placeholder="Пайплайн"
@@ -288,11 +300,11 @@ const save = () => {
           </div>
         </div>
         <div class="row">
-          <div class="left">Текст</div>
+          <div class="left align-start">Текст</div>
           <div class="right text">
             <el-input
               v-model="task.text"
-              :disabled="!TaskService.canChangeTaskText(task, user)"
+              :disabled="!canChangeTaskText"
               clearable
               :autosize="{ minRows: 2, maxRows: 4 }"
               type="textarea"
@@ -301,8 +313,8 @@ const save = () => {
           </div>
         </div>
         <div v-if="task.pipe_id">
-          <span class="left mt-2">Операции</span>
-          <el-collapse>
+          <span class="left">Операции</span>
+          <el-collapse class="mt-2">
             <template
               v-for="operation in taskPipe?.operation_entities"
               :key="`${task.id}-${operation?.id}`"
@@ -313,6 +325,8 @@ const save = () => {
                 :task-id="task.id"
                 :pipe-data="task.pipe_data[operation.id]"
                 :can-select-executors="canChangeEventExecutors"
+                :can-change-event-params="canChangeEventParams"
+                :active-division-id="task.division_id"
                 @update="updatePipeData($event, operation.id)"
               />
             </template>
@@ -402,8 +416,10 @@ const save = () => {
     flex-direction: column
     gap: 14px
     .row
-        display: flex
-        align-items: baseline
+      display: flex
+      align-items: baseline
+      .align-start
+        align-self: flex-start
     .left
         flex: 0 0 120px
         color: #6d6e6f

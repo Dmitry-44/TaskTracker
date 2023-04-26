@@ -1,9 +1,9 @@
 import { emptyTask } from '../entities/task';
 import { defineStore } from "pinia";
 import type { Task } from "@/entities/task";
-import type { Event } from '@/entities/event';
-import cloneDeep from 'lodash/cloneDeep';
-import { reactive, ref, type Ref } from 'vue';
+import type { EventStatus, Event } from '@/entities/event';
+import { lastFromArray } from '@/plugins/utils';
+import type { User } from '@/entities/user';
 
 interface State {
 	tasks: Task[];
@@ -23,6 +23,19 @@ export const useTaskStore = defineStore({
 	}),
 	getters: {
 		getList: (state) => state.tasks,
+		getTasksByEventStatus: (state) => {
+			return (user: User, status: EventStatus) =>
+			state.tasks.filter(task=> {
+				const lastEvent = lastFromArray(task.event_entities!)
+				if(!lastEvent)return false;
+				return lastEvent.status===status 
+					&& (
+						lastEvent.selected_divisions?.includes(user.selected_group) 
+						|| lastEvent.selected_users?.includes(user.id)
+						|| (lastEvent.selected_divisions?.length == 0 && lastEvent.selected_users?.length == 0)
+					)
+			})
+		},
 		getSingleTask: (state) => state.singleTask,
 		getActiveTask: (state) => state.activeTask,
 		getTaskToFinish: (state) => state.taskToFinish
