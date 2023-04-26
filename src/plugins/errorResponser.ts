@@ -1,6 +1,7 @@
 import { ElMessage } from "element-plus";
 import router from "@/router";
 export const errVueHandler = (res: number | boolean | string, errText = "") => {
+  console.log('errVueHandler res', res)
   if (res === true) {
     return true;
   }
@@ -29,7 +30,7 @@ export const errVueHandler = (res: number | boolean | string, errText = "") => {
 };
 
 export const errRequestHandler = (err: any) => {
-  if (process.env['NODE_ENV'] !== "production") {
+  if (process.env.NODE_ENV !== "production") {
     console.error(err);
   }
   if (Object.prototype.hasOwnProperty.call(err, "response") && err.response) {
