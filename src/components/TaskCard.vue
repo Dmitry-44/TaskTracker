@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SuccessFilled, More, EditPen, Pointer, Finished, ArrowLeftBold, ArrowRightBold} from "@element-plus/icons-vue";
-import { ref, onMounted, computed, nextTick, watch, onUpdated, onBeforeMount } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import type { PropType } from "vue";
 import SelectOptions from "./SelectOptions.vue";
 import { useTaskStore } from "@/stores/task";
@@ -9,6 +9,7 @@ import { useCommonStore } from "@/stores/common";
 import { taskPriorityOptions, taskStatusOptions, type Task } from "@/entities/task";
 import { services } from "@/main";
 import { updatedTasksIds } from "@/services/WSService";
+
 
 const props = defineProps({
   task: {
@@ -48,6 +49,13 @@ const taskStatus = computed(
 // );
 
 
+//CONDITIONS
+const canTakeTask = computed(()=>TaskService.canTakeTask(props.task, user))
+const canTakeTaskToProgress = computed(()=>TaskService.canTakeTaskToProgress(props.task, user))
+const canReturnTaskToBacklog = computed(()=>TaskService.canReturnTaskToBacklog(props.task, user))
+const canFinishTask = computed(()=>TaskService.canFinishTask(props.task, user))
+
+
 //METHODS
 const finishTask = () => {
     taskStore.setTaskToFinish(Object.assign({}, props.task))
@@ -57,7 +65,6 @@ const finishTask = () => {
 watch(
   () => props.task,
   (newVal, oldVal) => {
-    console.log({'newVal': newVal, 'oldVal': oldVal})
     if( updatedTasksIds.has(newVal.id) ) {
       taskCardElement.value?.classList.add('card-update-anim')
       setTimeout(()=>{
@@ -116,7 +123,7 @@ onMounted(()=>{
       <div class="actions">
         <div class="buttons">
           <el-tooltip
-            v-if="TaskService.canTakeTask(task, user)"
+            v-if="canTakeTask"
             class="item"
             effect="dark"
             content="Взять задачу"
@@ -128,7 +135,7 @@ onMounted(()=>{
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canTakeTaskToProgress(task, user)"
+            v-if="canTakeTaskToProgress"
             class="item"
             effect="dark"
             content="В работу"
@@ -140,7 +147,7 @@ onMounted(()=>{
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canReturnTaskToBacklog(task, user)"
+            v-if="canReturnTaskToBacklog"
             class="item"
             effect="dark"
             content="Вернуть к исполнению"
@@ -152,7 +159,7 @@ onMounted(()=>{
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canFinishTask(task, user)"
+            v-if="canFinishTask"
             class="item"
             effect="dark"
             content="Завершить задачу"

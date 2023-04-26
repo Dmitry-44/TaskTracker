@@ -54,6 +54,16 @@ const taskPriority = computed(
   () => taskPriorityOptions.find((v) => v['id'] === task.value.priority)
 );
 const canChangeEventExecutors = computed(()=> TaskService.canChangeEventExecutors(taskDivision.value!, user))
+const canChangeTaskText = computed(()=> TaskService.canChangeTaskText(task.value, user))
+const canTakeTask = computed(()=> TaskService.canTakeTask(task.value, user))
+const canTakeTaskToProgress = computed(()=> TaskService.canTakeTaskToProgress(task.value, user))
+const canReturnTaskToBacklog = computed(()=> TaskService.canReturnTaskToBacklog(task.value, user))
+const canFinishTask = computed(()=> TaskService.canFinishTask(task.value, user))
+const canChangeTaskTitle = computed(()=> TaskService.canChangeTaskTitle(task.value, user))
+const canChangeTaskPriority = computed(()=> TaskService.canChangeTaskPriority(task.value, user))
+const canChangeTaskDivision = computed(()=> TaskService.canChangeTaskDivision(task.value, user))
+const canSetTaskPipeline = computed(()=> TaskService.canSetTaskPipeline(task.value, user))
+const canChangeTaskPipeline = computed(()=> TaskService.canChangeTaskPipeline(task.value, user))
 
 //METHODS
 const finishTask = () => {
@@ -137,7 +147,7 @@ const save = () => {
         >
         <template v-if="!isCreatingTaskProcess">
           <el-tooltip
-            v-if="TaskService.canTakeTask(task, user)"
+            v-if="canTakeTask"
             class="item"
             effect="dark"
             content="Взять задачу"
@@ -149,7 +159,7 @@ const save = () => {
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canTakeTaskToProgress(task, user)"
+            v-if="canTakeTaskToProgress"
             class="item"
             effect="dark"
             content="В работу"
@@ -161,7 +171,7 @@ const save = () => {
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canReturnTaskToBacklog(task, user)"
+            v-if="canReturnTaskToBacklog"
             class="item"
             effect="dark"
             content="Вернуть к исполнению"
@@ -173,7 +183,7 @@ const save = () => {
             ></el-button>
           </el-tooltip>
           <el-tooltip
-            v-if="TaskService.canFinishTask(task, user)"
+            v-if="canFinishTask"
             class="item"
             effect="dark"
             content="Завершить задачу"
@@ -215,7 +225,7 @@ const save = () => {
       <div class="title_block">
         <input
           v-model.trim="task.title"
-          :disabled="!TaskService.canChangeTaskTitle(task, user)"
+          :disabled="!canChangeTaskTitle"
           class="title-input"
           placeholder="Ввести название задачи"
           ref="detailWindowTitleInput"
@@ -233,7 +243,7 @@ const save = () => {
           <div class="right">
             <el-select
               v-model="task.priority"
-              v-if="TaskService.canChangeTaskPriority(task, user)"
+              v-if="canChangeTaskPriority"
               clearable
               placeholder="Приоритет"
             >
@@ -253,7 +263,7 @@ const save = () => {
           <div class="left">Подразделение</div>
           <div class="right">
             <el-select
-              v-if="TaskService.canChangeTaskDivision(task, user)"
+              v-if="canChangeTaskDivision"
               v-model="task.division_id"
               clearable
               placeholder="Назначить подразделение"
@@ -269,11 +279,11 @@ const save = () => {
             <el-tag v-else size="large">{{taskDivision?.name.toUpperCase()}}</el-tag>
           </div>
         </div>
-        <div class="row" v-if="TaskService.canSetTaskPipeline(task, user)">
+        <div class="row" v-if="canSetTaskPipeline">
           <div class="left">Пайплайн</div>
           <div class="right">
             <el-select
-              v-if="TaskService.canChangeTaskPipeline(task, user)"
+              v-if="canChangeTaskPipeline"
               v-model="task.pipe_id"
               clearable
               placeholder="Пайплайн"
@@ -294,7 +304,7 @@ const save = () => {
           <div class="right text">
             <el-input
               v-model="task.text"
-              :disabled="!TaskService.canChangeTaskText(task, user)"
+              :disabled="!canChangeTaskText"
               clearable
               :autosize="{ minRows: 2, maxRows: 4 }"
               type="textarea"

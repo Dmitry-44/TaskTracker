@@ -116,7 +116,8 @@ export default class TaskService {
 			})
 			return false
 		}
-		const taskLastEvent = lastFromArray(task.event_entities!) as Event
+		const taskLastEvent = lastFromArray(task.event_entities!)
+		if(!taskLastEvent)return false;
 		const msg = ElMessage({
 			message: "Хватаю задачу..",
 			type: "success",
@@ -289,7 +290,8 @@ export default class TaskService {
 		if(newEventStatus<EventStatus.CREATED || newEventStatus>EventStatus.COMPLETED){
 			return false
 		}
-		const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
+		const eventToUpdate = lastFromArray(task.event_entities!)
+		if(!eventToUpdate)return false;
 		if(eventToUpdate.status === newEventStatus) {
 			return false;
 		}
@@ -343,7 +345,8 @@ export default class TaskService {
 			})
 			return false
 		} else {
-			const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
+			const eventToUpdate = lastFromArray(task.event_entities!)
+			if(!eventToUpdate)return false;
 			return this.updateEventStatus(task.id, eventToUpdate.id, EventStatus.CREATED)
 		}
 	}
@@ -358,7 +361,8 @@ export default class TaskService {
 			})
 			return false
 		} else {
-			const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
+			const eventToUpdate = lastFromArray(task.event_entities!)
+			if(!eventToUpdate)return false;
 			return this.updateEventStatus(task.id, eventToUpdate.id, EventStatus.IN_PROGRESS)
 		}
 	}
@@ -373,33 +377,34 @@ export default class TaskService {
 			})
 			return false
 		} else {
-			const eventToUpdate = task.event_entities![task.event_entities!.length - 1]
+			const eventToUpdate = lastFromArray(task.event_entities!)
+			if(!eventToUpdate)return false;
 			return this.completeEvent(task.id, eventToUpdate.id, eventResult)
 		}
 	}
 
 	canTakeTask(task: Task, user: User): boolean {
-		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		const taskLastEvent = lastFromArray(task.event_entities!)
 		if(!taskLastEvent){return false};
 		return ((taskLastEvent.selected_users.length===0 && taskLastEvent.selected_divisions.length===0) || taskLastEvent.selected_users.includes(user.id))
 				&& !taskLastEvent.u_id
 				&& taskLastEvent.status === EventStatus.CREATED
 	}
 	canTakeTaskToProgress(task: Task, user: User): boolean {
-		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		const taskLastEvent = lastFromArray(task.event_entities!)
 		if(!taskLastEvent){return false};
 		return taskLastEvent.u_id===user.id
 			&& taskLastEvent.status === EventStatus.CREATED
 	}
 	canReturnTaskToBacklog(task: Task, user: User): boolean {
-		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		const taskLastEvent = lastFromArray(task.event_entities!)
 		if(!taskLastEvent){return false};
 		return ((taskLastEvent.selected_users.length===0 && taskLastEvent.selected_divisions.length===0) || taskLastEvent.selected_users.includes(user.id))
 				&& taskLastEvent.u_id === user.id
 				&& taskLastEvent.status === EventStatus.IN_PROGRESS
 	}
 	canFinishTask(task: Task, user: User): boolean {
-		const taskLastEvent = task.event_entities![task.event_entities!.length - 1]
+		const taskLastEvent = lastFromArray(task.event_entities!)
 		if(!taskLastEvent){return false};
 		return taskLastEvent.u_id===user.id && taskLastEvent.status === EventStatus.IN_PROGRESS
 	}
@@ -434,7 +439,6 @@ export default class TaskService {
 		return task.id < 0
 	}
 	canChangeEventParams(task: Task, user: User): boolean {
-		console.log('canChangeEventParams')
 		// user.id=33
 		//если у меня есть право
 		// && user.rights['tt_task_accept']>=1
