@@ -2,13 +2,14 @@ import router from '@/router';
 import { TaskStatus, emptyTask, validateTask } from '@/entities/task';
 import { ElMessage } from 'element-plus';
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
-import { isSuccessApiResponse, isResultWithPagination, type FilterPayload } from "@/api";
+import { isSuccessApiResponse, isResultWithPagination, type FilterPayload, type WSTaskChannelMessage, WSEvents } from "@/api";
 import type { ITaskRepo, Task } from "@/entities/task";
 import type { ITaskStore, ICommonStore, IUserStore } from '@/adapters';
 import { EventStatus, type Event } from '@/entities/event';
 import type { Division, User } from '@/entities/user';
 import { WebSocketIsConnected } from '@/plugins/io';
 import { lastFromArray } from '@/plugins/utils';
+import { services } from '@/main';
 
 
 export default class TaskService {
@@ -174,7 +175,15 @@ export default class TaskService {
 						showClose: true,
 					});
 					// if (!WebSocketIsConnected) {
-					// 	this.taskStore.updateEventStatus(taskId, eventId, status)
+					// 	const message: WSTaskChannelMessage = {
+					// 		type: WSEvents.EVENT_STATUS_UPDATE,
+					// 		data: {
+					// 			task_id: taskId,
+					// 			id: eventId,
+					// 			status
+					// 		}
+					// 	}
+					// 	services.taskStoreUpdater.update(message)
 					// }
 					return true;
 				} else {
@@ -292,9 +301,7 @@ export default class TaskService {
 		}
 		const eventToUpdate = lastFromArray(task.event_entities!)
 		if(!eventToUpdate)return false;
-		if(eventToUpdate.status === newEventStatus) {
-			return false;
-		}
+		if(eventToUpdate.status === newEventStatus)return false;
 		switch (newEventStatus) {
 			case EventStatus.CREATED:
 				return this.returnTaskToBacklog(task, user)

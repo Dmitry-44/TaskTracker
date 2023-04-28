@@ -80,6 +80,9 @@ const clearDragAndDrop = () => {
 <template>
   <div class="kanbar-wrapper">
     <div class="menu-top">
+      <!-- <div class="indicator__wrapper">
+        <span class="indicator"></span>
+      </div> -->
       <div class="filters-wrapper">
         <Filters @update="filterUpdate($event)" ref="$filters" />
       </div>
@@ -119,7 +122,7 @@ const clearDragAndDrop = () => {
           @taskDragStart="dragstartHandler"
         />
       </div>
-      <div
+      <!-- <div
         class="draggable-area"
         @dragover="dragoverHandler($event, areaCompleted!)"
         @dragleave="dragleaveHandler($event)"
@@ -132,7 +135,7 @@ const clearDragAndDrop = () => {
           :loading="LOADING"
           key="3"
         />
-      </div>
+      </div> -->
     </div>
   </div>
   <FinishTaskModal />
@@ -176,4 +179,19 @@ const clearDragAndDrop = () => {
 @media screen and (max-width: 1024px)
     .kanban-background
         width: fit-content
+
+.indicator__wrapper
+  display: flex
+  align-items: center
+  margin-right: 15px
+
+.indicator 
+  display: inline-block 
+  width: 10px
+  height: 10px
+  border-radius: 50%
+  background-color: #2ecc71
+  box-shadow: 0px 0px 5px black
+
+
 </style>

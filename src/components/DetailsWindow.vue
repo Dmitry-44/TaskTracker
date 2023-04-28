@@ -244,7 +244,6 @@ const save = () => {
             <el-select
               v-model="task.priority"
               v-if="canChangeTaskPriority"
-              clearable
               placeholder="Приоритет"
             >
               <el-option
