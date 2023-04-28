@@ -1,3 +1,4 @@
+import taskStoreUpdater from '@/services/taskStoreUpdater';
 import TaskRepo from '@/api/task';
 import PipeRepo from '@/api/pipe';
 import TaskService from '@/services/task';
@@ -44,6 +45,7 @@ function initServices() {
         new PiniaUserAdapter(),
         new PiniaInterfaceAdapter()
     )
+    const storeUpdater = taskStoreUpdater(new PiniaTaskAdapter());
 
     return {
         Task: taskService,
@@ -51,7 +53,8 @@ function initServices() {
         Site: siteService,
         Operation: operationService,
         Filters: searchFiltersService,
-        User: userService
+        User: userService,
+        taskStoreUpdater: storeUpdater
     }
 }
 
