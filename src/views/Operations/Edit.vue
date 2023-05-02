@@ -17,18 +17,16 @@ const operation = computed<Operation | null>(
 );
 const LOADING = ref(false);
 
-const fetchOperationById = () => {
+onBeforeMount(async () => {
   const payload: FilterPayload = {
     select: [],
     filter: { id: paramId },
     options: { onlyLimit: true, itemsPerPage: 1 },
   };
-  return OperationService.fetchOperations(payload);
-};
-onBeforeMount(async () => {
   LOADING.value = true;
-  await fetchOperationById();
-  LOADING.value = false;
+  OperationService
+    .fetchOperations(payload)
+    .finally(()=>{ LOADING.value = false })
 });
 </script>
 
@@ -44,8 +42,10 @@ onBeforeMount(async () => {
     <OperationCard
       v-if="operation"
       :operation="operation"
-      :loading="LOADING"
       :key="operation?.id"
     />
+    <el-card v-if="!LOADING&&!operation">
+      <el-row justify="center">Операция не найдена</el-row>
+    </el-card>
   </el-skeleton>
 </template>

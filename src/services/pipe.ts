@@ -1,3 +1,4 @@
+import { ElMessage } from 'element-plus';
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
 import { isSuccessApiResponse, type FilterPayload } from "@/api";
 import type { IPipeRepo, Pipe } from "@/entities/pipe";
@@ -36,15 +37,36 @@ export default class PipeService {
 	}
 
 	async sendPipe(payload: Partial<Pipe>): Promise<boolean> {
+		ElMessage({
+			message: "Сохраняю пайплайн..",
+			type: "success",
+			center: true,
+			duration: 1000,
+		});
 		return this.pipeRepo
 			.SendPipe(payload)
 			.then((respdata) => {
 				if (isSuccessApiResponse(respdata)) {
+					ElMessage({
+						message: "Пайплайн сохранен!",
+						type: "success",
+						center: true,
+						duration: 2000,
+					});
 					return true;
 				} else {
 					return errVueHandler(respdata.message || -1)
 				}
 			})
-			.catch(err => errRequestHandler(err));
+			.catch(err => {
+				ElMessage({
+					message: "Что-то пошло не так...",
+					type: "error",
+					center: true,
+					duration: 1500,
+					showClose: true,
+				});
+				return false
+			})
 	};
 }

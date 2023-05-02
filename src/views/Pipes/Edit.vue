@@ -21,7 +21,7 @@ onBeforeMount(async () => {
 		filter: { id: paramId },
 		options: { onlyLimit: true, itemsPerPage: 1 },
 	};
-	LOADING.value = false
+	LOADING.value = true
 	PipeService
 		.fetchPipes(payload)
 		.finally(()=>{LOADING.value = false})
@@ -38,6 +38,9 @@ onBeforeMount(async () => {
         style="width: 300px; height: calc(100vh - 230px)"
       />
     </template>
-    <PipeCard v-if="pipe" :pipe="pipe" :loading="LOADING" :key="pipe?.id" />
+    <PipeCard v-if="pipe" :pipe="pipe" :key="pipe?.id" />
+    <el-card v-if="!LOADING&&!pipe">
+      <el-row justify="center">Пайплайн не найден</el-row>
+    </el-card>
   </el-skeleton>
 </template>
