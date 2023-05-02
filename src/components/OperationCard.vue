@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Operation } from "@/entities/operation";
-import { computed, type PropType, ref, onMounted, toRef } from "vue";
+import { computed, type PropType, ref, onMounted, toRef, onBeforeMount } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { errVueHandler } from "@/plugins/errorResponser";
@@ -9,7 +9,7 @@ import { services } from "@/main";
 
 const props = defineProps({
   operation: {
-    type: Object as PropType<Operation | null>,
+    type: Object as PropType<Operation>,
     default: () => ({
       name: "",
       params: {},
@@ -26,9 +26,9 @@ const router = useRouter();
 const paramsEditor = ref<HTMLInputElement | null>(null);
 const OperationService = services.Operation
 
-const operation = ref(props.operation);
-const params = ref(operation?.value?.params);
+const operation = toRef(props, 'operation');
 const oldContent = ref("");
+
 const wasChanged = computed(() => {
   const updatedData = JSON.parse(JSON.stringify(operation.value));
   return oldContent.value != JSON.stringify(updatedData);
@@ -36,14 +36,11 @@ const wasChanged = computed(() => {
 const LOADING = toRef(props, "loading");
 
 //HOOKS
-onMounted(() => {
-  oldContent.value = JSON.stringify(operation);
+onBeforeMount(() => {
+  oldContent.value = JSON.stringify(operation.value);
 });
 
 //METHODS
-const paramUpdateHandle = (val: Object) => {
-  operation.value!.params = val;
-};
 const sendOperation = () => {
   if (LOADING.value) return;
   LOADING.value = true;
@@ -101,17 +98,13 @@ const sendOperation = () => {
       <el-input
         class="card-name mb-4"
         label="Заголовок"
-        v-model="operation!.name"
+        v-model.trim="operation.name"
         placeholder="Название"
       />
     </div>
     <div>
       <h4>Параметры</h4>
-      <JsonEditor
-        :data="params"
-        @update="paramUpdateHandle"
-        ref="paramsEditor"
-      />
+      <JsonEditor v-model="operation.params"/>
     </div>
   </el-card>
 </template>

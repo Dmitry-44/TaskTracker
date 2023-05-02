@@ -42,10 +42,10 @@ onBeforeMount(async () => {
       />
     </template>
     <OperationCard
-    v-if="operation"
-    :operation="operation"
-    :loading="LOADING"
-    :key="operation?.id"
-  />
+      v-if="operation"
+      :operation="operation"
+      :loading="LOADING"
+      :key="operation?.id"
+    />
   </el-skeleton>
 </template>

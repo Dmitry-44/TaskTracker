@@ -1,36 +1,35 @@
 <script setup lang="ts">
-import { Checked } from "@element-plus/icons-vue";
-import { computed, ref, getCurrentInstance } from "vue";
+import { Checked, EditPen } from "@element-plus/icons-vue";
+import { cloneDeep } from "lodash";
+import { computed, ref, getCurrentInstance, toRef, type Ref } from "vue";
 
 const props = defineProps({
-  data: {
+  modelValue: {
     type: Object,
     default: {},
     required: true,
-  },
-  options: {
-    type: Object,
-    default: {
-      tabSize: 2,
-      readonly: false,
-      placeholder: "",
-      rows: 6,
-      width: "100%",
-    },
-  },
+  }
 });
 
 const emit = defineEmits<{
-  (e: "update", value: Object): void;
+  (e: "update:modelValue", value: Object): void;
 }>();
 
+
 //VARIABLES
-const value = ref(props.data);
-const OPTIONS = ref(props.options);
-const valueString = ref(
-  JSON.stringify(value.value, null, OPTIONS.value["tabSize"])
-);
 const error = ref(false);
+
+const OPTIONS = ref({
+      tabSize: 2,
+      readonly: true,
+      placeholder: "",
+      rows: 6,
+      width: "100%",
+    })
+    
+const textarea: Ref<HTMLInputElement|null> = ref(null)
+const valueString = computed(()=>JSON.stringify(props.modelValue, null, OPTIONS.value["tabSize"]));
+
 
 //METHODS
 const tabHandler = (e: KeyboardEvent) => {
@@ -41,66 +40,71 @@ const tabHandler = (e: KeyboardEvent) => {
     " ".repeat(OPTIONS.value["tabSize"])
   );
 };
-const inputHandle = (e: Event) => {
-  const target = e.target as HTMLInputElement;
-  // if(!isJsonData(target.value))return;
-  value.value = JSON.parse(target.value);
-  emit("update", value.value);
+const blurHandle = (e: Event) => {
+  format()
 };
 const format = () => {
-  valueString.value = JSON.stringify(
-    JSON.parse(JSON.stringify(value.value)),
-    null,
-    OPTIONS.value["tabSize"]
-  );
+  const data = cloneDeep(textarea.value?.value)
+  if(!data)return;
+  const isJSON = isValidJSON(data)
+  if(isJSON){
+    const newValue = JSON.parse(data);
+    emit("update:modelValue", newValue);
+    OPTIONS.value.readonly=true
+    error.value=false
+  } else {
+    error.value = true;
+  }
 };
-const isJsonData = (data: any) => {
+
+const isValidJSON = (data: any) => {
   try {
     JSON.parse(data);
   } catch (e) {
-    console.log("error parse", e);
-    error.value = true;
+    console.log("JSON parse error: ", e);
     return false;
   }
-  error.value = false;
   return true;
 };
 
-const getValue = () => {
-  return value.value;
-};
-const getValueJson = () => {
-  return JSON.stringify(value.value);
-};
+const edit = () => {
+  OPTIONS.value.readonly=false
+}
 
-defineExpose({
-  getValue,
-  getValueJson,
-  format,
-});
 </script>
 
 <template>
   <div
     class="json-editor"
     :style="{ width: OPTIONS['width'] }"
-    :class="{ error: error }"
+    :class="{ 'error': error }"
   >
     <textarea
       class="textarea"
       :value="valueString"
       :rows="OPTIONS['rows']"
-      :readonly="OPTIONS['readonly']"
+      :disabled="OPTIONS['readonly']"
       :placeholder="OPTIONS['placeholder']"
       @keydown.tab.prevent="tabHandler($event)"
-      @input="inputHandle($event)"
+      @blur="blurHandle($event)"
+      ref="textarea"
     >
     </textarea>
     <div class="actions_block">
       <el-tooltip
+        v-if="OPTIONS['readonly']"
         class="item"
         effect="dark"
-        content="Отформатировать"
+        content="Редактировать"
+        placement="right-start"
+      >
+        <el-button :icon="EditPen" @click="edit()" />
+      </el-tooltip>
+      <el-tooltip
+        v-if="!OPTIONS['readonly']"
+        class="item"
+        effect="dark"
+        content="Готово"
         placement="right-start"
       >
         <el-button :icon="Checked" @click="format()" />
@@ -113,11 +117,13 @@ defineExpose({
 .json-editor
     position: relative
     width: auto
-    .error
-        border-color: #red
+
 .textarea
     width: calc( 100% - 20px)
     padding-top: 45px
+
+.json-editor.error .textarea
+  border: 2px solid #f56c6c
 
 .actions_block
     position: absolute
