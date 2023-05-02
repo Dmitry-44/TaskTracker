@@ -65,15 +65,19 @@ const takeTask = () => {
     taskStore.setTaskToTake(Object.assign({}, props.task))
     commonStore.openTakeTaskModal()
 }
+const setAnimation = () => {
+  const ANIMATION_LIFETIME = 3000
+  taskCardElement.value?.classList.add('card-update-anim')
+  setTimeout(()=>{
+    taskCardElement.value?.classList.remove('card-update-anim')
+  },ANIMATION_LIFETIME)
+}
 
 watch(
   () => props.task,
   (newVal, oldVal) => {
     if( updatedTasksIds.has(newVal.id) ) {
-      taskCardElement.value?.classList.add('card-update-anim')
-      setTimeout(()=>{
-        taskCardElement.value?.classList.remove('card-update-anim')
-      },3000)
+      setAnimation()
     }
   },
   {
@@ -83,10 +87,7 @@ watch(
 
 onMounted(()=>{
   if( updatedTasksIds.has(props.task.id) ) {
-      taskCardElement.value?.classList.add('card-update-anim')
-      setTimeout(()=>{
-        taskCardElement.value?.classList.remove('card-update-anim')
-      },3000)
+      setAnimation()
     }
 })
 

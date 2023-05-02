@@ -5,30 +5,21 @@ import {
   computed,
   type PropType,
   ref,
-  toRef,
   onBeforeMount,
-  onMounted,
-  onBeforeUnmount,
 } from "vue";
-import { Plus, Close, Delete, Bottom } from "@element-plus/icons-vue";
+import { Plus} from "@element-plus/icons-vue";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
-import { errVueHandler } from "@/plugins/errorResponser";
 import type { Pipe } from "@/entities/pipe";
 import { services } from "@/main";
 
 const props = defineProps({
   pipe: {
-    type: Object as PropType<Pipe | null>,
+    type: Object as PropType<Pipe>,
     default: () => ({
       name: "",
       value: [],
     }),
-  },
-  loading: {
-    type: Boolean,
-    default: () => false,
   },
 });
 const router = useRouter();
@@ -39,15 +30,15 @@ const PipeService = services.Pipe
 const operationStore = useOperationStore();
 const operations = computed(() => operationStore.getOperations);
 const oldContent = ref("");
-const wasChanged = computed(() => {
+const dataWasChanged = computed(() => {
   const updatedData = JSON.parse(JSON.stringify(pipe.value));
   return oldContent.value != JSON.stringify(updatedData);
 });
-const LOADING = toRef(props, "loading");
+const LOADING = ref(false);
 
 //HOOKS
-onMounted(() => {
-  oldContent.value = JSON.stringify(props.pipe);
+onBeforeMount(() => {
+  oldContent.value = JSON.stringify(pipe.value);
 });
 
 //METHODS
@@ -61,14 +52,7 @@ const addEvent = (id: number) => {
   pipe?.value?.value.push(id!);
 };
 const sendPipe = () => {
-  if (LOADING.value) return;
   LOADING.value = true;
-  const msg = ElMessage({
-    message: "Сохранение...",
-    type: "warning",
-    center: true,
-    duration: 1000,
-  });
   const data = {
     id: pipe?.value?.id,
     name: pipe?.value?.name,
@@ -77,21 +61,13 @@ const sendPipe = () => {
   };
   PipeService
     .sendPipe(data)
-    .then((res) => {
-      if (errVueHandler(res)) {
-        ElMessage({
-          message: "Операция выполнена успешно!",
-          type: "success",
-          center: true,
-          duration: 1500,
-          showClose: true,
-        });
+    .then(ok => {
+      if (ok) {
         if (!pipe?.value?.id) router.push("/pipes");
-        oldContent.value = JSON.stringify(pipe.value);
+        oldContent.value = JSON.stringify(data);
       }
-      LOADING.value = false;
-      msg.close();
-    });
+    })
+    .finally(()=>{LOADING.value = false})
 };
 
 //DRAG AND DROP
@@ -127,7 +103,7 @@ const moveItemToIndex = (fromIndex: number | undefined, toIndex: number) => {
 </script>
 
 <template>
-  <el-card class="card" v-loading="loading">
+  <el-card class="card" v-loading="LOADING">
     <template #header>
       <el-row justify="space-between">
         <h3>Пайплайн</h3>
@@ -136,8 +112,7 @@ const moveItemToIndex = (fromIndex: number | undefined, toIndex: number) => {
             >Отмена</el-button
           >
           <el-button
-            :loading="LOADING"
-            :disabled="!wasChanged || pipe?.value.length === 0"
+            :disabled="!dataWasChanged || pipe?.value.length === 0"
             type="success"
             @click="sendPipe()"
             >Сохранить</el-button

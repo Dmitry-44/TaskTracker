@@ -2,8 +2,6 @@
 import type { Operation } from "@/entities/operation";
 import { computed, type PropType, ref, onMounted, toRef, onBeforeMount } from "vue";
 import { useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
-import { errVueHandler } from "@/plugins/errorResponser";
 import JsonEditor from "@/components/JsonEditor.vue";
 import { services } from "@/main";
 
@@ -14,26 +12,20 @@ const props = defineProps({
       name: "",
       params: {},
     }),
-  },
-  loading: {
-    type: Boolean,
-    default: () => false,
-  },
+  }
 });
 
 //VARIABLES
 const router = useRouter();
-const paramsEditor = ref<HTMLInputElement | null>(null);
 const OperationService = services.Operation
-
-const operation = toRef(props, 'operation');
+const operation = ref(props.operation);
 const oldContent = ref("");
 
-const wasChanged = computed(() => {
+const dataWasChanged = computed(() => {
   const updatedData = JSON.parse(JSON.stringify(operation.value));
   return oldContent.value != JSON.stringify(updatedData);
 });
-const LOADING = toRef(props, "loading");
+const LOADING = ref(false);
 
 //HOOKS
 onBeforeMount(() => {
@@ -41,41 +33,22 @@ onBeforeMount(() => {
 });
 
 //METHODS
-const sendOperation = () => {
-  if (LOADING.value) return;
+const sendOperation = async() => {
   LOADING.value = true;
-  const msg = ElMessage({
-    message: "Сохранение...",
-    type: "success",
-    center: true,
-    duration: 1000,
-  });
-  const data = {
-    id: operation?.value?.id,
-    name: operation?.value?.name,
-    params: operation?.value?.params,
-  };
-  OperationService.sendOperation(data)
-    .then(res => {
-      if (errVueHandler(res)) {
-        ElMessage({
-          message: "Операция выполнена успешно!",
-          type: "success",
-          center: true,
-          duration: 1500,
-          showClose: true,
-        });
+  OperationService
+    .sendOperation(operation.value)
+    .then(ok => {
+      if (ok) {
         if (!operation?.value?.id) router.push("/operations");
         oldContent.value = JSON.stringify(operation.value);
       }
-      LOADING.value = false;
-      msg.close();
-    });
+    })
+    .finally(()=> {LOADING.value = false})
 };
 </script>
 
 <template>
-  <el-card class="card" v-loading="loading">
+  <el-card class="card" v-loading="LOADING">
     <template #header>
       <el-row justify="space-between">
         <h3>Операция</h3>
@@ -84,8 +57,7 @@ const sendOperation = () => {
             >Отмена</el-button
           >
           <el-button
-            :loading="LOADING"
-            :disabled="!wasChanged"
+            :disabled="!dataWasChanged"
             type="success"
             @click="sendOperation()"
             >Сохранить</el-button
