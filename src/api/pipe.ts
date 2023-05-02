@@ -1,14 +1,23 @@
 import { envConfig } from "@/plugins/envConfig";
 import { errRequestHandler } from "@/plugins/errorResponser";
-import type { FilterPayload, ApiResponse } from "@//api";
+import type { FilterPayload, ApiResponse } from "@/api";
+import { Api } from "@/api/api";
 import type { IPipeRepo, Pipe } from "@/entities/pipe";
 import { axiosClient } from "../plugins/axios";
 
-export default class PipeRepo implements IPipeRepo {
+export default class PipeRepo extends Api implements IPipeRepo {
 	
+	//@ts-ignore
+	select=[]
+	//@ts-ignore
+	filter={}
+	//@ts-ignore
+	options={}
+
 	GetPipes(payload?: FilterPayload): Promise<ApiResponse<Pipe>> {
+		const data = this.mergeFilters(payload)
 		return axiosClient
-				.post(`${envConfig.API_URL}tasktracker/pipe`, payload)
+				.post(`${envConfig.API_URL}tasktracker/pipe`, data)
 				.then(res => res.data)
 				.catch(err=> {
 					return { message: errRequestHandler(err)}

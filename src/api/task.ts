@@ -1,3 +1,4 @@
+import { Api } from '@/api/api';
 import { envConfig } from "@/plugins/envConfig";
 import { errRequestHandler } from "@/plugins/errorResponser";
 import type { FilterPayload, ApiResponse } from "@/api";
@@ -5,44 +6,42 @@ import type { Event } from "@/entities/event";
 import type { ITaskRepo, Task } from "@/entities/task";
 import { axiosClient } from "../plugins/axios";
 
-export default class TaskRepo implements ITaskRepo {
+export default class TaskRepo extends Api implements ITaskRepo {
 
-	static filterBase: FilterPayload = 
-	{
-		select: [
-			'id',
-			'title',
-			'text',
-			'pipe_id',
-			'priority',
-			'status',
-			'event_id',
-			'division_id',
-			'created_by',
-			'created_at',
-			'pipe_data',
-			'events',
-			'event_entities',
-			'child_tasks',
-		],
-		filter: {},
-		options: {
-			onlyLimit: true,
-			page: 1,
-			itemsPerPage: 1000,
-			sortBy: ["id"],
-			sortDesc: [false],
-			groupBy: [],
-			groupDesc: [false],
-			mustSort: false,
-			multiSort: false,
-		},
+	// @ts-ignore
+	select = [
+		'id',
+		'title',
+		'text',
+		'pipe_id',
+		'priority',
+		'status',
+		'event_id',
+		'division_id',
+		'created_by',
+		'created_at',
+		'pipe_data',
+		'events',
+		'event_entities',
+		'child_tasks',
+	]
+	// @ts-ignore
+	filter = {}
+	// @ts-ignore
+	options = {
+		onlyLimit: true,
+		page: 1,
+		itemsPerPage: 1000,
+		sortBy: ["id"],
+		sortDesc: [false],
+		groupBy: [],
+		groupDesc: [false],
+		mustSort: false,
+		multiSort: false,
 	}
 
-	GetTasks(filterPayload?: Partial<FilterPayload>, signal?: AbortSignal | undefined): Promise<ApiResponse<Task>> {
-		const filter = Object.assign(TaskRepo.filterBase.filter, filterPayload?.filter)
-		const options = Object.assign(TaskRepo.filterBase.options, filterPayload?.options)
-		const data = {select: TaskRepo.filterBase.select, filter: filter, options: options}
+	GetTasks(filterPayload?: FilterPayload, signal?: AbortSignal): Promise<ApiResponse<Task>> {
+		const data = this.mergeFilters(filterPayload)
 		return axiosClient
 			.post(
 				`${envConfig.API_URL}tasktracker/tasks`,
