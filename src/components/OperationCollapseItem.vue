@@ -134,7 +134,7 @@ watch(
       </div>
     </div>
     <!-- TO DO SHOW CONDITION -->
-    <div v-if="!event">
+    <div>
       <OperationParamsGenerator 
         :key="taskId-operation.id" 
         :operation-id="operation.id" 

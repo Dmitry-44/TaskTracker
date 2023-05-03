@@ -1,17 +1,13 @@
 <script setup lang="ts">
 import {
-  Folder,
-  FolderDelete,
-  Menu,
-  DataAnalysis,
   SetUp,
   Connection,
 } from "@element-plus/icons-vue";
 import { useRoute } from "vue-router";
-import { useUserStore } from "@/stores/user";
-import { computed } from "vue";
-const UserStore = useUserStore();
+
+
 const route = useRoute();
+
 defineProps({
   isCollapse: {
     type: Boolean,
@@ -22,8 +18,8 @@ defineProps({
     default: false,
   },
 });
-////
-const rights = computed(() => UserStore.getRights);
+
+
 </script>
 <template>
   <el-menu
@@ -33,12 +29,17 @@ const rights = computed(() => UserStore.getRights);
     :router="true"
     :mode="isHorizontal ? 'horizontal' : 'vertical'"
   >
-    <el-menu-item index="/">
-      <el-icon>
-        <DataAnalysis />
-      </el-icon>
-      <template #title>Задачи</template>
-    </el-menu-item>
+    <el-sub-menu index="1">
+        <template #title>
+          <el-icon><DataAnalysis /></el-icon>
+          <span>Задачи</span>
+        </template>
+        <el-menu-item-group>
+          <el-menu-item index="/">Назначены мне</el-menu-item>
+          <el-menu-item index="/my">Созданы мной</el-menu-item>
+          <el-menu-item index="/archive">Завершенные</el-menu-item>
+        </el-menu-item-group>
+      </el-sub-menu>
     <el-menu-item index="/operations">
       <el-icon>
         <SetUp />
