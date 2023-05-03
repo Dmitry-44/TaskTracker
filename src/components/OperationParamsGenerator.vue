@@ -45,86 +45,94 @@ const changeSiteId = (value: string) => {
     <span v-if="params['auto']">Параметры данной операции будут заданы автоматически</span>
     <div v-else>
         <template v-if="'direction' in params">
-            <span class="param-name"><b>Направление</b></span>
-            <el-row>
-                <el-select
-                    v-model="taskPipeData['direction']"
-                    placeholder="Выбрать направление"
-                    :disabled="!canChangeEventParams"
-                    clearable
-                >
-                <el-option
-                    v-for="item in DIRECTION_OPTIONS"
-                    :key="item['id']"
-                    :label="item['name']"
-                    :value="item['id']"
-                />
-                </el-select>
-            </el-row>
-            <el-divider></el-divider>
+            <div class="row">
+                <div class="left">Направление</div>
+                <div class="right">
+                    <el-select
+                        v-model="taskPipeData['direction']"
+                        placeholder="Выбрать направление"
+                        :disabled="!canChangeEventParams"
+                        clearable
+                    >
+                    <el-option
+                        v-for="item in DIRECTION_OPTIONS"
+                        :key="item['id']"
+                        :label="item['name']"
+                        :value="item['id']"
+                    />
+                    </el-select>
+                </div>
+            </div>
+            <!-- <el-divider></el-divider> -->
         </template>
         <template v-if="'time' in params">
-            <span class="param-name"><b>Время на задачу</b></span>
-            <el-row>
-                <el-select
-                    v-model="taskPipeData['time']"
-                    placeholder="Выбрать время на задачу"
-                    :disabled="!canChangeEventParams"
-                    clearable
-                    @clear="clearSiteId"
-                    @change="changeSiteId"
-                >
-                <el-option
-                    v-for="item in TASK_TIME_OPTIONS"
-                    :key="item['value']"
-                    :label="item['time']"
-                    :value="item['value']"
-                />
-                </el-select>
-            </el-row>
-            <el-divider></el-divider>
+            <div class="row">
+                <div class="left">Время на задачу</div>
+                <div class="right">
+                    <el-select
+                        v-model="taskPipeData['time']"
+                        placeholder="Выбрать время на задачу"
+                        :disabled="!canChangeEventParams"
+                        clearable
+                        @clear="clearSiteId"
+                        @change="changeSiteId"
+                    >
+                    <el-option
+                        v-for="item in TASK_TIME_OPTIONS"
+                        :key="item['value']"
+                        :label="item['time']"
+                        :value="item['value']"
+                    />
+                    </el-select>
+                </div>
+            </div>
+            <!-- <el-divider></el-divider> -->
         </template>
         <template v-if="'site_ids' in params">
-            <span class="param-name"><b>На сайты</b></span>
-            <el-row>
-                <el-select
-                    v-model="taskPipeData['site_ids']"
-                    multiple
-                    collapse-tags
-                    collapse-tags-tooltip
-                    :max-collapse-tags="3"
-                    clearable
-                    placeholder="Выбрать сайты"
-                    :disabled="!canChangeEventParams"
-                >
-                <el-option
-                    v-for="item in SITE_OPTIONS"
-                    :key="item['id']"
-                    :label="item['url']"
-                    :value="item['id']"
-                />
-                </el-select>
-            </el-row>
-            <el-divider></el-divider>
+            <div class="row">
+                <div class="left">На сайты</div>
+                <div class="right">
+                    <el-select
+                        v-model="taskPipeData['site_ids']"
+                        multiple
+                        collapse-tags
+                        collapse-tags-tooltip
+                        :max-collapse-tags="3"
+                        clearable
+                        placeholder="Выбрать сайты"
+                        :disabled="!canChangeEventParams"
+                    >
+                    <el-option
+                        v-for="item in SITE_OPTIONS"
+                        :key="item['id']"
+                        :label="item['url']"
+                        :value="item['id']"
+                    />
+                    </el-select>
+                </div>
+            </div>
+            <!-- <el-divider></el-divider> -->
         </template>
         <template v-if="'site_id' in params">
-            <span class="param-name"><b>На сайт</b></span>
-            <el-row>
-                <el-select
-                    v-model="taskPipeData['site_id']"
-                    placeholder="Выбрать сайт"
-                    :disabled="!canChangeEventParams"
-                    clearable
-                >
-                <el-option
-                    v-for="item in SITE_OPTIONS"
-                    :key="item['id']"
-                    :label="item['url']"
-                    :value="item['id']"
-                />
-                </el-select>
-            </el-row>
-            <el-divider></el-divider>
+            <div class="row">
+                <div class="left">На сайт</div>
+                <div class="right">
+                    <el-select
+                        v-model="taskPipeData['site_id']"
+                        placeholder="Выбрать сайт"
+                        :disabled="!canChangeEventParams"
+                        clearable
+                    >
+                    <el-option
+                        v-for="item in SITE_OPTIONS"
+                        :key="item['id']"
+                        :label="item['url']"
+                        :value="item['id']"
+                    />
+                    </el-select>
+                </div>
+            </div>
+            <!-- <el-divider></el-divider> -->
         </template>
     </div>
 

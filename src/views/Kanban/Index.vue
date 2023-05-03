@@ -174,7 +174,11 @@ const clearDragAndDrop = () => {
     border-radius: 6px
     transition: all .2s
 .draggable-area.dragOver
-    outline: 2px solid #67C23A
+    // outline: 2px solid #67C23A
+    background-color: #6a7a97
+
+.draggable-area.dragOver .kanban-column:hover
+  box-shadow: none
 
 @media screen and (max-width: 1024px)
     .kanban-background

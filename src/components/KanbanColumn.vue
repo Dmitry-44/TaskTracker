@@ -143,7 +143,7 @@ const setDefaultSort = () => {
     height: 100%
     max-width: 304px
     padding: 0 12px
-    border: 2px solid #f9f8f8
+    // border: 2px solid #f9f8f8
     transition: box-shadow, border-color 250ms
     &:hover
         box-shadow: 0 0 0 1px #edeae9
