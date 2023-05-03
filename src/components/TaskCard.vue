@@ -25,6 +25,10 @@ const props = defineProps({
     type: Boolean,
     default: () => false,
   },
+  noActions: {
+    type: Boolean,
+    default: () => false,
+  },
 });
 
 const taskStore = useTaskStore();
@@ -126,7 +130,7 @@ onMounted(()=>{
         </div>
       </div>
       <div class="actions">
-        <div class="buttons">
+        <div v-if="!noActions" class="buttons">
           <el-tooltip
             v-if="canTakeTask"
             class="item"

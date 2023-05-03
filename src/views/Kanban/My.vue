@@ -8,8 +8,6 @@ import { ref, computed, onBeforeUnmount, nextTick } from "vue";
 import Filters from "../../components/Filters.vue";
 import KanbanColumn from "@/components/KanbanColumn.vue";
 import { services } from "@/main";
-import FinishTaskModal from "@/components/FinishTaskModal.vue";
-import TakeTaskModal from "@/components/TakeTaskModal.vue";
 import { EventStatus } from "@/entities/event";
 
 
@@ -23,9 +21,8 @@ const user = useUserStore().getUser;
 
 //GETTERS
 const LOADING = ref(false);
-const readyTasks = computed(() => taskStore.getTasksByEventStatus(user, EventStatus.CREATED));
-const tasksInProgress = computed(() => taskStore.getTasksByEventStatus(user, EventStatus.IN_PROGRESS));
-const completedTasks = computed(() => taskStore.getTasksByEventStatus(user, EventStatus.COMPLETED));
+const readyTasks = computed(() => taskStore.getMyTasksByEventStatus(user, EventStatus.CREATED));
+const tasksInProgress = computed(() => taskStore.getMyTasksByEventStatus(user, EventStatus.IN_PROGRESS));
 
 
 //METHODS
@@ -43,103 +40,34 @@ const filterUpdate = async (payload: FilterPayload) => {
 //HOOKS
 onBeforeUnmount(() => abortController.abort());
 
-//DRAG AND DROP
-const areaCreated = ref<HTMLDivElement|null>(null);
-const areaInProgress = ref<HTMLDivElement|null>(null);
-const areaCompleted = ref<HTMLDivElement|null>(null);
 
-const stopAll = (e: DragEvent) => {
-  e.preventDefault();
-  e.stopPropagation();
-};
-const dragstartHandler = (event: DragEvent, task: Task) => {
-  event.dataTransfer?.setData('text/plain', JSON.stringify(task));
-  event.dataTransfer!.effectAllowed = "link";
-};
-const dragoverHandler = (event: DragEvent, areElement: HTMLElement): void => {
-  stopAll(event);
-  areElement.classList.add("dragOver")
-};
-const dragleaveHandler = (ev: DragEvent) => {
-  stopAll(ev);
-  clearDragAndDrop()
-};
-const dropHandler = async (event: DragEvent, newStatus: number) => {
-  const task = JSON.parse(event.dataTransfer?.getData('text/plain')||'') as Task;
-  if(!!task && typeof task === 'object') {
-    TaskService.dragAndDropTask(task, newStatus, user)
-    clearDragAndDrop()
-  }
-};
-const clearDragAndDrop = () => {
-  areaCreated.value?.classList.remove("dragOver");
-  areaInProgress.value?.classList.remove("dragOver");
-  areaCompleted.value?.classList.remove("dragOver");
-}
 </script>
 <template>
   <div class="kanbar-wrapper">
     <div class="menu-top">
-      <!-- <div class="indicator__wrapper">
-        <span class="indicator"></span>
-      </div> -->
       <div class="filters-wrapper">
         <Filters @update="filterUpdate($event)" ref="$filters" />
       </div>
     </div>
     <div class="kanban-background" @click.stop="clickOutsideCards()">
-      <DetailsWindow />
-      <div
-        class="draggable-area"
-        @dragover="dragoverHandler($event, areaCreated!)"
-        @dragleave="dragleaveHandler($event)"
-        @drop="dropHandler($event, EventStatus.CREATED)"
-        ref="areaCreated"
-      >
+        <DetailsWindow :no-actions="true" />
         <KanbanColumn
           :tasks-list="readyTasks"
           title="К исполнению"
           :add-New-Task="true"
-          :is-Draggable="true"
+          :no-actions="true"
           :loading="LOADING"
           key="1"
-          @taskDragStart="dragstartHandler"
         />
-      </div>
-      <div
-        class="draggable-area"
-        @dragover="dragoverHandler($event, areaInProgress!)"
-        @dragleave="dragleaveHandler($event)"
-        @drop="dropHandler($event, EventStatus.IN_PROGRESS)"
-        ref="areaInProgress"
-      >
         <KanbanColumn
           :tasks-list="tasksInProgress"
           title="В работе"
-          :is-Draggable="true"
           :loading="LOADING"
+          :no-actions="true"
           key="2"
-          @taskDragStart="dragstartHandler"
         />
-      </div>
-      <!-- <div
-        class="draggable-area"
-        @dragover="dragoverHandler($event, areaCompleted!)"
-        @dragleave="dragleaveHandler($event)"
-        @drop="dropHandler($event, EventStatus.COMPLETED)"
-        ref="areaCompleted"
-      >
-        <KanbanColumn
-          :tasks-list="completedTasks"
-          title="Завершенные"
-          :loading="LOADING"
-          key="3"
-        />
-      </div> -->
     </div>
   </div>
-  <FinishTaskModal />
-  <TakeTaskModal />
 </template>
 
 <style lang="sass" scoped>
@@ -175,7 +103,7 @@ const clearDragAndDrop = () => {
     transition: all .2s
 .draggable-area.dragOver
     // outline: 2px solid #67C23A
-    background-color: #92a0ba
+    background-color: #6a7a97
 
 .draggable-area.dragOver .kanban-column:hover
   box-shadow: none

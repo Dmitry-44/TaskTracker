@@ -94,9 +94,15 @@ watch(
         <el-icon :color="eventStatus?.['color']">
           <SuccessFilled />
         </el-icon>
-        <span class="ml-1 operation-item-name">{{ operation?.name.toUpperCase() }}</span>
+        <span class="ml-1 operation-item-name">{{ operation.name.toUpperCase() }}</span>
       </div>
     </template>
+    <div class="row">
+      <div class="left">Задача</div>
+      <div class="right">
+        <el-tag class="status-tag">{{ operation.name }}</el-tag>
+      </div>
+    </div>
     <div class="row" v-if="event?.status">
       <div class="left">Статус</div>
       <div class="right">

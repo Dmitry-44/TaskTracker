@@ -38,6 +38,15 @@ export const useTaskStore = defineStore({
 					)
 			})
 		},
+		getMyTasksByEventStatus: (state) => {
+			return (user: User, status: EventStatus) => 
+				state.tasks.filter(task => {
+					if(task.created_by!=user.id)return false;
+					const lastEvent = lastFromArray(task.event_entities!)
+					if(!lastEvent)return false;
+					return lastEvent.status===status
+				})
+		},
 		getSingleTask: (state) => state.singleTask,
 		getActiveTask: (state) => state.activeTask,
 		getTaskToFinish: (state) => state.taskToFinish,

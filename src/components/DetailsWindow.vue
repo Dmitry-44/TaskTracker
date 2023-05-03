@@ -12,6 +12,12 @@ import { taskStatusOptions, taskPriorityOptions, type Task, formatTask } from "@
 import type { Operation } from "@/entities/operation";
 import cloneDeep from 'lodash/cloneDeep';
 
+const props = defineProps({
+  noActions: {
+    type: Boolean,
+    default: () => false,
+  },
+});
 
 const taskStore = useTaskStore();
 const commonStore = useCommonStore();
@@ -53,9 +59,11 @@ const taskStatus = computed(
 const taskPriority = computed(
   () => taskPriorityOptions.find((v) => v['id'] === task.value.priority)
 );
-const canChangeEventExecutors = computed(()=> TaskService.canChangeEventExecutors(taskDivision.value!, user))
+const canChangeEventExecutors = computed(()=> TaskService.canChangeEventExecutors(task.value, user))
 const canChangeTaskText = computed(()=> TaskService.canChangeTaskText(task.value, user))
-const canTakeTask = computed(()=> TaskService.canTakeTask(task.value, user))
+const canTakeTask = computed(()=> {
+  console.log('can take task computed')
+  return TaskService.canTakeTask(task.value, user)})
 const canTakeTaskToProgress = computed(()=> TaskService.canTakeTaskToProgress(task.value, user))
 const canReturnTaskToBacklog = computed(()=> TaskService.canReturnTaskToBacklog(task.value, user))
 const canFinishTask = computed(()=> TaskService.canFinishTask(task.value, user))
@@ -146,55 +154,57 @@ const save = () => {
           >Очистить</el-button
         >
         <template v-if="!isCreatingTaskProcess">
-          <el-tooltip
-            v-if="canTakeTask"
-            class="item"
-            effect="dark"
-            content="Взять задачу"
-            placement="top-start"
-          >
-            <el-button 
-            :icon="Pointer"
-            @click.stop="TaskService.takeTask(task, user)"
-            ></el-button>
-          </el-tooltip>
-          <el-tooltip
-            v-if="canTakeTaskToProgress"
-            class="item"
-            effect="dark"
-            content="В работу"
-            placement="top-start"
-          >
-            <el-button
-              :icon="ArrowRightBold"
-              @click.stop="TaskService.takeTaskToProgress(task, user)"
-            ></el-button>
-          </el-tooltip>
-          <el-tooltip
-            v-if="canReturnTaskToBacklog"
-            class="item"
-            effect="dark"
-            content="Вернуть к исполнению"
-            placement="top-start"
-          >
-            <el-button
-              :icon="ArrowLeftBold"
-              @click.stop="TaskService.returnTaskToBacklog(task, user)"
-            ></el-button>
-          </el-tooltip>
-          <el-tooltip
-            v-if="canFinishTask"
-            class="item"
-            effect="dark"
-            content="Завершить задачу"
-            placement="top-start"
-          >
-            <el-button 
-              :icon="Finished"
-              @click.stop="finishTask()"
+          <template v-if="!noActions">
+            <el-tooltip
+              v-if="canTakeTask"
+              class="item"
+              effect="dark"
+              content="Взять задачу"
+              placement="top-start"
             >
-            </el-button>
-          </el-tooltip>
+              <el-button 
+              :icon="Pointer"
+              @click.stop="TaskService.takeTask(task, user)"
+              ></el-button>
+            </el-tooltip>
+            <el-tooltip
+              v-if="canTakeTaskToProgress"
+              class="item"
+              effect="dark"
+              content="В работу"
+              placement="top-start"
+            >
+              <el-button
+                :icon="ArrowRightBold"
+                @click.stop="TaskService.takeTaskToProgress(task, user)"
+              ></el-button>
+            </el-tooltip>
+            <el-tooltip
+              v-if="canReturnTaskToBacklog"
+              class="item"
+              effect="dark"
+              content="Вернуть к исполнению"
+              placement="top-start"
+            >
+              <el-button
+                :icon="ArrowLeftBold"
+                @click.stop="TaskService.returnTaskToBacklog(task, user)"
+              ></el-button>
+            </el-tooltip>
+            <el-tooltip
+              v-if="canFinishTask"
+              class="item"
+              effect="dark"
+              content="Завершить задачу"
+              placement="top-start"
+            >
+              <el-button 
+                :icon="Finished"
+                @click.stop="finishTask()"
+              >
+              </el-button>
+            </el-tooltip>
+          </template>
           <el-tooltip
             class="item"
             effect="dark"
