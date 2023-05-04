@@ -7,6 +7,8 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    '1.WriteNews': typeof import('./src/components/operations/1.WriteNews.vue')['default']
+    '2.CheckNews': typeof import('./src/components/operations/2.CheckNews.vue')['default']
     copy: typeof import('./src/components/FinishTaskModal copy.vue')['default']
     DetailsWindow: typeof import('./src/components/DetailsWindow.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']

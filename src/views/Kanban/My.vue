@@ -50,7 +50,7 @@ onBeforeUnmount(() => abortController.abort());
       </div>
     </div>
     <div class="kanban-background" @click.stop="clickOutsideCards()">
-        <DetailsWindow :no-actions="true" />
+        <DetailsWindow />
         <KanbanColumn
           :tasks-list="readyTasks"
           title="К исполнению"

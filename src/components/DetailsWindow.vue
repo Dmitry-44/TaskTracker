@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
+import { useOperationStore } from "@/stores/operation";
 import { useCommonStore } from "@/stores/common";
 import { Close, Pointer, Notification, Finished, ArrowRightBold, ArrowLeftBold } from "@element-plus/icons-vue";
-import { computed, onMounted, reactive, toRaw, toRef, watch, type Ref } from "vue";
+import { computed, defineAsyncComponent, onMounted, reactive, toRaw, toRef, watch, type Component, type Ref, type VueElementConstructor } from "vue";
 import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
 import { usePipeStore } from "@/stores/pipe";
@@ -11,18 +12,25 @@ import { services } from "@/main";
 import { taskStatusOptions, taskPriorityOptions, type Task, formatTask } from "@/entities/task"
 import type { Operation } from "@/entities/operation";
 import cloneDeep from 'lodash/cloneDeep';
+import { lastFromArray, operationResolver } from "@/plugins/utils";
+import operationComponents from '../../operationComponents.json';
+
 
 const props = defineProps({
-  noActions: {
+  readonly: {
     type: Boolean,
     default: () => false,
   },
 });
 
+const CREATE_MODE = computed(()=>task.value.id<=0)
+const READ_MODE = computed(()=>props.readonly)
+
 const taskStore = useTaskStore();
 const commonStore = useCommonStore();
 const pipeStore = usePipeStore();
 const userStore = useUserStore();
+const operationStore = useOperationStore()
 const user = userStore.getUser;
 const TaskService = services.Task
 
@@ -30,13 +38,16 @@ const TaskService = services.Task
 const detailWindowIsOpen = computed(() => commonStore.getDetailWindowIsOpen);
 const activeTask = computed(() => taskStore.getActiveTask);
 let task = ref(cloneDeep(activeTask.value)) as Ref<Task>
+const taskLastEvent = computed(()=> lastFromArray(task.value.event_entities!))
+const taskLastOperation = computed(()=>OPERATION_OPTIONS.value.find(oper=>oper.id===taskLastEvent.value?.operation_id))
 const canChangeEventParams = computed(()=>TaskService.canChangeEventParams(task.value, user))
 // let task = ref(structuredClone(activeTask.value)) as Ref<Task>
-const isCreatingTaskProcess = computed(
-  () => commonStore.isCreatingTaskProcess
-);
+// const isCreatingTaskProcess = computed(
+//   () => commonStore.isCreatingTaskProcess
+// );
 const PIPES = computed(() => pipeStore.getPipes);
 const DIVISIONS_OPTIONS = computed(()=>userStore.getDivisions)
+const OPERATION_OPTIONS = computed(()=>operationStore.getOperations)
 
 //VARIABLES
 const LOADING = ref(false);
@@ -104,9 +115,17 @@ watch(
   {deep: true}
 );
 
+const OperationComponentsList: Record<string, Component> = {}
+const componentList: Record<string, string> = operationComponents
+
 watch(
   () => taskPipe.value,
   (newTaskPipe, oldTaskPipe) => {
+    newTaskPipe?.operation_entities.forEach(async (oper)=>{
+      OperationComponentsList[oper.id]= defineAsyncComponent({
+        loader: () => import(/* @vite-ignore */`../components/operations/${componentList[oper.id]}`),
+      });
+    })
     if(newTaskPipe != oldTaskPipe && task.value.id < 0){
       task.value.pipe_data={}
       newTaskPipe?.operation_entities.forEach(oper=>{
@@ -132,14 +151,14 @@ const save = () => {
     });
 };
 
-
-
 </script>
+
 <template>
   <div :class="['details', detailWindowIsOpen ? 'active' : '']" @click.stop>
     <div class="header">
       <div class="actions">
         <el-button
+          v-if="!READ_MODE"
           :loading="LOADING"
           :disabled="!dataWasChanged"
           type="success"
@@ -148,73 +167,60 @@ const save = () => {
         >
         <el-button
           :loading="LOADING"
-          v-show="!(task.id>0)"
+          v-show="CREATE_MODE"
           type="info"
           @click="TaskService.clearTask()"
           >Очистить</el-button
         >
-        <template v-if="!isCreatingTaskProcess">
-          <template v-if="!noActions">
-            <el-tooltip
-              v-if="canTakeTask"
-              class="item"
-              effect="dark"
-              content="Взять задачу"
-              placement="top-start"
-            >
-              <el-button 
-              :icon="Pointer"
-              @click.stop="TaskService.takeTask(task, user)"
-              ></el-button>
-            </el-tooltip>
-            <el-tooltip
-              v-if="canTakeTaskToProgress"
-              class="item"
-              effect="dark"
-              content="В работу"
-              placement="top-start"
-            >
-              <el-button
-                :icon="ArrowRightBold"
-                @click.stop="TaskService.takeTaskToProgress(task, user)"
-              ></el-button>
-            </el-tooltip>
-            <el-tooltip
-              v-if="canReturnTaskToBacklog"
-              class="item"
-              effect="dark"
-              content="Вернуть к исполнению"
-              placement="top-start"
-            >
-              <el-button
-                :icon="ArrowLeftBold"
-                @click.stop="TaskService.returnTaskToBacklog(task, user)"
-              ></el-button>
-            </el-tooltip>
-            <el-tooltip
-              v-if="canFinishTask"
-              class="item"
-              effect="dark"
-              content="Завершить задачу"
-              placement="top-start"
-            >
-              <el-button 
-                :icon="Finished"
-                @click.stop="finishTask()"
-              >
-              </el-button>
-            </el-tooltip>
-          </template>
+        <template v-if="READ_MODE">
           <el-tooltip
+            v-if="canTakeTask"
             class="item"
             effect="dark"
-            content="Открыть в новой вкладке"
+            content="Взять задачу"
+            placement="top-start"
+          >
+            <el-button 
+            :icon="Pointer"
+            @click.stop="TaskService.takeTask(task, user)"
+            ></el-button>
+          </el-tooltip>
+          <el-tooltip
+            v-if="canTakeTaskToProgress"
+            class="item"
+            effect="dark"
+            content="В работу"
             placement="top-start"
           >
             <el-button
-              :icon="Notification"
-              @click.stop="TaskService.openTaskInNewTab(task)"
+              :icon="ArrowRightBold"
+              @click.stop="TaskService.takeTaskToProgress(task, user)"
             ></el-button>
+          </el-tooltip>
+          <el-tooltip
+            v-if="canReturnTaskToBacklog"
+            class="item"
+            effect="dark"
+            content="Вернуть к исполнению"
+            placement="top-start"
+          >
+            <el-button
+              :icon="ArrowLeftBold"
+              @click.stop="TaskService.returnTaskToBacklog(task, user)"
+            ></el-button>
+          </el-tooltip>
+          <el-tooltip
+            v-if="canFinishTask"
+            class="item"
+            effect="dark"
+            content="Завершить задачу"
+            placement="top-start"
+          >
+            <el-button 
+              :icon="Finished"
+              @click.stop="finishTask()"
+            >
+            </el-button>
           </el-tooltip>
         </template>
         <el-tooltip
@@ -231,21 +237,27 @@ const save = () => {
         </el-tooltip>
       </div>
     </div>
-    <div v-if="task" class="body">
+    <div class="body">
       <div class="title_block">
         <input
           v-model.trim="task.title"
-          :disabled="!canChangeTaskTitle"
+          :disabled="!canChangeTaskTitle || READ_MODE"
           class="title-input"
           placeholder="Ввести название задачи"
           ref="detailWindowTitleInput"
         />
       </div>
       <div class="content">
-        <div class="row" v-if="taskStatus">
+        <div class="row" v-if="READ_MODE">
+          <div class="left">Задача</div>
+          <div class="right">
+            <el-tag size="large" class="tag-info">{{ taskLastOperation?.name.toUpperCase() }}</el-tag>
+          </div>
+        </div>
+        <div class="row" v-if="READ_MODE && taskStatus">
           <div class="left">Статус</div>
           <div class="right">
-            <el-tag size="large" class="status-tag" :color="taskStatus['color']">{{ taskStatus['value'] }}</el-tag>
+            <el-tag size="large" class="tag-info" :color="taskStatus['color']">{{ taskStatus['value'] }}</el-tag>
           </div>
         </div>
         <div class="row">
@@ -253,7 +265,7 @@ const save = () => {
           <div class="right">
             <el-select
               v-model="task.priority"
-              v-if="canChangeTaskPriority"
+              v-if="canChangeTaskPriority && !READ_MODE"
               placeholder="Приоритет"
             >
               <el-option
@@ -262,17 +274,17 @@ const save = () => {
                 :label="item['value']"
                 :value="item['id']"
               >
-                <el-tag class="priority-tag" :color="item['color']">{{ item['value'] }}</el-tag>
+                <el-tag class="tag-info" :color="item['color']">{{ item['value'] }}</el-tag>
               </el-option>
             </el-select>
-            <el-tag v-else class="priority-tag" size="large" :color="taskPriority!['color']">{{ taskPriority!['value'] }}</el-tag>
+            <el-tag v-if="READ_MODE && taskPriority" class="tag-info" size="large" :color="taskPriority?.['color']">{{ taskPriority!['value'] }}</el-tag>
           </div>
         </div>
         <div class="row">
           <div class="left">Подразделение</div>
           <div class="right">
             <el-select
-              v-if="canChangeTaskDivision"
+              v-if="CREATE_MODE && canChangeTaskDivision"
               v-model="task.division_id"
               clearable
               placeholder="Назначить подразделение"
@@ -285,14 +297,14 @@ const save = () => {
               >
               </el-option>
             </el-select>
-            <el-tag v-else size="large">{{taskDivision?.name.toUpperCase()}}</el-tag>
+            <el-tag v-else size="large" class="tag-info">{{taskDivision?.name}}</el-tag>
           </div>
         </div>
         <div class="row" v-if="canSetTaskPipeline">
           <div class="left">Пайплайн</div>
           <div class="right">
             <el-select
-              v-if="canChangeTaskPipeline"
+              v-if="CREATE_MODE && canChangeTaskPipeline"
               v-model="task.pipe_id"
               clearable
               placeholder="Пайплайн"
@@ -305,7 +317,7 @@ const save = () => {
               >
               </el-option>
             </el-select>
-            <el-tag size="large" v-else>{{taskPipe?.name.toUpperCase()}}</el-tag>
+            <el-tag size="large" class="tag-info" v-else>{{taskPipe?.name}}</el-tag>
           </div>
         </div>
         <div class="row">
@@ -313,7 +325,7 @@ const save = () => {
           <div class="right text">
             <el-input
               v-model="task.text"
-              :disabled="!canChangeTaskText"
+              :disabled="!canChangeTaskText || READ_MODE"
               clearable
               :autosize="{ minRows: 2, maxRows: 4 }"
               type="textarea"
@@ -321,14 +333,26 @@ const save = () => {
             />
           </div>
         </div>
-        <div v-if="task.pipe_id">
+        <component v-if="READ_MODE && taskLastOperation" :readonly="readonly" :is="OperationComponentsList[taskLastOperation['id']]"></component>
+        <div v-if="task.pipe_id && !READ_MODE">
           <span class="left">Операции</span>
           <el-collapse class="mt-2">
             <template
               v-for="operation in taskPipe?.operation_entities"
               :key="`${task.id}-${operation?.id}`"
             >
-              <OperationCollapseItem
+            <el-collapse-item class="collapse-item">
+              <template #title>
+                <div class="collapse-item-header">
+                  <!-- <el-icon :color="eventStatus?.['color']">
+                    <SuccessFilled />
+                  </el-icon> -->
+                  <span class="ml-1 operation-item-name">{{ operation.name.toUpperCase() }}</span>
+                </div>
+              </template>
+              <component :is="OperationComponentsList[operation.id]"></component>
+            </el-collapse-item>
+              <!-- <OperationCollapseItem
                 :operation="operation"
                 :event="task?.event_entities!.find(event=>event?.operation_id===operation?.id) || null"
                 :task-id="task.id"
@@ -337,7 +361,7 @@ const save = () => {
                 :can-change-event-params="canChangeEventParams"
                 :active-division-id="task.division_id"
                 @update="updatePipeData($event, operation.id)"
-              />
+              /> -->
             </template>
           </el-collapse>
         </div>

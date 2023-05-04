@@ -88,7 +88,7 @@ const clearDragAndDrop = () => {
       </div>
     </div>
     <div class="kanban-background" @click.stop="clickOutsideCards()">
-      <DetailsWindow />
+      <DetailsWindow :readonly="true"/>
       <div
         class="draggable-area"
         @dragover="dragoverHandler($event, areaCreated!)"
