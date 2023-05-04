@@ -8,6 +8,7 @@ import { services } from '@/main';
 import { lastFromArray } from '@/plugins/utils';
 import { useOperationStore } from '@/stores/operation';
 import OperationParamsGenerator from "./OperationParamsGenerator.vue";
+import OperationLoader from "@/components/OperationLoader.vue";
 
 
 const taskStore = useTaskStore()
@@ -44,7 +45,7 @@ function dialogOkHandle(){
 			<span><b>{{ taskLastEventOperation?.name }}:</b></span><br/>
 			<span>"{{ task?.title }}"</span>
 		</el-row>
-			<OperationParamsGenerator v-if="task" :params="taskLastEvent?.params" :operation-id="taskLastEventOperation?.id!" :can-change-event-params="false" />
+			<OperationLoader v-if="taskLastEventOperation" key="modal" :id="taskLastEventOperation.id" :readonly="true" :params="taskLastEvent?.params"/>
 		<template #footer>
 			<span class="dialog-footer">
 				<el-button @click="dialogCancelHandle">Отмена</el-button>

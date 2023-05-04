@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useOperationStore } from '@/stores/operation';
-import { ref, watch, type PropType } from 'vue';
+import { computed, ref, watch, type PropType } from 'vue';
 import { taskTimeOptions as TASK_TIME_OPTIONS } from '@/entities/task'
 
 const props = defineProps({
@@ -23,19 +23,31 @@ const emit = defineEmits<{
 const params = ref(props.modelValue)
 const DIRECTION_OPTIONS = useOperationStore().getDirectionOptions
 
+const activeDirection = computed(()=>DIRECTION_OPTIONS.find(dir=>dir['id']===params.value['direction']))
+const activeTime = computed(()=>TASK_TIME_OPTIONS.find(time=>time['value']===params.value['time']))
+
 watch(
-    ()=> params.value,
-    (newParams, oldParams)=>{
-        emit('update:modelValue', newParams)
+    ()=> props.modelValue,
+    (newValue, oldValue)=>{
+        params.value=newValue
     }
 )
-
+if(!props.readonly){
+    watch(
+        ()=> params.value,
+        (newParams, oldParams)=>{
+            emit('update:modelValue', newParams)
+        }
+    )
+}
 </script>
+
 <template>
     <div class="row">
         <div class="left">Направление</div>
         <div class="right">
             <el-select
+                v-if="!readonly"
                 v-model="params['direction']"
                 placeholder="Выбрать направление"
                 :disabled="readonly"
@@ -47,12 +59,14 @@ watch(
                 :value="item['id']"
             />
             </el-select>
+            <el-tag v-else>{{ activeDirection?.['name'] }}</el-tag>
         </div>
     </div>
     <div class="row">
         <div class="left">Время на задачу</div>
         <div class="right">
             <el-select
+                v-if="!readonly"
                 v-model="params['time']"
                 placeholder="Выбрать время на задачу"
                 :disabled="readonly"
@@ -64,6 +78,7 @@ watch(
                 :value="item['value']"
             />
             </el-select>
+            <el-tag v-else>{{ activeTime?.['time'] }}</el-tag>
         </div>
     </div>
 </template>

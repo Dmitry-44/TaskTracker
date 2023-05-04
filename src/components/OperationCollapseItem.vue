@@ -6,6 +6,7 @@ import { useUserStore } from "@/stores/user";
 import { computed, onBeforeMount, onBeforeUnmount, ref, toRef, watch, type PropType, type Ref } from "vue";
 import OperationParamsGenerator from "./OperationParamsGenerator.vue";
 import cloneDeep from 'lodash/cloneDeep';
+import OperationLoader from "@/components/OperationLoader.vue";
 
 const props = defineProps({
   operation: {
@@ -141,13 +142,7 @@ watch(
     </div>
     <!-- TO DO SHOW CONDITION -->
     <div>
-      <OperationParamsGenerator 
-        :key="taskId-operation.id" 
-        :operation-id="operation.id" 
-        :pipe-data="taskPipeData" 
-        :params="operation['params']"
-        :can-change-event-params="canChangeEventParams"
-      />
+      <OperationLoader key="3" :id="operation.id"  :params="event?.params"/>
       <template v-if="canSelectExecutors">
       <el-row><b>Кто видит задачу</b></el-row>
       <el-radio-group v-show="canChangeEventParams" v-model="executors">

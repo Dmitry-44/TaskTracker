@@ -1,4 +1,7 @@
 {
-  "1": "1.WriteNews.vue",
-  "2": "2.CheckNews.vue"
+  "1": "01.WriteNews",
+  "2": "02.CheckNews",
+  "3": "03.PublishNews",
+  "4": "04.Postavit",
+  "7": "07.CheckRelease"
 }

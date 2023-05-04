@@ -3,17 +3,17 @@ import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
 import { useOperationStore } from "@/stores/operation";
 import { useCommonStore } from "@/stores/common";
-import { Close, Pointer, Notification, Finished, ArrowRightBold, ArrowLeftBold } from "@element-plus/icons-vue";
-import { computed, defineAsyncComponent, onMounted, reactive, toRaw, toRef, watch, type Component, type Ref, type VueElementConstructor } from "vue";
+import { computed, onMounted, watch, type Ref, } from "vue";
 import { ref } from "vue";
 import OperationCollapseItem from "./OperationCollapseItem.vue";
+import OperationLoader from "@/components/OperationLoader.vue";
 import { usePipeStore } from "@/stores/pipe";
 import { services } from "@/main";
-import { taskStatusOptions, taskPriorityOptions, type Task, formatTask } from "@/entities/task"
+import { taskStatusOptions, taskPriorityOptions, type Task, formatTask, taskDateFormat } from "@/entities/task"
 import type { Operation } from "@/entities/operation";
 import cloneDeep from 'lodash/cloneDeep';
 import { lastFromArray, operationResolver } from "@/plugins/utils";
-import operationComponents from '../../operationComponents.json';
+import DetailsWindowActions from "./DetailsWindowActions.vue";
 
 
 const props = defineProps({
@@ -24,7 +24,7 @@ const props = defineProps({
 });
 
 const CREATE_MODE = computed(()=>task.value.id<=0)
-const READ_MODE = computed(()=>props.readonly)
+const READ_MODE = computed(()=>props.readonly && task.value.id>0)
 
 const taskStore = useTaskStore();
 const commonStore = useCommonStore();
@@ -37,14 +37,9 @@ const TaskService = services.Task
 //GETTERS
 const detailWindowIsOpen = computed(() => commonStore.getDetailWindowIsOpen);
 const activeTask = computed(() => taskStore.getActiveTask);
-let task = ref(cloneDeep(activeTask.value)) as Ref<Task>
+const task = ref(cloneDeep(activeTask.value)) as Ref<Task>
 const taskLastEvent = computed(()=> lastFromArray(task.value.event_entities!))
 const taskLastOperation = computed(()=>OPERATION_OPTIONS.value.find(oper=>oper.id===taskLastEvent.value?.operation_id))
-const canChangeEventParams = computed(()=>TaskService.canChangeEventParams(task.value, user))
-// let task = ref(structuredClone(activeTask.value)) as Ref<Task>
-// const isCreatingTaskProcess = computed(
-//   () => commonStore.isCreatingTaskProcess
-// );
 const PIPES = computed(() => pipeStore.getPipes);
 const DIVISIONS_OPTIONS = computed(()=>userStore.getDivisions)
 const OPERATION_OPTIONS = computed(()=>operationStore.getOperations)
@@ -58,23 +53,16 @@ const dataWasChanged = computed(() => {
 });
 const detailWindowTitleInput = ref<HTMLInputElement|null>(null);
 
-const taskPipe = computed(
-  () => PIPES.value.find((pipe) => pipe?.id === task.value?.pipe_id)
-);
-const taskDivision = computed(
-  () => DIVISIONS_OPTIONS.value.find((division) => division?.id === task.value?.division_id)
-);
-const taskStatus = computed(
-  () => taskStatusOptions.find((v) => v['id'] === task.value.status)
-);
-const taskPriority = computed(
-  () => taskPriorityOptions.find((v) => v['id'] === task.value.priority)
-);
+const taskPipe = computed(() => PIPES.value.find((pipe) => pipe?.id === task.value?.pipe_id));
+const taskDivision = computed(() => DIVISIONS_OPTIONS.value.find((division) => division?.id === task.value?.division_id));
+const taskStatus = computed(() => taskStatusOptions.find((v) => v['id'] === task.value.status));
+const taskPriority = computed(() => taskPriorityOptions.find((v) => v['id'] === task.value.priority));
+
+//CONDITIONS
+const canChangeEventParams = computed(()=>TaskService.canChangeEventParams(task.value, user))
 const canChangeEventExecutors = computed(()=> TaskService.canChangeEventExecutors(task.value, user))
 const canChangeTaskText = computed(()=> TaskService.canChangeTaskText(task.value, user))
-const canTakeTask = computed(()=> {
-  console.log('can take task computed')
-  return TaskService.canTakeTask(task.value, user)})
+const canTakeTask = computed(()=> TaskService.canTakeTask(task.value, user))
 const canTakeTaskToProgress = computed(()=> TaskService.canTakeTaskToProgress(task.value, user))
 const canReturnTaskToBacklog = computed(()=> TaskService.canReturnTaskToBacklog(task.value, user))
 const canFinishTask = computed(()=> TaskService.canFinishTask(task.value, user))
@@ -92,6 +80,19 @@ const finishTask = () => {
 const updatePipeData = (data: Task['pipe_data'], operId: Operation['id']) => {
   task.value['pipe_data'][operId] = data
 }
+const save = () => {
+  LOADING.value = true;
+  TaskService
+    .upsertTask(task.value)
+    .then(res => {
+      if (res) {
+        initialData.value=JSON.stringify(task.value)
+      }
+    })
+    .finally(() => {
+      LOADING.value = false;
+    });
+};
 
 onMounted(()=>{
   initialData.value=JSON.stringify(task.value);
@@ -115,17 +116,9 @@ watch(
   {deep: true}
 );
 
-const OperationComponentsList: Record<string, Component> = {}
-const componentList: Record<string, string> = operationComponents
-
 watch(
   () => taskPipe.value,
   (newTaskPipe, oldTaskPipe) => {
-    newTaskPipe?.operation_entities.forEach(async (oper)=>{
-      OperationComponentsList[oper.id]= defineAsyncComponent({
-        loader: () => import(/* @vite-ignore */`../components/operations/${componentList[oper.id]}`),
-      });
-    })
     if(newTaskPipe != oldTaskPipe && task.value.id < 0){
       task.value.pipe_data={}
       newTaskPipe?.operation_entities.forEach(oper=>{
@@ -135,106 +128,24 @@ watch(
   }
 );
 
-//METHODS
-const save = () => {
-  if(!task.value)return
-  LOADING.value = true;
-  TaskService
-    .upsertTask(task.value)
-    .then(res => {
-      if (res) {
-        initialData.value=JSON.stringify(task.value)
-      }
-    })
-    .finally(() => {
-      LOADING.value = false;
-    });
-};
-
 </script>
 
 <template>
   <div :class="['details', detailWindowIsOpen ? 'active' : '']" @click.stop>
     <div class="header">
       <div class="actions">
-        <el-button
-          v-if="!READ_MODE"
-          :loading="LOADING"
-          :disabled="!dataWasChanged"
-          type="success"
-          @click="save()"
-          >Сохранить</el-button
-        >
-        <el-button
-          :loading="LOADING"
-          v-show="CREATE_MODE"
-          type="info"
-          @click="TaskService.clearTask()"
-          >Очистить</el-button
-        >
-        <template v-if="READ_MODE">
-          <el-tooltip
-            v-if="canTakeTask"
-            class="item"
-            effect="dark"
-            content="Взять задачу"
-            placement="top-start"
-          >
-            <el-button 
-            :icon="Pointer"
-            @click.stop="TaskService.takeTask(task, user)"
-            ></el-button>
-          </el-tooltip>
-          <el-tooltip
-            v-if="canTakeTaskToProgress"
-            class="item"
-            effect="dark"
-            content="В работу"
-            placement="top-start"
-          >
-            <el-button
-              :icon="ArrowRightBold"
-              @click.stop="TaskService.takeTaskToProgress(task, user)"
-            ></el-button>
-          </el-tooltip>
-          <el-tooltip
-            v-if="canReturnTaskToBacklog"
-            class="item"
-            effect="dark"
-            content="Вернуть к исполнению"
-            placement="top-start"
-          >
-            <el-button
-              :icon="ArrowLeftBold"
-              @click.stop="TaskService.returnTaskToBacklog(task, user)"
-            ></el-button>
-          </el-tooltip>
-          <el-tooltip
-            v-if="canFinishTask"
-            class="item"
-            effect="dark"
-            content="Завершить задачу"
-            placement="top-start"
-          >
-            <el-button 
-              :icon="Finished"
-              @click.stop="finishTask()"
-            >
-            </el-button>
-          </el-tooltip>
-        </template>
-        <el-tooltip
-          class="item"
-          effect="dark"
-          content="Закрыть"
-          placement="top-start"
-        >
-          <el-button
-            class="close-btn"
-            :icon="Close"
-            @click.stop="TaskService.closeDetailWindow()"
-          ></el-button>
-        </el-tooltip>
+        <DetailsWindowActions
+          :task="task"
+          :data-was-changed="dataWasChanged"
+          :can-take-task="canTakeTask"
+          :can-take-task-to-progress="canTakeTaskToProgress"
+          :can-return-task-to-backlog="canReturnTaskToBacklog"
+          :can-finish-task="canFinishTask"
+          :CREATE_MODE="CREATE_MODE"
+          :READ_MODE="READ_MODE"
+          @save="save()"
+          @finish="finishTask()"
+        />
       </div>
     </div>
     <div class="body">
@@ -333,7 +244,31 @@ const save = () => {
             />
           </div>
         </div>
-        <component v-if="READ_MODE && taskLastOperation" :readonly="readonly" :is="OperationComponentsList[taskLastOperation['id']]"></component>
+        <OperationLoader :key="taskLastOperation.id" v-if="READ_MODE && taskLastOperation" :id="taskLastOperation.id" :params="taskLastEvent?.params" :readonly="readonly"/>
+        <div class="row" v-if="taskLastEvent?.created">
+          <div class="left">Старт</div>
+          <div class="right">
+            <el-tag>{{ taskDateFormat(taskLastEvent.created) }}</el-tag>
+          </div>
+        </div>
+        <div class="row" v-if="taskLastEvent?.modified">
+          <div class="left">Изменено</div>
+          <div class="right">
+            <el-tag>{{ taskDateFormat(taskLastEvent.modified) }}</el-tag>
+          </div>
+        </div>
+        <div class="row" v-if="taskLastEvent?.finished">
+          <div class="left">Закончена</div>
+          <div class="right">
+            <el-tag>{{ taskDateFormat(taskLastEvent.finished) }}</el-tag>
+          </div>
+        </div>
+        <div class="row" v-if="taskLastEvent?.user_name">
+          <div class="left">Исполнитель</div>
+          <div class="right">
+            <el-tag>{{ taskLastEvent.user_name }}</el-tag>
+          </div>
+        </div>
         <div v-if="task.pipe_id && !READ_MODE">
           <span class="left">Операции</span>
           <el-collapse class="mt-2">
@@ -341,18 +276,18 @@ const save = () => {
               v-for="operation in taskPipe?.operation_entities"
               :key="`${task.id}-${operation?.id}`"
             >
-            <el-collapse-item class="collapse-item">
+            <!-- <el-collapse-item class="collapse-item">
               <template #title>
                 <div class="collapse-item-header">
-                  <!-- <el-icon :color="eventStatus?.['color']">
+                  <el-icon :color="eventStatus?.['color']">
                     <SuccessFilled />
-                  </el-icon> -->
+                  </el-icon>
                   <span class="ml-1 operation-item-name">{{ operation.name.toUpperCase() }}</span>
                 </div>
               </template>
-              <component :is="OperationComponentsList[operation.id]"></component>
-            </el-collapse-item>
-              <!-- <OperationCollapseItem
+              <OperationLoader key="2" :id="operation.id" :readonly="readonly"/>
+            </el-collapse-item> -->
+              <OperationCollapseItem
                 :operation="operation"
                 :event="task?.event_entities!.find(event=>event?.operation_id===operation?.id) || null"
                 :task-id="task.id"
@@ -361,7 +296,7 @@ const save = () => {
                 :can-change-event-params="canChangeEventParams"
                 :active-division-id="task.division_id"
                 @update="updatePipeData($event, operation.id)"
-              /> -->
+              />
             </template>
           </el-collapse>
         </div>

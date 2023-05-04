@@ -7,10 +7,17 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    '01.WriteNews': typeof import('./src/components/operations/01.WriteNews.vue')['default']
+    '02.CheckNews': typeof import('./src/components/operations/02.CheckNews.vue')['default']
+    '03.CheckNews': typeof import('./src/components/operations/03.CheckNews.vue')['default']
+    '03.PublishNews': typeof import('./src/components/operations/03.PublishNews.vue')['default']
+    '04.Postavit': typeof import('./src/components/operations/04.Postavit.vue')['default']
+    '07.CheckRelease': typeof import('./src/components/operations/07.CheckRelease.vue')['default']
     '1.WriteNews': typeof import('./src/components/operations/1.WriteNews.vue')['default']
     '2.CheckNews': typeof import('./src/components/operations/2.CheckNews.vue')['default']
-    copy: typeof import('./src/components/FinishTaskModal copy.vue')['default']
+    copy: typeof import('./src/components/DetailsWindow copy.vue')['default']
     DetailsWindow: typeof import('./src/components/DetailsWindow.vue')['default']
+    DetailsWindowActions: typeof import('./src/components/DetailsWindowActions.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
@@ -58,6 +65,7 @@ declare module '@vue/runtime-core' {
     OperationCard: typeof import('./src/components/OperationCard.vue')['default']
     OperationCollapseItem: typeof import('./src/components/OperationCollapseItem.vue')['default']
     OperationColumn: typeof import('./src/components/OperationColumn.vue')['default']
+    OperationLoader: typeof import('./src/components/OperationLoader.vue')['default']
     OperationParamsGenerator: typeof import('./src/components/OperationParamsGenerator.vue')['default']
     PipeCard: typeof import('./src/components/PipeCard.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

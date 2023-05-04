@@ -14,7 +14,7 @@ files
         const index = file.indexOf('.');
         if(index === -1)return;
         const key = Number.parseInt(file.slice(0, index), 10);
-        data[key]=file
+        data[key]=path.parse(file).name
     });
 
 fs.writeFileSync(componentsListFile, JSON.stringify(data, null, 2));
