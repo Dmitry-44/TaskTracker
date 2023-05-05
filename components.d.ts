@@ -55,6 +55,7 @@ declare module '@vue/runtime-core' {
     ElTag: typeof import('element-plus/es')['ElTag']
     ElText: typeof import('element-plus/es')['ElText']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
+    EventData: typeof import('./src/components/EventData.vue')['default']
     EventsModal: typeof import('./src/components/EventsModal.vue')['default']
     Filters: typeof import('./src/components/Filters.vue')['default']
     FinishTaskModal: typeof import('./src/components/FinishTaskModal.vue')['default']

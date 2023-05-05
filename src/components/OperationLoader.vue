@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import type { Event } from '@/entities/event';
 import { defineAsyncComponent, onBeforeMount, ref, watch, type Component, type PropType } from 'vue';
 import operationComponents from '../../operationComponents.json';
 
 const props = defineProps({
     params: {           
-      type: Object as PropType<Record<string,any>>,
+      type: Object as PropType<Event['params']>,
       default: () => ({
         direction: 0,
         time: null
@@ -20,7 +21,7 @@ const props = defineProps({
     }
 })
 const emit = defineEmits<{
-  (e: "update:params", value: Object): void;
+  (e: "update:params", value: Event['params']): void;
 }>();
 
 const params = ref(props.params)
@@ -31,16 +32,18 @@ const componentToRender: Component = defineAsyncComponent({
     loader: () => import(`@/components/operations/${componentNamesList[props.id]}.vue`)
 });
 
-if(!props.readonly){
-    watch(
+watch(
     ()=> params.value,
     (newParams, oldParams)=>{
-        emit('update:params', newParams)
+        params.value=newParams;
+        if(!props.readonly){
+            emit('update:params', newParams)
+        }
     }
-)}
-
+)
 
 </script>
+
 <template>
-    <component :key="id" :is="componentToRender" v-model="params" :readonly="readonly" ></component>
+    <componentToRender :key="id" :is="componentToRender" v-model="params" :readonly="readonly" ></componentToRender>
 </template>

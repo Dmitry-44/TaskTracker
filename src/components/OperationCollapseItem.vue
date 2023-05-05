@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { eventStatusOptions, type Event } from "@/entities/event";
 import type { Operation } from "@/entities/operation";
-import { taskDateFormat, type Task } from "@/entities/task";
+import type { Task } from "@/entities/task";
 import { useUserStore } from "@/stores/user";
 import { computed, onBeforeMount, onBeforeUnmount, ref, toRef, watch, type PropType, type Ref } from "vue";
 import OperationParamsGenerator from "./OperationParamsGenerator.vue";
 import cloneDeep from 'lodash/cloneDeep';
 import OperationLoader from "@/components/OperationLoader.vue";
+import EventData from "./EventData.vue";
 
 const props = defineProps({
   operation: {
@@ -42,7 +43,7 @@ const props = defineProps({
 
 const taskPipeData = toRef(props, 'pipeData')
 const emit = defineEmits<{
-  (e: "update", value: Task['pipe_data']): void;
+  (e: "update", value: Event['params']): void;
 }>();
 
 
@@ -62,6 +63,10 @@ function optionChangeHandle(value: number) {
     } else if (value===3){
       taskPipeData.value['selected_divisions']=[]
     }
+}
+
+const updateParams = (params: Event['params']) => {
+  emit('update', params)
 }
 
 
@@ -104,45 +109,10 @@ watch(
         <el-tag class="status-tag">{{ operation.name }}</el-tag>
       </div>
     </div>
-    <div class="row" v-if="event?.status">
-      <div class="left">Статус</div>
-      <div class="right">
-        <el-tag class="status-tag" :color="eventStatus?.['color']">{{ eventStatus?.['value'] }}</el-tag>
-      </div>
-    </div>
-    <div class="row" v-if="event?.created">
-      <div class="left">Старт</div>
-      <div class="right">
-        <el-tag>{{ taskDateFormat(event.created) }}</el-tag>
-      </div>
-    </div>
-    <div class="row" v-if="event?.modified">
-      <div class="left">Изменено</div>
-      <div class="right">
-        <el-tag>{{ taskDateFormat(event.modified) }}</el-tag>
-      </div>
-    </div>
-    <div class="row" v-if="event?.finished">
-      <div class="left">Закончена</div>
-      <div class="right">
-        <el-tag>{{ taskDateFormat(event.finished) }}</el-tag>
-      </div>
-    </div>
-    <div class="row" v-if="event?.user_name">
-      <div class="left">Исполнитель</div>
-      <div class="right">
-        <el-tag>{{ event.user_name }}</el-tag>
-      </div>
-    </div>
-    <div class="row" v-if="event?.result">
-      <div class="left">Результат</div>
-      <div class="right">
-        {{ event.result['text']||'-' }}
-      </div>
-    </div>
+    <EventData v-if="event" :id="`${taskId}-${event.id}`" :event="event"/>
     <!-- TO DO SHOW CONDITION -->
     <div>
-      <OperationLoader key="3" :id="operation.id"  :params="event?.params"/>
+      <OperationLoader :key="`${taskId}-${operation.id}` " :id="operation.id"  :params="event ? event?.params : pipeData" @update:params="updateParams" :readonly="event ? true : false"/>
       <template v-if="canSelectExecutors">
       <el-row><b>Кто видит задачу</b></el-row>
       <el-radio-group v-show="canChangeEventParams" v-model="executors">

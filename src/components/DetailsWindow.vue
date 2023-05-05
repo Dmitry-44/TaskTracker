@@ -12,8 +12,10 @@ import { services } from "@/main";
 import { taskStatusOptions, taskPriorityOptions, type Task, formatTask, taskDateFormat } from "@/entities/task"
 import type { Operation } from "@/entities/operation";
 import cloneDeep from 'lodash/cloneDeep';
-import { lastFromArray, operationResolver } from "@/plugins/utils";
+import { lastFromArray } from "@/plugins/utils";
 import DetailsWindowActions from "./DetailsWindowActions.vue";
+import type { Event } from "@/entities/event";
+import EventData from "./EventData.vue";
 
 
 const props = defineProps({
@@ -72,12 +74,13 @@ const canChangeTaskDivision = computed(()=> TaskService.canChangeTaskDivision(ta
 const canSetTaskPipeline = computed(()=> TaskService.canSetTaskPipeline(task.value, user))
 const canChangeTaskPipeline = computed(()=> TaskService.canChangeTaskPipeline(task.value, user))
 
+
 //METHODS
 const finishTask = () => {
     taskStore.setTaskToFinish(cloneDeep(task.value))
     commonStore.openFinishTaskModal()
 }
-const updatePipeData = (data: Task['pipe_data'], operId: Operation['id']) => {
+const updatePipeData = (data: Event['params'], operId: Operation['id']) => {
   task.value['pipe_data'][operId] = data
 }
 const save = () => {
@@ -165,12 +168,12 @@ watch(
             <el-tag size="large" class="tag-info">{{ taskLastOperation?.name.toUpperCase() }}</el-tag>
           </div>
         </div>
-        <div class="row" v-if="READ_MODE && taskStatus">
+        <!-- <div class="row" v-if="READ_MODE && taskStatus">
           <div class="left">Статус</div>
           <div class="right">
             <el-tag size="large" class="tag-info" :color="taskStatus['color']">{{ taskStatus['value'] }}</el-tag>
           </div>
-        </div>
+        </div> -->
         <div class="row">
           <div class="left">Приоритет</div>
           <div class="right">
@@ -245,30 +248,8 @@ watch(
           </div>
         </div>
         <OperationLoader :key="taskLastOperation.id" v-if="READ_MODE && taskLastOperation" :id="taskLastOperation.id" :params="taskLastEvent?.params" :readonly="readonly"/>
-        <div class="row" v-if="taskLastEvent?.created">
-          <div class="left">Старт</div>
-          <div class="right">
-            <el-tag>{{ taskDateFormat(taskLastEvent.created) }}</el-tag>
-          </div>
-        </div>
-        <div class="row" v-if="taskLastEvent?.modified">
-          <div class="left">Изменено</div>
-          <div class="right">
-            <el-tag>{{ taskDateFormat(taskLastEvent.modified) }}</el-tag>
-          </div>
-        </div>
-        <div class="row" v-if="taskLastEvent?.finished">
-          <div class="left">Закончена</div>
-          <div class="right">
-            <el-tag>{{ taskDateFormat(taskLastEvent.finished) }}</el-tag>
-          </div>
-        </div>
-        <div class="row" v-if="taskLastEvent?.user_name">
-          <div class="left">Исполнитель</div>
-          <div class="right">
-            <el-tag>{{ taskLastEvent.user_name }}</el-tag>
-          </div>
-        </div>
+        <EventData v-if="taskLastEvent&&READ_MODE" :key="`${task.id}-${taskLastEvent.id}`" :event="taskLastEvent" />
+
         <div v-if="task.pipe_id && !READ_MODE">
           <span class="left">Операции</span>
           <el-collapse class="mt-2">
@@ -276,17 +257,6 @@ watch(
               v-for="operation in taskPipe?.operation_entities"
               :key="`${task.id}-${operation?.id}`"
             >
-            <!-- <el-collapse-item class="collapse-item">
-              <template #title>
-                <div class="collapse-item-header">
-                  <el-icon :color="eventStatus?.['color']">
-                    <SuccessFilled />
-                  </el-icon>
-                  <span class="ml-1 operation-item-name">{{ operation.name.toUpperCase() }}</span>
-                </div>
-              </template>
-              <OperationLoader key="2" :id="operation.id" :readonly="readonly"/>
-            </el-collapse-item> -->
               <OperationCollapseItem
                 :operation="operation"
                 :event="task?.event_entities!.find(event=>event?.operation_id===operation?.id) || null"

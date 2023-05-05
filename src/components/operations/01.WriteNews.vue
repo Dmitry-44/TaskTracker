@@ -2,10 +2,18 @@
 import { useOperationStore } from '@/stores/operation';
 import { computed, ref, watch, type PropType } from 'vue';
 import { taskTimeOptions as TASK_TIME_OPTIONS } from '@/entities/task'
+import type { Event } from '@/entities/event';
 
 const props = defineProps({
     modelValue: {           
-      type: Object as PropType<Record<string,any>>,
+      type: Object as PropType<Event['params']>,
+      default: () => ({
+        direction: 0,
+        time: null
+      })
+    },
+    params: {           
+      type: Object as PropType<Event['params']>,
       default: () => ({
         direction: 0,
         time: null
@@ -17,14 +25,14 @@ const props = defineProps({
     }
 })
 const emit = defineEmits<{
-  (e: "update:modelValue", value: Object): void;
+  (e: "update:params", value: Event['params']): void;
 }>();
 
 const params = ref(props.modelValue)
 const DIRECTION_OPTIONS = useOperationStore().getDirectionOptions
 
-const activeDirection = computed(()=>DIRECTION_OPTIONS.find(dir=>dir['id']===params.value['direction']))
-const activeTime = computed(()=>TASK_TIME_OPTIONS.find(time=>time['value']===params.value['time']))
+const activeDirection = computed(()=>DIRECTION_OPTIONS.find(dir=>dir['id']===params.value!['direction']))
+const activeTime = computed(()=>TASK_TIME_OPTIONS.find(time=>time['value']===params.value!['time']))
 
 watch(
     ()=> props.modelValue,
@@ -36,8 +44,9 @@ if(!props.readonly){
     watch(
         ()=> params.value,
         (newParams, oldParams)=>{
-            emit('update:modelValue', newParams)
-        }
+            emit('update:params', newParams)
+        },
+        {deep: true}
     )
 }
 </script>
@@ -48,7 +57,7 @@ if(!props.readonly){
         <div class="right">
             <el-select
                 v-if="!readonly"
-                v-model="params['direction']"
+                v-model="params!['direction']"
                 placeholder="Выбрать направление"
                 :disabled="readonly"
             >
@@ -67,7 +76,7 @@ if(!props.readonly){
         <div class="right">
             <el-select
                 v-if="!readonly"
-                v-model="params['time']"
+                v-model="params!['time']"
                 placeholder="Выбрать время на задачу"
                 :disabled="readonly"
             >
@@ -78,7 +87,7 @@ if(!props.readonly){
                 :value="item['value']"
             />
             </el-select>
-            <el-tag v-else>{{ activeTime?.['time'] }}</el-tag>
+            <el-tag v-else>{{ activeTime?.['time'] || '-' }}</el-tag>
         </div>
     </div>
 </template>
