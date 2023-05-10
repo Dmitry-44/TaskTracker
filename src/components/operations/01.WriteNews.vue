@@ -68,7 +68,7 @@ if(!props.readonly){
                 :value="item['id']"
             />
             </el-select>
-            <el-tag v-else>{{ activeDirection?.['name'] }}</el-tag>
+            <el-tag v-else class="tag-info">{{ activeDirection?.['name'] }}</el-tag>
         </div>
     </div>
     <div class="row">
@@ -87,7 +87,7 @@ if(!props.readonly){
                 :value="item['value']"
             />
             </el-select>
-            <el-tag v-else>{{ activeTime?.['time'] || '-' }}</el-tag>
+            <el-tag v-else class="tag-info">{{ activeTime?.['time'] || '-' }}</el-tag>
         </div>
     </div>
 </template>

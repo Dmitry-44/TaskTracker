@@ -19,31 +19,31 @@ const eventStatus = eventStatusOptions.find((ev) => props.event?.status === ev['
     <div class="row" v-if="event?.status">
       <div class="left">Статус</div>
       <div class="right">
-        <el-tag class="status-tag" :color="eventStatus?.['color']">{{ eventStatus?.['value'] }}</el-tag>
+        <el-tag class="tag-info" :color="eventStatus?.['color']">{{ eventStatus?.['value'] }}</el-tag>
       </div>
     </div>
     <div class="row" v-if="event?.created">
       <div class="left">Старт</div>
       <div class="right">
-        <el-tag>{{ taskDateFormat(event.created) }}</el-tag>
+        <el-tag class="tag-info">{{ taskDateFormat(event.created) }}</el-tag>
       </div>
     </div>
     <div class="row" v-if="event?.modified">
       <div class="left">Изменено</div>
       <div class="right">
-        <el-tag>{{ taskDateFormat(event.modified) }}</el-tag>
+        <el-tag class="tag-info">{{ taskDateFormat(event.modified) }}</el-tag>
       </div>
     </div>
     <div class="row" v-if="event?.finished">
       <div class="left">Закончена</div>
       <div class="right">
-        <el-tag>{{ taskDateFormat(event.finished) }}</el-tag>
+        <el-tag class="tag-info">{{ taskDateFormat(event.finished) }}</el-tag>
       </div>
     </div>
     <div class="row" v-if="event?.user_name">
       <div class="left">Исполнитель</div>
       <div class="right">
-        <el-tag>{{ event.user_name }}</el-tag>
+        <el-tag class="tag-info">{{ event.user_name }}</el-tag>
       </div>
     </div>
     <div class="row" v-if="event?.result">

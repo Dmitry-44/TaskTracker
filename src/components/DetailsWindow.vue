@@ -275,7 +275,7 @@ watch(
   </div>
 </template>
 
-<style lang="sass" scoped>
+<style lang="sass">
 .details
     box-shadow: 0 0 0 1px #edeae9, 0 5px 20px 0 rgba(109, 110, 111, 0.08)
     background-color: #fff

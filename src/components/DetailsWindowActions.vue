@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { useUserStore } from "@/stores/user";
+import { useTaskStore } from "@/stores/task";
+import { useCommonStore } from "@/stores/common";
 import { Close, Pointer, Finished, ArrowRightBold, ArrowLeftBold } from "@element-plus/icons-vue";
 import type { PropType} from "vue";
 import { services } from "@/main";
 import type { Task } from "@/entities/task"
 
-defineProps({
+const props = defineProps({
   task: {
     type: Object as PropType<Task>,
     required: true
@@ -47,8 +49,15 @@ const emit = defineEmits<{
 
 
 const userStore = useUserStore();
+const taskStore = useTaskStore();
+const commonStore = useCommonStore();
 const user = userStore.getUser;
 const TaskService = services.Task
+
+const takeTask = () => {
+    taskStore.setTaskToTake(Object.assign({}, props.task))
+    commonStore.openTakeTaskModal()
+}
 
 </script>
 
@@ -76,7 +85,7 @@ const TaskService = services.Task
     >
       <el-button 
       :icon="Pointer"
-      @click.stop="TaskService.takeTask(task, user)"
+      @click.stop="takeTask"
       ></el-button>
     </el-tooltip>
     <el-tooltip
