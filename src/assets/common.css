@@ -19,3 +19,21 @@
     font-size: 14px;
     /* font-weight: bold; */
 }
+#app .el-dialog {
+    width: 30%;
+}
+@media screen and (max-width: 1024px) {
+    #app .el-dialog {
+        width: 50%;
+    }
+}
+@media screen and (max-width: 768px) {
+    #app .el-dialog {
+        width: 70%;
+    }
+}
+@media screen and (max-width: 425px) {
+    #app .el-dialog {
+        width: 98%;
+    }
+}
