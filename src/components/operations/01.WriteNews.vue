@@ -91,3 +91,17 @@ if(!props.readonly){
         </div>
     </div>
 </template>
+
+<style>
+
+.modal-take-task-body .row{
+    display: flex;
+    align-items: baseline;
+    margin-top: 5px;
+}
+.modal-take-task-body .row .left {
+    min-width: 100px;
+    margin-right: 10px;
+}
+
+</style>

@@ -46,18 +46,17 @@ function dialogOkHandle(){
 </script>
 
 <template>
-	<el-dialog v-model="showModal" width="30%" @close="dialogCancelHandle">
+	<el-dialog v-model="showModal" class="modal-take-task" @close="dialogCancelHandle">
 		<template #header>
 			<el-row justify="center">
 				<span class="modal__title">Уверены что хотите взять задачу?</span>
 			</el-row>
 		</template>
-		<el-row class="modal__task__title mb-2">
-			<span><b>{{ taskLastEventOperation?.name }}:</b></span><br/>
+		<div class="modal-take-task-body">
+			<span style="margin-right:5px;"><b>{{ taskLastEventOperation?.name }}:</b></span>
 			<span>"{{ task?.title }}"</span>
-		</el-row>
-			<!-- <component :key="task?.id" v-if="operationComponent" :is="operationComponent" v-bind="{readonly: true, params: taskLastEvent?.params}" ></component> -->
 			<OperationLoader v-if="taskLastEvent" :key="task?.id" :params="taskLastEvent?.params" :readonly="true" :id="taskLastEventOperation!.id"></OperationLoader>
+		</div>
 		<template #footer>
 			<span class="dialog-footer">
 				<el-button @click="dialogCancelHandle">Отмена</el-button>

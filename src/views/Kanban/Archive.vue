@@ -16,8 +16,6 @@ const user = useUserStore().getUser;
 
 //GETTERS
 const LOADING = ref(false);
-const readyTasks = computed(() => taskStore.getMyTasksByEventStatus(user, EventStatus.CREATED));
-const tasksInProgress = computed(() => taskStore.getMyTasksByEventStatus(user, EventStatus.IN_PROGRESS));
 const taskFilters = computed(() => taskStore.getfilters)
 
 const tasksIFinished = computed(() => taskStore.getMyTasksByEventStatus(user, EventStatus.COMPLETED));
@@ -34,17 +32,15 @@ const firstColumnData = computed(()=>{
   }
 })
 
-const secondColumnData = computed(()=>{
-  return {
+const secondColumnData = {
     display: false,
     title: 'В работе',
     isDraggable: false,
     addNewTask: false,
-    tasks: unref(tasksInProgress),
-    loading: unref(LOADING),
+    tasks: [],
+    loading: false,
     noActions: true
-  }
-})
+}
 
 const filterUpdate = async (payload: FilterPayload) => {
   LOADING.value = true;
