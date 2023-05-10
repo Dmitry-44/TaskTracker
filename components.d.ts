@@ -60,6 +60,7 @@ declare module '@vue/runtime-core' {
     Filters: typeof import('./src/components/Filters.vue')['default']
     FinishTaskModal: typeof import('./src/components/FinishTaskModal.vue')['default']
     JsonEditor: typeof import('./src/components/JsonEditor.vue')['default']
+    Kanban: typeof import('./src/components/Kanban.vue')['default']
     KanbanColumn: typeof import('./src/components/KanbanColumn.vue')['default']
     KanbanColumnSortPicker: typeof import('./src/components/KanbanColumnSortPicker.vue')['default']
     MenuAside: typeof import('./src/components/MenuAside.vue')['default']

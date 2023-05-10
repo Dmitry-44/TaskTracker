@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSitesStore } from "@/stores/sites";
+import { useCommonStore } from "@/stores/common";
 import type { FilterPayload } from "@/api";
 import { Close } from "@element-plus/icons-vue";
 import { ref, computed, watch, nextTick, onMounted, onBeforeMount, type Ref } from "vue";
@@ -7,12 +8,9 @@ import { services } from "@/main";
 import { taskPriorityOptions } from "@/entities/task";
 
 
-const emit = defineEmits<{
-  (e: "update", value: FilterPayload): void;
-}>();
-
 //CONSTANTS
 const sitesStore = useSitesStore();
+const commonStore = useCommonStore()
 const SITES_OPTIONS = computed(() => sitesStore.getList);
 const FilterService = services.Filters
 // const operationsById = computed(() => operationStore.getOperationsById);
@@ -22,7 +20,7 @@ const FilterService = services.Filters
 
 
 //VARIABLES
-const filterIsOpen = ref(false);
+const filterIsOpen = computed(()=>commonStore.getFiltersIsOpen)
 const date = ref(FilterService.date)
 const dateInt = computed(() => {
   const dtss = Math.round(new Date(date.value[0]).getTime() / 1000);
@@ -34,14 +32,14 @@ const dateInt = computed(() => {
 });
 
 const filterPayload: Ref<FilterPayload> = ref(FilterService.getPersonalFilters())
+  
 addDataFilter()
-
 
 watch(
   () => date.value,
   () => {
     addDataFilter()
-    emit("update", filterPayload.value);
+    applyFilters()
   }
 );
 
@@ -50,19 +48,8 @@ function addDataFilter() {
   filterPayload.value.filter['dts'] = dateInt.value.dts
   filterPayload.value.filter['dtf'] = dateInt.value.dtf
 }
-const applyFilters = () => {
-  FilterService.applyFilters(filterPayload.value)
-  emit("update", filterPayload.value);
-  closeFilters();
-};
+const applyFilters = () => FilterService.applyFilters(filterPayload.value)
 const resetFilters = () => FilterService.resetFilters(filterPayload.value)
-
-const closeFilters = () => {
-  filterIsOpen.value = false;
-};
-const openFilters = () => {
-  filterIsOpen.value = true;
-};
 
 //HOOKS
 onMounted(() => {
@@ -100,13 +87,6 @@ const shortcuts = [
   },
 ];
 
-defineExpose({
-  closeFilters,
-  openFilters,
-  resetFilters,
-  applyFilters,
-  filterPayload,
-});
 </script>
 
 <template>
@@ -121,7 +101,7 @@ defineExpose({
       :shortcuts="shortcuts"
     />
     <div class="dropdown">
-      <el-button type="info" class="mx-4" @click="filterIsOpen = true">
+      <el-button type="info" class="mx-4" @click="FilterService.openFilters()">
         Фильтры<el-icon class="ml-1"><ArrowDown /></el-icon>
       </el-button>
       <el-card v-if="filterIsOpen" class="box-card filters_card">
@@ -136,7 +116,7 @@ defineExpose({
               <el-button
                 class="filters_card-close-btn"
                 :icon="Close"
-                @click="filterIsOpen = false"
+                @click="FilterService.closeFilters"
               />
             </el-tooltip>
           </div>

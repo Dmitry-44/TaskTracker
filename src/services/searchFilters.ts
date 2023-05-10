@@ -1,13 +1,17 @@
-import type { IUserStore } from '@/adapters';
+import type { ICommonStore, ITaskStore, IUserStore } from '@/adapters';
 import type { FilterPayload } from '@/api';
 
 
 export default class SearchFiltersService {
 
 	userStore;
+	taskStore;
+	commonStore;
 	
-	constructor(userStore: IUserStore){
+	constructor(userStore: IUserStore, taskStore: ITaskStore, commonStore: ICommonStore ){
 		this.userStore = userStore
+		this.taskStore = taskStore
+		this.commonStore = commonStore
 	}
 
 	LOCAL_STORAGE_PRE_KEY='tasks_filter_settings'
@@ -107,5 +111,14 @@ export default class SearchFiltersService {
 		}
 		
 		this.setPersonalFilters(filters);
+		this.taskStore.updateFilters(filters)
+		this.closeFilters()
+	}
+
+	closeFilters = () => {
+		this.commonStore.closeFilters()
+	}
+	openFilters() {
+		this.commonStore.openFilters()
 	}
 }

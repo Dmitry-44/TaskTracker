@@ -98,7 +98,7 @@ onMounted(()=>{
 </script>
 
 <template>
-  <div :class="['card', active ? 'active' : '', readonlyTask ? 'done' : '']" :style="{ '--priority-color': taskPriority!['color'] }" ref='taskCardElement'>
+  <div :class="['card', active ? 'active' : '']" :style="{ '--priority-color': taskPriority!['color'] }" ref='taskCardElement'>
     <div class="content">
       <div class="title-indicator">
         <span class="title">

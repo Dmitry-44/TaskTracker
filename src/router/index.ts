@@ -25,6 +25,12 @@ const routes = [
 				meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
 			},
 			{
+				path: "/archive",
+				name: "Завершенные",
+				component: () => import("@/views/Kanban/Archive.vue"),
+				meta: { requiresAuth: false, rights: { mh_photobank: 1 } },
+			},
+			{
 				path: "/operations",
 				name: "Операции",
 				component: () => import("@/views/Operations/Index.vue"),

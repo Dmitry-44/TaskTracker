@@ -4,6 +4,8 @@ import type { Task } from "@/entities/task";
 import type { EventStatus, Event } from '@/entities/event';
 import { lastFromArray } from '@/plugins/utils';
 import type { User } from '@/entities/user';
+import type { FilterPayload } from '@/api';
+import TaskRepo from '@/api/task';
 
 interface State {
 	tasks: Task[];
@@ -11,6 +13,7 @@ interface State {
 	activeTask: Task;
 	taskToFinish: Task|null;
 	taskToTake: Task|null;
+	filters: FilterPayload
 }
 
 
@@ -22,6 +25,7 @@ export const useTaskStore = defineStore({
 		singleTask: null,
 		taskToFinish: null,
 		taskToTake: null,
+		filters: new TaskRepo().getDefaultFilters
 	}),
 	getters: {
 		getList: (state) => state.tasks,
@@ -50,7 +54,8 @@ export const useTaskStore = defineStore({
 		getSingleTask: (state) => state.singleTask,
 		getActiveTask: (state) => state.activeTask,
 		getTaskToFinish: (state) => state.taskToFinish,
-		getTaskToTake: (state) => state.taskToTake
+		getTaskToTake: (state) => state.taskToTake,
+		getfilters: (state) => state.filters
 	},
 	actions: {
 		setActiveTask(payload: Task): void {
@@ -108,5 +113,10 @@ export const useTaskStore = defineStore({
 			if(!eventToUpdate)return;
 			eventToUpdate.status=status
 		},
+		updateFilters(filters: FilterPayload): void {
+			this.filters.select = filters.select.length>0 ? filters.select : this.filters.select
+			this.filters.filter = Object.assign(this.filters.filter, filters.filter)
+			this.filters.options = Object.assign(this.filters.options, filters.options)
+		}
 	},
 });

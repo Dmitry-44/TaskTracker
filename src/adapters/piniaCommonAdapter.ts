@@ -2,7 +2,7 @@ import { useCommonStore } from '../stores/common';
 import type { ICommonStore } from '.';
 
 
-export default class PiniaInterfaceAdapter implements ICommonStore {
+export default class piniaCommonAdapter implements ICommonStore {
 
 	commonStore; 
 
@@ -33,6 +33,12 @@ export default class PiniaInterfaceAdapter implements ICommonStore {
 	}
 	openFinishTaskModal(): void {
 		this.commonStore.openFinishTaskModal()
+	}
+	openFilters(): void {
+		this.commonStore.openFilters()
+	}
+	closeFilters(): void {
+		this.commonStore.hideFilters()
 	}
 
 }
