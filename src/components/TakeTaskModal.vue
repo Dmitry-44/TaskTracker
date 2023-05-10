@@ -3,11 +3,12 @@
 import { useTaskStore } from '@/stores/task'
 import { useCommonStore } from '@/stores/common'
 import { useUserStore } from '@/stores/user'
-import { computed } from 'vue';
+import { computed, onBeforeMount, ref, shallowRef, watch, type Component, type Ref, type ShallowRef } from 'vue';
 import { services } from '@/main';
 import { lastFromArray } from '@/plugins/utils';
 import { useOperationStore } from '@/stores/operation';
-import OperationParamsGenerator from "./OperationParamsGenerator.vue";
+import { operationLoader } from '@/plugins/operationLoader';
+import OperationLoader from './OperationLoader.vue';
 
 
 const taskStore = useTaskStore()
@@ -31,6 +32,17 @@ function dialogOkHandle(){
 	commonStore.hideTakeTaskModal()
 }
 
+// const operationComponent: ShallowRef<Component|null> = shallowRef(null);
+
+// watch(
+// 	()=>taskLastEventOperation.value,
+// 	async(newValue, oldValue)=>{
+// 		if(!newValue)return;
+// 		if(!newValue.id)return;
+// 		operationComponent.value= await operationLoader(newValue!.id)
+// 	}
+// )
+
 </script>
 
 <template>
@@ -44,7 +56,8 @@ function dialogOkHandle(){
 			<span><b>{{ taskLastEventOperation?.name }}:</b></span><br/>
 			<span>"{{ task?.title }}"</span>
 		</el-row>
-			<OperationParamsGenerator v-if="task" :params="taskLastEvent?.params" :operation-id="taskLastEventOperation?.id!" :can-change-event-params="false" />
+			<!-- <component :key="task?.id" v-if="operationComponent" :is="operationComponent" v-bind="{readonly: true, params: taskLastEvent?.params}" ></component> -->
+			<OperationLoader v-if="taskLastEvent" :key="task?.id" :params="taskLastEvent?.params" :readonly="true" :id="taskLastEventOperation!.id"></OperationLoader>
 		<template #footer>
 			<span class="dialog-footer">
 				<el-button @click="dialogCancelHandle">Отмена</el-button>

@@ -12,7 +12,7 @@ import UserService from './user';
 import UserRepo from '@/api/user';
 import PiniaUserAdapter from '@/adapters/piniaUserAdapter';
 import PiniaTaskAdapter from '@/adapters/piniaTaskAdapter';
-import PiniaInterfaceAdapter from '@/adapters/piniaInterfaceAdapter';
+import piniaCommonAdapter from '@/adapters/piniaCommonAdapter';
 import PiniaSiteAdapter from '@/adapters/piniaSiteAdapter';
 import PiniaOperationAdapter from '@/adapters/piniaOperationAdapter';
 import PiniaPipeAdapter from '@/adapters/piniaPipeAdapter';
@@ -24,7 +24,7 @@ function initServices() {
     const taskService = new TaskService(
         new TaskRepo(),
         new PiniaTaskAdapter(),
-        new PiniaInterfaceAdapter(),
+        new piniaCommonAdapter(),
         new PiniaUserAdapter()
     );
     const pipeService = new PipeService(
@@ -39,11 +39,11 @@ function initServices() {
         new OperationRepo(),
         new PiniaOperationAdapter(),
     );
-    const searchFiltersService = new SearchFiltersService(new PiniaUserAdapter())
+    const searchFiltersService = new SearchFiltersService(new PiniaUserAdapter(), new PiniaTaskAdapter(), new piniaCommonAdapter());
     const userService = new UserService(
         new UserRepo(), 
         new PiniaUserAdapter(),
-        new PiniaInterfaceAdapter()
+        new piniaCommonAdapter()
     )
     const storeUpdater = taskStoreUpdater(new PiniaTaskAdapter());
 

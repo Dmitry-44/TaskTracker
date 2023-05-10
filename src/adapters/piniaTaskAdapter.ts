@@ -3,6 +3,7 @@ import type { Task } from '@/entities/task';
 import { useTaskStore } from '@/stores/task';
 import type { ITaskStore } from '.';
 import type { Event } from '@/entities/event';
+import type { FilterPayload } from '@/api';
 
 
 export default class PiniaTaskAdapter implements ITaskStore {
@@ -45,5 +46,8 @@ export default class PiniaTaskAdapter implements ITaskStore {
 	}
 	setTaskToFinish(payload: Task|null): void {
 		return this.taskStore.setTaskToFinish(payload)
+	}
+	updateFilters(payload: FilterPayload): void {
+		return this.taskStore.updateFilters(payload)
 	}
 }

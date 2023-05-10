@@ -8,7 +8,6 @@ import { EventStatus } from "@/entities/event";
 import Kanban from "@/components/Kanban.vue";
 
 
-
 const taskStore = useTaskStore();
 const abortController = new AbortController();
 const abortSignal = abortController.signal;
@@ -17,8 +16,8 @@ const user = useUserStore().getUser;
 
 //GETTERS
 const LOADING = ref(false);
-const readyTasks = computed(() => taskStore.getTasksByEventStatus(user, EventStatus.CREATED));
-const tasksInProgress = computed(() => taskStore.getTasksByEventStatus(user, EventStatus.IN_PROGRESS));
+const readyTasks = computed(() => taskStore.getMyTasksByEventStatus(user, EventStatus.CREATED));
+const tasksInProgress = computed(() => taskStore.getMyTasksByEventStatus(user, EventStatus.IN_PROGRESS));
 const taskFilters = computed(() => taskStore.getfilters)
 
 
@@ -26,11 +25,11 @@ const firstColumnData = computed(()=>{
   return {
     display: true,
     title: 'К исполнению',
-    isDraggable: true,
+    isDraggable: false,
     addNewTask: true,
     tasks: unref(readyTasks),
     loading: unref(LOADING),
-    noActions: false
+    noActions: true
   }
 })
 
@@ -38,11 +37,11 @@ const secondColumnData = computed(()=>{
   return {
     display: true,
     title: 'В работе',
-    isDraggable: true,
+    isDraggable: false,
     addNewTask: false,
     tasks: unref(tasksInProgress),
     loading: unref(LOADING),
-    noActions: false
+    noActions: true
   }
 })
 
@@ -69,10 +68,10 @@ onBeforeUnmount(() => {
 
 <template>
   <Kanban 
-    key="index" 
+    key="my" 
     :first-column="firstColumnData" 
     :second-column="secondColumnData" 
     :loading="LOADING" 
-    :readonly="true" 
+    :readonly="false"  
   />
 </template>

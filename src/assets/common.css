@@ -7,8 +7,7 @@
     align-items: center;
 }
 
-.status-tag,
-.priority-tag {
+.details .tag-info{
     letter-spacing: 1px;
 }
 

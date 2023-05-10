@@ -1,3 +1,4 @@
+import type { FilterPayload } from '@/api';
 import type { Event } from '@/entities/event';
 import type{ Operation } from '@/entities/operation';
 import type { Pipe } from '@/entities/pipe';
@@ -29,6 +30,7 @@ interface ITaskStore {
     updateEvent(taskId: Task['id'], event: Partial<Event>):void
     updateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): void
     setTaskToFinish(payload: Task|null):void
+    updateFilters(payload: FilterPayload):void
 }
 interface ICommonStore {
     getGlobalLoading(): boolean
@@ -39,6 +41,8 @@ interface ICommonStore {
     showGlobalLoader(): void
     hideGlobalLoader(): void
     openFinishTaskModal(): void
+    openFilters():void
+    closeFilters():void
 }
 interface ISiteStore {
     getList(): Site[],

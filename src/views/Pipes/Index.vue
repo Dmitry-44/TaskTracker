@@ -4,6 +4,7 @@ import { useOperationStore } from "@/stores/operation";
 import { usePipeStore } from "@/stores/pipe";
 import { useRouter } from "vue-router";
 import { ref, computed, onBeforeMount } from "vue";
+import { services } from "@/main";
 
 const router = useRouter();
 const pipeStore = usePipeStore();
@@ -15,6 +16,14 @@ const operations = computed(() => operationStore.getOperations);
 const handleEdit = (id: number) => {
   router.push(`/pipes/${id}`);
 };
+const loading = ref(false)
+
+onBeforeMount(()=>{
+  loading.value=true
+  services.Pipe.fetchPipes()
+                .finally(()=>{loading.value=false})
+})
+
 </script>
 
 <template>
@@ -31,7 +40,7 @@ const handleEdit = (id: number) => {
         >
       </div>
     </template>
-    <el-table class="table" :data="pipes" size="large" :border="true">
+    <el-table class="table" :data="pipes" size="large" :border="true" v-loading="loading">
       <el-table-column label="Название" prop="name" width="180">
       </el-table-column>
       <el-table-column label="Операции">

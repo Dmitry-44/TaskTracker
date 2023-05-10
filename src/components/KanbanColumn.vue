@@ -30,6 +30,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  noActions: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits<{
@@ -115,6 +119,7 @@ const setDefaultSort = () => {
           :draggable="isDraggable"
           :task="task"
           :active="task.id === activeTask?.id ? true : false"
+          :no-actions="noActions"
           @click.stop="TaskService.clickTask(task)"
           @dragstart="emit('taskDragStart', $event, task)"
         />
@@ -155,6 +160,7 @@ const setDefaultSort = () => {
         h3
             font-size: 16px
             line-height: 20px
+            letter-spacing: 1px
             overflow: hidden
             text-overflow: ellipsis
             white-space: nowrap

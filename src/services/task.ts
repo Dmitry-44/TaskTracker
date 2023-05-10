@@ -451,9 +451,10 @@ export default class TaskService {
 		// && user.rights['tt_task_accept']>=1
 		return task.id<0 || task.created_by===user.id 
 	}
-	canChangeEventExecutors(division: Division, user: User): boolean {
+	canChangeEventExecutors(task: Task, user: User): boolean {
 		//TO DO + право пользователя на выбор исполнителя
-		return division?.ttrace_ids?.includes(user.selected_group)
+			return task.id<=0
+		// return division?.ttrace_ids?.includes(user.selected_group)
 	}
 
 	clearTask(){

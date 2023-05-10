@@ -40,6 +40,10 @@ export default class TaskRepo extends Api implements ITaskRepo {
 		multiSort: false,
 	}
 
+	get getDefaultFilters(): FilterPayload {
+		return { select: this.select, filter: this.filter, options: this.options }
+	}
+
 	GetTasks(filterPayload?: FilterPayload, signal?: AbortSignal): Promise<ApiResponse<Task>> {
 		const data = this.mergeFilters(filterPayload)
 		return axiosClient

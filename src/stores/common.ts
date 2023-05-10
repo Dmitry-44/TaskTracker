@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 
 type State = {
 	detailWindowIsOpen: boolean;
+	filtersIsOpen: boolean,
 	isCreatingTaskProcess: boolean;
 	globalLoading: boolean;
 	showFinishTaskModal: boolean;
@@ -12,6 +13,7 @@ export const useCommonStore = defineStore({
 	id: "common",
 	state: (): State => ({
 		detailWindowIsOpen: false,
+		filtersIsOpen: false,
 		isCreatingTaskProcess: false,
 		globalLoading: false,
 		showFinishTaskModal: false,
@@ -22,7 +24,8 @@ export const useCommonStore = defineStore({
 		getDetailWindowIsOpen: (state) => state.detailWindowIsOpen,
 		getGlobalLoading: (state) => state.globalLoading,
 		getShowFinishTaskModal: (state) => state.showFinishTaskModal,
-		getShowTakeTaskModal: (state) => state.showTakeTaskModal
+		getShowTakeTaskModal: (state) => state.showTakeTaskModal,
+		getFiltersIsOpen: (state) => state.filtersIsOpen
 	},
 	actions: {
 		toggleDetailsWindow(bool: boolean): void {
@@ -45,6 +48,12 @@ export const useCommonStore = defineStore({
 		},
 		hideTakeTaskModal(): void {
 			this.showTakeTaskModal = false
+		},
+		openFilters():void {
+			this.filtersIsOpen=true
+		},
+		hideFilters():void {
+			this.filtersIsOpen=false
 		}
 	},
 });

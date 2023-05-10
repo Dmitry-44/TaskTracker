@@ -7,6 +7,8 @@ import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 
 
+
+
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
@@ -21,7 +23,7 @@ export default defineConfig({
     }),
     Components({
       resolvers: [ElementPlusResolver()],
-    })
+    }),
   ],
   build: {
     sourcemap: true,
