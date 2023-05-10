@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts">
 import { useUserStore } from "@/stores/user";
 import type{ Task } from "@/entities/task";
 import DetailsWindow from "@/components/DetailsWindow.vue";
@@ -19,87 +19,98 @@ type ColumnProp = {
     noActions: boolean,
 }
 
-defineProps({
+const columnPropDefault = {
+  display: true,
+  tasks: [],
+  title: '',
+  addNewTask: false,
+  isDraggable: true,
+  loading: false,
+  noActions: false
+}
+
+export default {
+  props: {
     firstColumn: {
-        type: Object as PropType<ColumnProp>,
-        required: true,
-        default: {
-            display: true,
-            tasks: [],
-            title: '',
-            addNewTask: false,
-            isDraggable: true,
-            loading: false,
-            noActions: false
-        }
+      type: Object as PropType<ColumnProp>,
+      required: true,
+      default: columnPropDefault
     },
     secondColumn: {
-        type: Object as PropType<ColumnProp>,
-        required: true,
-        default: {
-            display: true,
-            tasks: [],
-            title: '',
-            addNewTask: false,
-            isDraggable: true,
-            loading: false,
-            noActions: false
-        }
+      type: Object as PropType<ColumnProp>,
+      required: true,
+      default: columnPropDefault
     },
     loading: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false
     },
     readonly: {
-        type: Boolean,
-        default: true
+      type: Boolean,
+      default: true
     }
-})
+  },
+  setup() {
+    const TaskService = services.Task
+    const user = useUserStore().getUser;
 
-const TaskService = services.Task
-const user = useUserStore().getUser;
+    //METHODS
+    const clickOutsideCards = () => {
+      TaskService.clickOutsideTaskCard()
+      services.Filters.closeFilters()
+    };
 
+    //DRAG AND DROP
+    const areaCreated = ref<HTMLDivElement|null>(null);
+    const areaInProgress = ref<HTMLDivElement|null>(null);
+    const areaCompleted = ref<HTMLDivElement|null>(null);
 
-//METHODS
-const clickOutsideCards = () => {
-  TaskService.clickOutsideTaskCard()
-  services.Filters.closeFilters()
-};
+    const stopAll = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    const dragstartHandler = (event: DragEvent, task: Task) => {
+      event.dataTransfer?.setData('text/plain', JSON.stringify(task));
+      event.dataTransfer!.effectAllowed = "link";
+    };
+    const dragoverHandler = (event: DragEvent, areElement: HTMLElement): void => {
+      stopAll(event);
+      areElement.classList.add("dragOver")
+    };
+    const dragleaveHandler = (ev: DragEvent) => {
+      stopAll(ev);
+      clearDragAndDrop()
+    };
+    const dropHandler = async (event: DragEvent, newStatus: number) => {
+      const task = JSON.parse(event.dataTransfer?.getData('text/plain')||'') as Task;
+      if(!!task && typeof task === 'object') {
+        TaskService.dragAndDropTask(task, newStatus, user)
+        clearDragAndDrop()
+      }
+    };
+    const clearDragAndDrop = () => {
+      areaCreated.value?.classList.remove("dragOver");
+      areaInProgress.value?.classList.remove("dragOver");
+      areaCompleted.value?.classList.remove("dragOver");
+    }
 
-//DRAG AND DROP
-const areaCreated = ref<HTMLDivElement|null>(null);
-const areaInProgress = ref<HTMLDivElement|null>(null);
-const areaCompleted = ref<HTMLDivElement|null>(null);
+    return {
+      areaCreated,
+      areaInProgress,
+      areaCompleted,
+      EventStatus,
+      TaskService,
+      clickOutsideCards,
+      dragoverHandler,
+      dragleaveHandler,
+      dropHandler,
+      dragstartHandler,
+    }
+  },
 
-const stopAll = (e: DragEvent) => {
-  e.preventDefault();
-  e.stopPropagation();
-};
-const dragstartHandler = (event: DragEvent, task: Task) => {
-  event.dataTransfer?.setData('text/plain', JSON.stringify(task));
-  event.dataTransfer!.effectAllowed = "link";
-};
-const dragoverHandler = (event: DragEvent, areElement: HTMLElement): void => {
-  stopAll(event);
-  areElement.classList.add("dragOver")
-};
-const dragleaveHandler = (ev: DragEvent) => {
-  stopAll(ev);
-  clearDragAndDrop()
-};
-const dropHandler = async (event: DragEvent, newStatus: number) => {
-  const task = JSON.parse(event.dataTransfer?.getData('text/plain')||'') as Task;
-  if(!!task && typeof task === 'object') {
-    TaskService.dragAndDropTask(task, newStatus, user)
-    clearDragAndDrop()
-  }
-};
-const clearDragAndDrop = () => {
-  areaCreated.value?.classList.remove("dragOver");
-  areaInProgress.value?.classList.remove("dragOver");
-  areaCompleted.value?.classList.remove("dragOver");
 }
 </script>
+
 <template>
   <div class="kanbar-wrapper">
     <div class="menu-top">
