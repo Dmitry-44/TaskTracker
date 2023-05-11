@@ -37,3 +37,7 @@
         width: 98%;
     }
 }
+
+.el-tag.text-white {
+    color: #ffff;
+}

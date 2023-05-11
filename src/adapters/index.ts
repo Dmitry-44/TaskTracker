@@ -20,6 +20,7 @@ interface IUserStore {
 }
 interface ITaskStore {
     getActiveTask(): Task
+    getFilters(): FilterPayload
     setActiveTask(payload: Task): void
     setTasksList(payload: Task[]): void
     setSingleTask(payload: Task|null): void

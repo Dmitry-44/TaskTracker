@@ -1,5 +1,6 @@
 import type { ICommonStore, ITaskStore, IUserStore } from '@/adapters';
 import type { FilterPayload } from '@/api';
+import { taskPriorityOptions } from '@/entities/task';
 
 
 export default class SearchFiltersService {
@@ -115,10 +116,15 @@ export default class SearchFiltersService {
 		this.closeFilters()
 	}
 
-	closeFilters = () => {
+	closeFilters(){
 		this.commonStore.closeFilters()
 	}
-	openFilters() {
+	openFilters(){
 		this.commonStore.openFilters()
+	}
+	getFiltersNames() {
+		const filters = this.taskStore.getFilters()
+		const priority = taskPriorityOptions.filter(priority=>filters.filter['priority']?.includes(priority['id']))
+		return priority||[]
 	}
 }

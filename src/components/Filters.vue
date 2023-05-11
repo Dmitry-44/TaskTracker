@@ -116,7 +116,7 @@ const shortcuts = [
               <el-button
                 class="filters_card-close-btn"
                 :icon="Close"
-                @click="FilterService.closeFilters"
+                @click="FilterService.closeFilters()"
               />
             </el-tooltip>
           </div>

@@ -50,4 +50,7 @@ export default class PiniaTaskAdapter implements ITaskStore {
 	updateFilters(payload: FilterPayload): void {
 		return this.taskStore.updateFilters(payload)
 	}
+	getFilters(): FilterPayload {
+		return this.taskStore.getFilters
+	}
 }

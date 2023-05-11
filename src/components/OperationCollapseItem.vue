@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { eventStatusOptions, type Event } from "@/entities/event";
+import { EventStatus, eventStatusOptions, type Event } from "@/entities/event";
 import type { Operation } from "@/entities/operation";
 import type { Task } from "@/entities/task";
 import { useUserStore } from "@/stores/user";
 import { computed, onBeforeMount, onBeforeUnmount, ref, toRef, watch, type PropType, type Ref } from "vue";
-import OperationParamsGenerator from "./OperationParamsGenerator.vue";
 import cloneDeep from 'lodash/cloneDeep';
 import OperationLoader from "@/components/OperationLoader.vue";
 import EventData from "./EventData.vue";
@@ -65,11 +64,6 @@ function optionChangeHandle(value: number) {
     }
 }
 
-const updateParams = (params: Event['params']) => {
-  emit('update', params)
-}
-
-
 onBeforeMount(()=> {
   if(props.taskId<0){
       emit("update", cloneDeep(taskPipeData.value));
@@ -91,8 +85,8 @@ watch(
   },
 );
 
-
 </script>
+
 <template>
   <el-collapse-item class="collapse-item">
     <template #title>
@@ -106,61 +100,71 @@ watch(
     <div class="row">
       <div class="left">Задача</div>
       <div class="right">
-        <el-tag class="status-tag">{{ operation.name }}</el-tag>
+        <el-tag class="tag-info">{{ operation.name }}</el-tag>
       </div>
     </div>
-    <EventData v-if="event" :id="`${taskId}-${event.id}`" :event="event"/>
+    <EventData 
+      v-if="event" 
+      :id="`${taskId}-${event.id}`" 
+      :event="event"
+      />
     <!-- TO DO SHOW CONDITION -->
     <div>
-      <OperationLoader :key="`${taskId}-${operation.id}` " :id="operation.id"  :params="event ? event?.params : pipeData" @update:params="updateParams" :readonly="event ? true : false"/>
-      <template v-if="canSelectExecutors">
-      <el-row><b>Кто видит задачу</b></el-row>
-      <el-radio-group v-show="canChangeEventParams" v-model="executors">
-          <el-radio :label="1">Все</el-radio>
-          <el-radio :label="2">Группы пользователей</el-radio>
-          <el-radio :label="3">Пользователи</el-radio>
-      </el-radio-group>
-      <el-row>
-          <span style="margin-top:15px;" v-show="executors === 1">{{taskId>0 ? 'Задача видна всем пользователям' : 'Задача будет видна всем пользователям'}}</span>
-          <el-select
-              v-model="taskPipeData['selected_divisions']"
-              v-show="executors === 2"
-              :disabled="!canChangeEventParams"
-              multiple
-              collapse-tags
-              collapse-tags-tooltip
-              :max-collapse-tags="3"
-              placeholder="Выбрать группы"
-              class="select-executor"
-          >
-          <el-option
-              v-for="item in DIVISIONS_OPTIONS"
-              :key="item['id']"
-              :label="item['name']"
-              :value="item['id']"
-          />
-          </el-select>
-          <el-select
-              v-model="taskPipeData['selected_users']"
-              v-show="executors === 3"
-              :disabled="!canChangeEventParams"
-              multiple
-              filterable
-              collapse-tags
-              collapse-tags-tooltip
-              :max-collapse-tags="3"
-              placeholder="Выбрать людей"
-              class="select-executor"
-          >
-          <el-option
-              v-for="item in USERS_OPTIONS"
-              :key="item.id"
-              :label="item.fullname"
-              :value="item.id"
-          />
-          </el-select>
-      </el-row>
-      </template>
+      <OperationLoader 
+        :key="`${taskId}-${operation.id}` " 
+        :id="operation.id"  
+        :params="event ? event?.params : pipeData" 
+        @update:params="$event=>emit('update', $event)" 
+        :readonly="event ? true : false"
+      />
+      <div v-show="!event||event.status===EventStatus.CREATED">
+        <el-row><b>Кто видит задачу</b></el-row>
+        <el-radio-group v-show="canChangeEventParams&&canSelectExecutors" v-model="executors">
+            <el-radio :label="1">Все</el-radio>
+            <el-radio :label="2">Группы пользователей</el-radio>
+            <el-radio :label="3">Пользователи</el-radio>
+        </el-radio-group>
+        <el-row>
+            <span style="margin-top:15px;" v-show="executors === 1">{{taskId>0 ? 'Задача видна всем пользователям' : 'Задача будет видна всем пользователям'}}</span>
+            <el-select
+                v-model="taskPipeData['selected_divisions']"
+                v-show="executors === 2"
+                :disabled="!canChangeEventParams||!canSelectExecutors"
+                multiple
+                collapse-tags
+                collapse-tags-tooltip
+                :max-collapse-tags="3"
+                placeholder="Выбрать группы"
+                class="select-executor"
+            >
+            <el-option
+                v-for="item in DIVISIONS_OPTIONS"
+                :key="item['id']"
+                :label="item['name']"
+                :value="item['id']"
+            />
+            </el-select>
+            <el-select
+                v-model="taskPipeData['selected_users']"
+                v-show="executors === 3"
+                :disabled="!canChangeEventParams||!canSelectExecutors"
+                multiple
+                filterable
+                collapse-tags
+                collapse-tags-tooltip
+                :max-collapse-tags="3"
+                placeholder="Выбрать людей"
+                class="select-executor"
+            >
+            <el-option
+                v-for="item in USERS_OPTIONS"
+                :key="item.id"
+                :label="item.fullname"
+                :value="item.id"
+            />
+            </el-select>
+        </el-row>
+      </div>
     </div>
   </el-collapse-item>
 </template>

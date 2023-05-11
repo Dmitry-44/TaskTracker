@@ -2,30 +2,30 @@
 import { useUserStore } from "@/stores/user";
 import type{ Task } from "@/entities/task";
 import DetailsWindow from "@/components/DetailsWindow.vue";
-import { ref, type PropType } from "vue";
+import { computed, ref, watch, type PropType, type Ref } from "vue";
 import Filters from "@/components/Filters.vue";
 import KanbanColumn from "@/components/KanbanColumn.vue";
 import { services } from "@/main";
 import FinishTaskModal from "@/components/FinishTaskModal.vue";
 import TakeTaskModal from "@/components/TakeTaskModal.vue";
 import { EventStatus } from "@/entities/event";
+import { useTaskStore } from "@/stores/task";
 
 type ColumnProp = { 
-    display: boolean,
-    tasks: Task[],
-    title?: string,
-    addNewTask: boolean,
-    isDraggable: boolean,
-    noActions: boolean,
+  display: boolean,
+  tasks: Task[],
+  title?: string,
+  addNewTask: boolean,
+  isDraggable: boolean,
+  noActions: boolean,
 }
 
-const columnPropDefault = {
+const columnPropDefault: ColumnProp = {
   display: true,
   tasks: [],
   title: '',
   addNewTask: false,
   isDraggable: true,
-  loading: false,
   noActions: false
 }
 
@@ -41,6 +41,10 @@ export default {
       required: true,
       default: columnPropDefault
     },
+    title: {
+      type: String,
+      default: ''
+    },
     loading: {
       type: Boolean,
       default: false
@@ -53,6 +57,8 @@ export default {
   setup() {
     const TaskService = services.Task
     const user = useUserStore().getUser;
+    const filters = computed(()=>useTaskStore().getFilters)
+    const filtersTags: Ref<Record<string,any>> = ref([])
 
     //METHODS
     const clickOutsideCards = () => {
@@ -94,6 +100,14 @@ export default {
       areaCompleted.value?.classList.remove("dragOver");
     }
 
+    watch(
+      ()=> filters.value,
+      ()=>{
+        filtersTags.value=services.Filters.getFiltersNames()
+      },
+      {deep: true}
+    )
+
     return {
       areaCreated,
       areaInProgress,
@@ -105,6 +119,7 @@ export default {
       dragleaveHandler,
       dropHandler,
       dragstartHandler,
+      filtersTags
     }
   },
 
@@ -114,11 +129,11 @@ export default {
 <template>
   <div class="kanbar-wrapper">
     <div class="menu-top">
-      <!-- <div class="indicator__wrapper">
-        <span class="indicator"></span>
-      </div> -->
+
       <div class="filters-wrapper">
         <Filters />
+        <el-tag class="tag-title tag-info" size="large" effect="dark" type="info">{{ title.toUpperCase() }}</el-tag>
+        <el-tag :key="filter.id" v-for="filter in filtersTags" class="tag-info text-white ml-3" effect="dark" size="small" type="info" :color="filter?.['color']">{{ filter['value'] }}</el-tag>
       </div>
     </div>
     <div class="kanban-background" @click.stop="clickOutsideCards()">
@@ -192,6 +207,7 @@ export default {
 .filters-wrapper
     display: flex
     margin-right: auto
+    align-items: center
 
 .draggable-area
     max-height: calc(100% - 10px)
@@ -221,5 +237,7 @@ export default {
   background-color: #2ecc71
   box-shadow: 0px 0px 5px black
 
+.tag-title 
+  color: #fff
 
 </style>
