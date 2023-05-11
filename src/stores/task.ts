@@ -55,7 +55,7 @@ export const useTaskStore = defineStore({
 		getActiveTask: (state) => state.activeTask,
 		getTaskToFinish: (state) => state.taskToFinish,
 		getTaskToTake: (state) => state.taskToTake,
-		getfilters: (state) => state.filters
+		getFilters: (state) => state.filters
 	},
 	actions: {
 		setActiveTask(payload: Task): void {

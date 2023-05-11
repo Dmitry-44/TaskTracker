@@ -16,14 +16,14 @@ const user = useUserStore().getUser;
 
 //GETTERS
 const LOADING = ref(false);
-const taskFilters = computed(() => taskStore.getfilters)
+const taskFilters = computed(() => taskStore.getFilters)
 
 const tasksIFinished = computed(() => taskStore.getMyTasksByEventStatus(user, EventStatus.COMPLETED));
 
 const firstColumnData = computed(()=>{
   return {
     display: true,
-    title: 'Завершенные',
+    title: '',
     isDraggable: false,
     addNewTask: false,
     tasks: unref(tasksIFinished),
@@ -66,6 +66,7 @@ onBeforeUnmount(() => {
 <template>
   <Kanban 
     key="my" 
+    title="Завершенные"
     :first-column="firstColumnData" 
     :second-column="secondColumnData" 
     :loading="LOADING" 

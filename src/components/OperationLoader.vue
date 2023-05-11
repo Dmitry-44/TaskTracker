@@ -45,5 +45,5 @@ watch(
 </script>
 
 <template>
-    <componentToRender :key="id" :is="componentToRender" v-model="params" :readonly="readonly" ></componentToRender>
+    <componentToRender v-if="componentToRender" :key="id" v-model="params" :readonly="readonly" ></componentToRender>
 </template>

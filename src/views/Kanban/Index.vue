@@ -19,7 +19,7 @@ const user = useUserStore().getUser;
 const LOADING = ref(false);
 const readyTasks = computed(() => taskStore.getTasksByEventStatus(user, EventStatus.CREATED));
 const tasksInProgress = computed(() => taskStore.getTasksByEventStatus(user, EventStatus.IN_PROGRESS));
-const taskFilters = computed(() => taskStore.getfilters)
+const taskFilters = computed(() => taskStore.getFilters)
 
 
 const firstColumnData = computed(()=>{
@@ -70,6 +70,7 @@ onBeforeUnmount(() => {
 <template>
   <Kanban 
     key="index" 
+    title="Назначены мне"
     :first-column="firstColumnData" 
     :second-column="secondColumnData" 
     :loading="LOADING" 

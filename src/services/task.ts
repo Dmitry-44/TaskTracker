@@ -453,12 +453,14 @@ export default class TaskService {
 	}
 	canChangeEventExecutors(task: Task, user: User): boolean {
 		//TO DO + право пользователя на выбор исполнителя
-			return task.id<=0
-		// return division?.ttrace_ids?.includes(user.selected_group)
+		const division = this.userStore.getDivisionList().find(division=>division.id===task.division_id)
+		if(!division)return false;
+		return task.id<=0 && division?.ttrace_ids?.includes(user.selected_group)
 	}
 
 	clearTask(){
 		this.taskStore.setActiveTask(Object.assign({},emptyTask));
 	}
+
 
 }

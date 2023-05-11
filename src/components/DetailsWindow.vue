@@ -81,7 +81,7 @@ const finishTask = () => {
     commonStore.openFinishTaskModal()
 }
 const updatePipeData = (data: Event['params'], operId: Operation['id']) => {
-  task.value['pipe_data'][operId] = data
+  task.value['pipe_data'][operId] = Object.assign(task.value['pipe_data'][operId], data)
 }
 const save = () => {
   LOADING.value = true;
@@ -168,12 +168,6 @@ watch(
             <el-tag size="large" class="tag-info">{{ taskLastOperation?.name.toUpperCase() }}</el-tag>
           </div>
         </div>
-        <!-- <div class="row" v-if="READ_MODE && taskStatus">
-          <div class="left">Статус</div>
-          <div class="right">
-            <el-tag size="large" class="tag-info" :color="taskStatus['color']">{{ taskStatus['value'] }}</el-tag>
-          </div>
-        </div> -->
         <div class="row">
           <div class="left">Приоритет</div>
           <div class="right">
@@ -247,8 +241,18 @@ watch(
             />
           </div>
         </div>
-        <OperationLoader :key="taskLastOperation.id" v-if="READ_MODE && taskLastOperation" :id="taskLastOperation.id" :params="taskLastEvent?.params" :readonly="readonly"/>
-        <EventData v-if="taskLastEvent&&READ_MODE" :key="`${task.id}-${taskLastEvent.id}`" :event="taskLastEvent" />
+        <OperationLoader 
+          :key="taskLastOperation.id" 
+          v-if="READ_MODE && taskLastOperation" 
+          :id="taskLastOperation.id" 
+          :params="taskLastEvent?.params" 
+          :readonly="readonly"
+        />
+        <EventData 
+          v-if="taskLastEvent&&READ_MODE" 
+          :key="`${task.id}-${taskLastEvent.id}`" 
+          :event="taskLastEvent" 
+        />
 
         <div v-if="task.pipe_id && !READ_MODE">
           <span class="left">Операции</span>

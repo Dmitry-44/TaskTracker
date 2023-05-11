@@ -118,7 +118,10 @@ export default class UserService {
 		const rights = userStore.getRights();
 		let access = true;
 		for (const prop in rightsObj) {
-			if (!rights[prop] || rights[prop] < rightsObj[prop]) {
+			if (
+				!(rights as Record<string, any>)[prop]
+				|| (rights as Record<string, any>)[prop] < rightsObj[prop]
+			) {
 				access = false;
 				break;
 			}
