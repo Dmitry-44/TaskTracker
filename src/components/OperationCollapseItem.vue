@@ -105,13 +105,12 @@ watch(
     </div>
     <EventData 
       v-if="event" 
-      :id="`${taskId}-${event.id}`" 
+      :key="`${taskId}-${event.id}`" 
       :event="event"
       />
     <!-- TO DO SHOW CONDITION -->
     <div>
       <OperationLoader 
-        :key="`${taskId}-${operation.id}` " 
         :id="operation.id"  
         :params="event ? event?.params : pipeData" 
         @update:params="$event=>emit('update', $event)" 

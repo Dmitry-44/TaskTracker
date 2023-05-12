@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { Event } from '@/entities/event';
-import { defineAsyncComponent, onBeforeMount, ref, watch, type Component, type PropType } from 'vue';
+import { defineAsyncComponent, onBeforeMount, onMounted, ref, watch, type Component, type PropType } from 'vue';
 import operationComponents from '../../operationComponents.json';
+import { componentsCache } from '@/plugins/componentsCache'
+
 
 const props = defineProps({
     params: {           
@@ -24,13 +26,23 @@ const emit = defineEmits<{
   (e: "update:params", value: Event['params']): void;
 }>();
 
+
 const params = ref(props.params)
 
 const componentNamesList: Record<string, string> = operationComponents
 
-const componentToRender: Component = defineAsyncComponent({
-    loader: () => import(`@/components/operations/${componentNamesList[props.id]}.vue`)
-});
+const loadComponent = (): Component => {
+    const component = defineAsyncComponent({
+        loader: () => import(`@/components/operations/${componentNamesList[props.id]}.vue`).catch(()=>false)
+    })
+    if(!componentsCache.has(props.id) && component != false){
+        componentsCache.set(props.id, component)
+    }
+    return component
+}
+
+const componentToRender: Component = componentsCache.get(props.id) || loadComponent();
+
 
 watch(
     ()=> params.value,
