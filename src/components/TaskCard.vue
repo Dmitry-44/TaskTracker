@@ -6,14 +6,14 @@ import SelectOptions from "./SelectOptions.vue";
 import { useTaskStore } from "@/stores/task";
 import { useUserStore } from "@/stores/user";
 import { useCommonStore } from "@/stores/common";
-import { taskPriorityOptions, taskStatusOptions, type Task } from "@/entities/task";
+import { taskPriorityOptions, taskStatusOptions, type Task, type TaskEvent } from "@/entities/task";
 import { services } from "@/main";
 import { updatedTasksIds } from "@/services/taskStoreUpdater";
 
 
 const props = defineProps({
   task: {
-    type: Object as PropType<Task>,
+    type: Object as PropType<TaskEvent>,
     default: () => ({}),
     require: true,
   },
@@ -32,7 +32,7 @@ const props = defineProps({
 });
 
 const taskStore = useTaskStore();
-const readonlyTask = computed(() => props.task.status === 4);
+// const readonlyTask = computed(() => props.task.status === 4);
 const userStore = useUserStore();
 const commonStore = useCommonStore();
 const user = userStore.getUser;
@@ -190,7 +190,7 @@ onMounted(()=>{
         @click.stop="selectMore.toggleMenu()"
       ></el-button>
       <el-select class="select-more" ref="selectMore">
-        <SelectOptions :task="task" />
+        <!-- <SelectOptions :task="task" /> -->
       </el-select>
     </div>
   </div>

@@ -17,6 +17,7 @@ declare module '@vue/runtime-core' {
     '2.CheckNews': typeof import('./src/components/operations/2.CheckNews.vue')['default']
     copy: typeof import('./src/components/DetailsWindow copy.vue')['default']
     DetailsWindow: typeof import('./src/components/DetailsWindow.vue')['default']
+    DetailsWindow2: typeof import('./src/components/DetailsWindow2.vue')['default']
     DetailsWindowActions: typeof import('./src/components/DetailsWindowActions.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']

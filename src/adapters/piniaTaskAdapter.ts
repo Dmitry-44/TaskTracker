@@ -1,5 +1,5 @@
 
-import type { Task } from '@/entities/task';
+import type { Task, TaskEvent } from '@/entities/task';
 import { useTaskStore } from '@/stores/task';
 import type { ITaskStore } from '.';
 import type { Event } from '@/entities/event';
@@ -14,10 +14,10 @@ export default class PiniaTaskAdapter implements ITaskStore {
 		this.taskStore = useTaskStore();
 	}
 
-	getActiveTask(): Task {
+	getActiveTask(): TaskEvent|null {
 		return this.taskStore.getActiveTask;
 	}
-	setActiveTask(payload: Task): void{
+	setActiveTask(payload: TaskEvent|null): void{
 		return this.taskStore.setActiveTask(payload);
 	}
     setTasksList(payload: Task[]): void {
@@ -44,7 +44,7 @@ export default class PiniaTaskAdapter implements ITaskStore {
 	updateEventStatus(taskId: number, eventId: number, status: number): void {
 		return this.taskStore.updateEventStatus(taskId, eventId, status)
 	}
-	setTaskToFinish(payload: Task|null): void {
+	setTaskToFinish(payload: TaskEvent|null): void {
 		return this.taskStore.setTaskToFinish(payload)
 	}
 	updateFilters(payload: FilterPayload): void {
@@ -52,5 +52,8 @@ export default class PiniaTaskAdapter implements ITaskStore {
 	}
 	getFilters(): FilterPayload {
 		return this.taskStore.getFilters
+	}
+	setTasksView(payload: TaskEvent[]): void {
+		return this.taskStore.setTasksView(payload)
 	}
 }

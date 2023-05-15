@@ -1,5 +1,5 @@
 import { ElMessage } from 'element-plus';
-import type { Event } from "@/entities/event";
+import type { Event, EventStatus } from "@/entities/event";
 import type { FilterPayload, ApiResponse } from "@/api";
 
 
@@ -27,6 +27,26 @@ interface Task {
 	child_tasks?: Task[];
 	smi_direction?: number;
 }
+
+type TaskEvent = {
+	id: UniqueId;
+	taskId: UniqueId;
+	status: EventStatus;
+	priority?: TaskPriority;
+	title: string;
+	text: string;
+	created: DateTimeStamp;
+	modified?: DateTimeStamp;
+	finished?: DateTimeStamp;
+	operationId: number;
+	params: Record<string, any>;
+	result: Record<string, any>;
+	selectedDivisions: UniqueId[];
+	selectedUsers: UniqueId[];
+	userId: UniqueId;
+	userName: string;
+}
+
 
 export const emptyTask: Readonly<Task> = {
 	id: -1,
@@ -137,4 +157,4 @@ interface ITaskRepo {
 	CompleteEvent(taskId: Task['id'], eventId: Event['id'], eventResult: Event['result']): Promise<ApiResponse<Task>>
 }
 
-export type { Task, ITaskRepo };
+export type { Task, ITaskRepo, TaskEvent };

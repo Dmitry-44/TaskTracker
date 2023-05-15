@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { eventStatusOptions, type Event } from '@/entities/event';
-import { taskDateFormat } from '@/entities/task';
+import { taskDateFormat, type TaskEvent } from '@/entities/task';
 import type { PropType } from 'vue';
 
 
 const props = defineProps({
     event: {
-        type: Object as PropType<Event>,
+        type: Object as PropType<TaskEvent>,
         required: true
     }
 })
@@ -40,10 +40,10 @@ const eventStatus = eventStatusOptions.find((ev) => props.event?.status === ev['
         <el-tag class="tag-info">{{ taskDateFormat(event.finished) }}</el-tag>
       </div>
     </div>
-    <div class="row" v-if="event?.user_name">
+    <div class="row" v-if="event?.userName">
       <div class="left">Исполнитель</div>
       <div class="right">
-        <el-tag class="tag-info">{{ event.user_name }}</el-tag>
+        <el-tag class="tag-info">{{ event.userName }}</el-tag>
       </div>
     </div>
     <div class="row" v-if="event?.result">

@@ -3,7 +3,7 @@ import type { Event } from '@/entities/event';
 import type{ Operation } from '@/entities/operation';
 import type { Pipe } from '@/entities/pipe';
 import type { Site } from '@/entities/site';
-import type { Task } from '@/entities/task';
+import type { Task, TaskEvent } from '@/entities/task';
 import type { Division, User, Person } from '@/entities/user';
 
 
@@ -19,9 +19,9 @@ interface IUserStore {
     getDivisionList(): Division[]
 }
 interface ITaskStore {
-    getActiveTask(): Task
+    getActiveTask(): TaskEvent|null
     getFilters(): FilterPayload
-    setActiveTask(payload: Task): void
+    setActiveTask(payload: TaskEvent|null): void
     setTasksList(payload: Task[]): void
     setSingleTask(payload: Task|null): void
     addNewTask(payload: Task):void
@@ -30,8 +30,9 @@ interface ITaskStore {
     pushNewEventToTask(event: Event): void
     updateEvent(taskId: Task['id'], event: Partial<Event>):void
     updateEventStatus(taskId: Task['id'], eventId: Event['id'], status: Event['status']): void
-    setTaskToFinish(payload: Task|null):void
+    setTaskToFinish(payload: TaskEvent|null):void
     updateFilters(payload: FilterPayload):void
+    setTasksView(payload: TaskEvent[]):void
 }
 interface ICommonStore {
     getGlobalLoading(): boolean

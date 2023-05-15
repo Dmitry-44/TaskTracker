@@ -17,8 +17,8 @@ const user = useUserStore().getUser;
 
 //GETTERS
 const LOADING = ref(false);
-const readyTasks = computed(() => taskStore.getTasksByEventStatus(user, EventStatus.CREATED));
-const tasksInProgress = computed(() => taskStore.getTasksByEventStatus(user, EventStatus.IN_PROGRESS));
+const readyTasks = computed(() => taskStore.getTaskEventByStatus(user, EventStatus.CREATED));
+const tasksInProgress = computed(() => taskStore.getTaskEventByStatus(user, EventStatus.IN_PROGRESS));
 const taskFilters = computed(() => taskStore.getFilters)
 
 

@@ -1,5 +1,5 @@
 import router from '@/router';
-import { TaskStatus, emptyTask, validateTask } from '@/entities/task';
+import { TaskStatus, emptyTask, validateTask, type TaskEvent } from '@/entities/task';
 import { ElMessage } from 'element-plus';
 import { errRequestHandler, errVueHandler } from "@/plugins/errorResponser";
 import { isSuccessApiResponse, isResultWithPagination, type FilterPayload, type WSTaskChannelMessage, WSEvents } from "@/api";
@@ -46,8 +46,14 @@ export default class TaskService {
 							isResultWithPagination(respdata.result)
 							? respdata.result.data
 							: respdata.result
-
+						const tasksView = [] as TaskEvent[]
+						tasks.forEach(task=>{
+							this.mapTaskToTaskEvent(task).forEach(taskEvent=>{
+								tasksView.push(taskEvent);
+							})
+						})
 						this.taskStore.setTasksList(tasks);
+						this.taskStore.setTasksView(tasksView)
 					}
 					return true;
 				} else {
@@ -106,7 +112,7 @@ export default class TaskService {
 			})
 	}
 
-	async takeTask(task: Task, user: User): Promise<boolean> {
+	async takeTask(task: TaskEvent, user: User): Promise<boolean> {
 		if(!this.canTakeTask(task, user)){
 			ElMessage({
 				message: "Ты не можешь взять эту задачу",
@@ -117,8 +123,8 @@ export default class TaskService {
 			})
 			return false
 		}
-		const taskLastEvent = lastFromArray(task.event_entities!)
-		if(!taskLastEvent)return false;
+		// const taskLastEvent = lastFromArray(task.event_entities!)
+		// if(!taskLastEvent)return false;
 		const msg = ElMessage({
 			message: "Хватаю задачу..",
 			type: "success",
@@ -126,7 +132,7 @@ export default class TaskService {
 			duration: 1000,
 		});
 		return this.taskRepo
-			.TakeTask(task.id, taskLastEvent.id )
+			.TakeTask(task.id, task.id)
 			.then(respdata => {
 				if (isSuccessApiResponse(respdata)) {
 					ElMessage({
@@ -243,7 +249,7 @@ export default class TaskService {
 			})
 	}
 
-	setActiveTask(payload: Task|null){
+	setActiveTask(payload: TaskEvent|null){
 		const activeTask = this.taskStore.getActiveTask()
 		if (
 			activeTask?.id == payload?.id &&
@@ -252,10 +258,10 @@ export default class TaskService {
 			return;
 		payload  
 			? this.taskStore.setActiveTask(payload)
-			: this.taskStore.setActiveTask(Object.assign({},emptyTask));
+			: this.taskStore.setActiveTask(null);
 	}
 
-	clickTask(task: Task) {
+	clickTask(task: TaskEvent) {
 		this.taskStore.setActiveTask(task)
 		this.commonStore.toggleCreatingTaskProcess(false)
 		this.commonStore.toggleDetailsWindow(true)
@@ -264,7 +270,7 @@ export default class TaskService {
 	clickOutsideTaskCard(){
 		this.commonStore.toggleDetailsWindow(false)
 		this.commonStore.toggleCreatingTaskProcess(false)
-		this.taskStore.setActiveTask(Object.assign({},emptyTask))
+		this.taskStore.setActiveTask(null)
 	}
 
 	createNewTask(){
@@ -275,7 +281,7 @@ export default class TaskService {
 
 	closeDetailWindow(){
 		this.commonStore.toggleDetailsWindow(false),
-		this.setActiveTask(Object.assign({},emptyTask)),
+		this.setActiveTask(null),
 		this.commonStore.toggleCreatingTaskProcess(false)
 	}
 
@@ -295,20 +301,18 @@ export default class TaskService {
 		);
 	}
 
-	async dragAndDropTask(task: Task, newEventStatus: number, user: User): Promise<boolean> {
+	async dragAndDropTask(task: TaskEvent, newEventStatus: number, user: User): Promise<boolean> {
 		if(newEventStatus<EventStatus.CREATED || newEventStatus>EventStatus.COMPLETED){
 			return false
 		}
-		const eventToUpdate = lastFromArray(task.event_entities!)
-		if(!eventToUpdate)return false;
-		if(eventToUpdate.status === newEventStatus)return false;
+		if(task.status === newEventStatus)return false;
 		switch (newEventStatus) {
 			case EventStatus.CREATED:
 				return this.returnTaskToBacklog(task, user)
 				break;
 			case EventStatus.IN_PROGRESS:
 				//если задача еще не взята, берем задачу на себя и уже после берем в работу
-				if(eventToUpdate.u_id!=user.id){
+				if(task.userId!=user.id){
 					const didITakeTask = await this.takeTask(task, user)
 					if(didITakeTask){
 						return this.takeTaskToProgress(task, user)
@@ -341,7 +345,7 @@ export default class TaskService {
 		}
 	}
 
-	async returnTaskToBacklog(task: Task, user: User): Promise<boolean> {
+	async returnTaskToBacklog(task: TaskEvent, user: User): Promise<boolean> {
 		if(!this.canReturnTaskToBacklog(task, user)){
 			ElMessage({
 				message: "Вы не можете вернуть данную задачу к исполнению",
@@ -352,12 +356,10 @@ export default class TaskService {
 			})
 			return false
 		} else {
-			const eventToUpdate = lastFromArray(task.event_entities!)
-			if(!eventToUpdate)return false;
-			return this.updateEventStatus(task.id, eventToUpdate.id, EventStatus.CREATED)
+			return this.updateEventStatus(task.id, task.id, EventStatus.CREATED)
 		}
 	}
-	async takeTaskToProgress(task: Task, user: User): Promise<boolean> {
+	async takeTaskToProgress(task: TaskEvent, user: User): Promise<boolean> {
 		if(!this.canTakeTaskToProgress(task, user)){
 			ElMessage({
 				message: "Вы не можете взять данную задачу в работу",
@@ -368,12 +370,10 @@ export default class TaskService {
 			})
 			return false
 		} else {
-			const eventToUpdate = lastFromArray(task.event_entities!)
-			if(!eventToUpdate)return false;
-			return this.updateEventStatus(task.id, eventToUpdate.id, EventStatus.IN_PROGRESS)
+			return this.updateEventStatus(task.id, task.id, EventStatus.IN_PROGRESS)
 		}
 	}
-	async finishTask(task: Task, user: User, eventResult: Event['result']): Promise<boolean> {
+	async finishTask(task: TaskEvent, user: User, eventResult: Event['result']): Promise<boolean> {
 		if(!this.canFinishTask(task, user)){
 			ElMessage({
 				message: "Вы не можете завершить данную задачу",
@@ -384,43 +384,33 @@ export default class TaskService {
 			})
 			return false
 		} else {
-			const eventToUpdate = lastFromArray(task.event_entities!)
-			if(!eventToUpdate)return false;
-			return this.completeEvent(task.id, eventToUpdate.id, eventResult)
+			return this.completeEvent(task.id, task.id, eventResult)
 		}
 	}
 
-	canTakeTask(task: Task, user: User): boolean {
-		const taskLastEvent = lastFromArray(task.event_entities!)
-		if(!taskLastEvent){return false};
-		return ((taskLastEvent.selected_users.length===0 && taskLastEvent.selected_divisions.length===0) || taskLastEvent.selected_users.includes(user.id))
-				&& !taskLastEvent.u_id
-				&& taskLastEvent.status === EventStatus.CREATED
+	canTakeTask(task: TaskEvent, user: User): boolean {
+		return ((task.selectedUsers.length===0 && task.selectedDivisions.length===0) || task.selectedUsers.includes(user.id))
+				&& !task.userId
+				&& task.status === EventStatus.CREATED
 	}
-	canTakeTaskToProgress(task: Task, user: User): boolean {
-		const taskLastEvent = lastFromArray(task.event_entities!)
-		if(!taskLastEvent){return false};
-		return taskLastEvent.u_id===user.id
-			&& taskLastEvent.status === EventStatus.CREATED
+	canTakeTaskToProgress(task: TaskEvent, user: User): boolean {
+		return task.userId===user.id
+			&& task.status === EventStatus.CREATED
 	}
-	canReturnTaskToBacklog(task: Task, user: User): boolean {
-		const taskLastEvent = lastFromArray(task.event_entities!)
-		if(!taskLastEvent){return false};
-		return ((taskLastEvent.selected_users.length===0 && taskLastEvent.selected_divisions.length===0) || taskLastEvent.selected_users.includes(user.id))
-				&& taskLastEvent.u_id === user.id
-				&& taskLastEvent.status === EventStatus.IN_PROGRESS
+	canReturnTaskToBacklog(task: TaskEvent, user: User): boolean {
+		return ((task.selectedUsers.length===0 && task.selectedDivisions.length===0) || task.selectedUsers.includes(user.id))
+				&& task.userId === user.id
+				&& task.status === EventStatus.IN_PROGRESS
 	}
-	canFinishTask(task: Task, user: User): boolean {
-		const taskLastEvent = lastFromArray(task.event_entities!)
-		if(!taskLastEvent){return false};
-		return taskLastEvent.u_id===user.id && taskLastEvent.status === EventStatus.IN_PROGRESS
+	canFinishTask(task: TaskEvent, user: User): boolean {
+		return task.userId===user.id && task.status === EventStatus.IN_PROGRESS
 	}
-	canChangeTaskPriority(task: Task, user: User): boolean {
+	canChangeTaskPriority(task: TaskEvent, user: User): boolean {
 		if(!(task.id>0))return true;
-		return task.created_by === user?.id
-				&& (task.status != TaskStatus.COMPLETED || !task.status)
+		return task.userId === user?.id
+				&& task.status != EventStatus.COMPLETED
 	}
-	canChangeTaskPipeline(task: Task, user: User): boolean {
+	canChangeTaskPipeline(task: TaskEvent, user: User): boolean {
 		return !(task.id>0)
 	}
 	canSetTaskPipeline(task: Task, user: User): boolean {
@@ -462,5 +452,31 @@ export default class TaskService {
 		this.taskStore.setActiveTask(Object.assign({},emptyTask));
 	}
 
-
+	mapTaskToTaskEvent(task: Task): TaskEvent[] {
+		const taskEvents: TaskEvent[] = [];
+		if (task.event_entities && task.event_entities.length > 0) {
+			for (const event of task.event_entities) {
+				const taskEvent: TaskEvent = {
+					id: event.id,
+					taskId: task.id,
+					status: event.status,
+					priority: task.priority,
+					title: task.title,
+					text: task.text,
+					created: event.created,
+					modified: event.modified,
+					finished: event.finished,
+					operationId: event.operation_id,
+					params: event.params,
+					result: event.result || {},
+					selectedDivisions: event.selected_divisions || [],
+					selectedUsers: event.selected_users || [],
+					userId: event.u_id || -1,
+					userName: event.user_name || ''
+				};
+				taskEvents.push(taskEvent);
+			}
+		}
+		return taskEvents;
+	}
 }

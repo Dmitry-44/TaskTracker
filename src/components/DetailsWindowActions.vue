@@ -5,11 +5,11 @@ import { useCommonStore } from "@/stores/common";
 import { Close, Pointer, Finished, ArrowRightBold, ArrowLeftBold } from "@element-plus/icons-vue";
 import type { PropType} from "vue";
 import { services } from "@/main";
-import type { Task } from "@/entities/task"
+import type { Task, TaskEvent } from "@/entities/task"
 
 const props = defineProps({
   task: {
-    type: Object as PropType<Task>,
+    type: Object as PropType<TaskEvent>,
     required: true
   },
   dataWasChanged: {

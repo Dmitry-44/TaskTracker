@@ -1,4 +1,4 @@
-import { emptyTask } from '../entities/task';
+import type{ TaskEvent } from '@/entities/task';
 import { defineStore } from "pinia";
 import type { Task } from "@/entities/task";
 import type { EventStatus, Event } from '@/entities/event';
@@ -10,22 +10,24 @@ import TaskRepo from '@/api/task';
 interface State {
 	tasks: Task[];
 	singleTask: Task | null;
-	activeTask: Task;
-	taskToFinish: Task|null;
-	taskToTake: Task|null;
+	activeTask: TaskEvent|null;
+	taskToFinish: TaskEvent|null;
+	taskToTake: TaskEvent|null;
 	filters: FilterPayload
+	tasksView: TaskEvent[]
 }
 
 
 export const useTaskStore = defineStore({
 	id: "task",
 	state: (): State => ({
-		activeTask: Object.assign({}, emptyTask),
+		activeTask: null,
 		tasks: [],
 		singleTask: null,
 		taskToFinish: null,
 		taskToTake: null,
-		filters: new TaskRepo().getDefaultFilters
+		filters: new TaskRepo().getDefaultFilters,
+		tasksView: []
 	}),
 	getters: {
 		getList: (state) => state.tasks,
@@ -55,10 +57,18 @@ export const useTaskStore = defineStore({
 		getActiveTask: (state) => state.activeTask,
 		getTaskToFinish: (state) => state.taskToFinish,
 		getTaskToTake: (state) => state.taskToTake,
-		getFilters: (state) => state.filters
+		getFilters: (state) => state.filters,
+		getTasksView: (state) => state.tasksView,
+		getTaskEventByStatus: (state) => {
+			return (user: User, status: EventStatus) =>
+				state.tasksView.filter(task => {
+					return task.userId === user.id
+						&& task.status===status
+				})
+		}
 	},
 	actions: {
-		setActiveTask(payload: Task): void {
+		setActiveTask(payload: TaskEvent|null): void {
 			this.activeTask = payload;
 		},
 		setTasksList(payload: Task[]): void {
@@ -67,14 +77,16 @@ export const useTaskStore = defineStore({
 		setSingleTask(payload: Task | null): void {
 			this.singleTask = payload;
 		},
-		setTaskToFinish(payload: Task|null): void {
+		setTaskToFinish(payload: TaskEvent|null): void {
 			this.taskToFinish = payload
 		},
-		setTaskToTake(payload: Task|null): void {
+		setTaskToTake(payload: TaskEvent|null): void {
 			this.taskToTake = payload
 		},
-		updateActiveTask(task: Partial<Task>): void {
-			this.activeTask = Object.assign(this.activeTask, task)
+		updateActiveTask(task: Partial<TaskEvent>): void {
+			// this.activeTask = this.activeTask 
+			// 	? Object.assign(this.activeTask, task)
+			// 	: task
 		},
 		updateTask(payload: Partial<Task>): void {
 			let task = this.tasks.find(task=>task.id===payload.id)
@@ -117,6 +129,9 @@ export const useTaskStore = defineStore({
 			this.filters.select = filters.select.length>0 ? filters.select : this.filters.select
 			this.filters.filter = Object.assign(this.filters.filter, filters.filter)
 			this.filters.options = Object.assign(this.filters.options, filters.options)
+		},
+		setTasksView(payload: TaskEvent[]): void {
+			this.tasksView=payload
 		}
 	},
 });

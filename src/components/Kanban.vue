@@ -1,7 +1,8 @@
 <script lang="ts">
 import { useUserStore } from "@/stores/user";
-import type{ Task } from "@/entities/task";
+import type{ Task, TaskEvent } from "@/entities/task";
 import DetailsWindow from "@/components/DetailsWindow.vue";
+import DetailsWindow2 from "@/components/DetailsWindow2.vue";
 import { computed, ref, watch, type PropType, type Ref } from "vue";
 import Filters from "@/components/Filters.vue";
 import KanbanColumn from "@/components/KanbanColumn.vue";
@@ -13,7 +14,7 @@ import { useTaskStore } from "@/stores/task";
 
 type ColumnProp = { 
   display: boolean,
-  tasks: Task[],
+  tasks: TaskEvent[],
   title?: string,
   addNewTask: boolean,
   isDraggable: boolean,
@@ -75,7 +76,7 @@ export default {
       e.preventDefault();
       e.stopPropagation();
     };
-    const dragstartHandler = (event: DragEvent, task: Task) => {
+    const dragstartHandler = (event: DragEvent, task: TaskEvent) => {
       event.dataTransfer?.setData('text/plain', JSON.stringify(task));
       event.dataTransfer!.effectAllowed = "link";
     };
@@ -88,7 +89,7 @@ export default {
       clearDragAndDrop()
     };
     const dropHandler = async (event: DragEvent, newStatus: number) => {
-      const task = JSON.parse(event.dataTransfer?.getData('text/plain')||'') as Task;
+      const task = JSON.parse(event.dataTransfer?.getData('text/plain')||'') as TaskEvent;
       if(!!task && typeof task === 'object') {
         TaskService.dragAndDropTask(task, newStatus, user)
         clearDragAndDrop()
@@ -137,7 +138,7 @@ export default {
       </div>
     </div>
     <div class="kanban-background" @click.stop="clickOutsideCards()">
-      <DetailsWindow :readonly="readonly"/>
+      <DetailsWindow2 :readonly="readonly"/>
       <div
         class="draggable-area"
         @dragover="dragoverHandler($event, areaCreated!)"
