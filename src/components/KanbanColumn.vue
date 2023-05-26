@@ -86,7 +86,8 @@ const setDefaultSort = () => {
         </el-tooltip>
       </template>
     </div>
-    <div class="title-row">
+    <!-- TODO -->
+    <!-- <div class="title-row">
       <el-input
         v-model="searchValue"
         class="input-search"
@@ -99,7 +100,7 @@ const setDefaultSort = () => {
         @changeSort="(sort) => tasks.sort(sort)"
         @noSort="setDefaultSort"
       />
-    </div>
+    </div> -->
     <div class="content">
       <el-skeleton
         style="width: 300px"

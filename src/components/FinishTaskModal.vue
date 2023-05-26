@@ -36,6 +36,7 @@ watch(
   () => showModal.value,
   (newVal) => {
     if(!newVal){
+		eventResult.value={}
 		finishConfirmed.value=false
 	}
   }

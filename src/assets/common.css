@@ -11,6 +11,10 @@
     letter-spacing: 1px;
 }
 
+.tag-info:not(:first-child) {
+    margin-left: 0.5rem;
+}
+
 .modal__title {
     font-size: 16px;
     font-weight: bold;

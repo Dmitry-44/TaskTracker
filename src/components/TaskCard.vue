@@ -118,7 +118,7 @@ onMounted(()=>{
             }}</el-tag>
           </el-tooltip>
         </div>
-        <div class="wrapper" v-if="taskStatus">
+        <!-- <div class="wrapper" v-if="taskStatus">
           <el-tooltip
             class="item"
             effect="dark"
@@ -127,7 +127,7 @@ onMounted(()=>{
           >
             <el-tag :color="taskStatus['color']">{{ taskStatus['value'] }}</el-tag>
           </el-tooltip>
-        </div>
+        </div> -->
       </div>
       <div class="actions">
         <div v-if="!noActions" class="buttons">

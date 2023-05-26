@@ -1,8 +1,4 @@
 # ОБЯЗАТЕЛЬНО СДЕЛАЙТЕ npm run prepare !!!!!
-# Дока стора 
-https://pinia.vuejs.org/cookbook/migration-vuex.html#usage-inside-components
-# Дока дизайнера
-https://element-plus.org/en-US/component/icon.html#icon-collection
 
 # tasktracker
 
@@ -50,3 +46,11 @@ npm run build
 ```sh
 npm run lint
 ```
+
+# Уникальные компоненты для каждой операции
+
+Для каждой операции в проекте имеется уникальный компонент, который находится в папке `/src/components/operations`. Название каждого компонента содержит id операции, например `01.OptionalOperationName.vue` соответствует операции с id=1.
+
+Для загрузки необходимого компонента-операции используется `/src/components/OperationLoader.vue`. Он загружает нужный нам компонент по ключу из `operationComponents.json`.
+
+Для генерации или обновления `operationComponent.json` используйте команду `npm run gen`.

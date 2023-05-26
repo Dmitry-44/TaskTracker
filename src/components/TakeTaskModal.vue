@@ -3,11 +3,10 @@
 import { useTaskStore } from '@/stores/task'
 import { useCommonStore } from '@/stores/common'
 import { useUserStore } from '@/stores/user'
-import { computed, onBeforeMount, ref, shallowRef, watch, type Component, type Ref, type ShallowRef } from 'vue';
+import { computed } from 'vue';
 import { services } from '@/main';
 import { lastFromArray } from '@/plugins/utils';
 import { useOperationStore } from '@/stores/operation';
-import { operationLoader } from '@/plugins/operationLoader';
 import OperationLoader from './OperationLoader.vue';
 
 
@@ -32,21 +31,10 @@ function dialogOkHandle(){
 	commonStore.hideTakeTaskModal()
 }
 
-// const operationComponent: ShallowRef<Component|null> = shallowRef(null);
-
-// watch(
-// 	()=>taskLastEventOperation.value,
-// 	async(newValue, oldValue)=>{
-// 		if(!newValue)return;
-// 		if(!newValue.id)return;
-// 		operationComponent.value= await operationLoader(newValue!.id)
-// 	}
-// )
-
 </script>
 
 <template>
-	<el-dialog v-model="showModal" class="modal-take-task" @close="dialogCancelHandle">
+	<el-dialog v-model="showModal" @close="dialogCancelHandle">
 		<template #header>
 			<el-row justify="center">
 				<span class="modal__title">Уверены что хотите взять задачу?</span>
