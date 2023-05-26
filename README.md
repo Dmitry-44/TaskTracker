@@ -54,3 +54,8 @@ npm run lint
 Для загрузки необходимого компонента-операции используется `/src/components/OperationLoader.vue`. Он загружает нужный нам компонент по ключу из `operationComponents.json`.
 
 Для генерации или обновления `operationComponent.json` используйте команду `npm run gen`.
+
+
+### бэкенд
+
+Фронт работает с веткой бэка https://git.ttrace.ru/ttrace/admin-backend-api/-/tree/feature/tasktracker_api
